@@ -1,4 +1,5 @@
-import search
+from . import search
+
 
 class Entity(object):
 
@@ -30,7 +31,6 @@ class Order(Entity):
 
     def sum_item_attr(self, attr: str):
         return round(sum(self.get_item_attrs(attr)), 2)
-
 
     @property
     def bill_to(self) -> {}:
@@ -156,11 +156,9 @@ class Order(Entity):
 class Invoice(Entity):
 
     def __init__(self, json: {}):
-        self.json = json
+        super().__init__(json)
         self.billing_address_id = json.get("billing_address_id"),  # int
         self.created = json.get("created_at"),  # "2021-12-01 14:13:11",
-        self.discount_tax_compensation = json.get("discount_tax_compensation_amount"),  # int
-        self.entity_id = json.get("entity_id"),
         self.discount = json.get("discount_amount"),  # int
         self.currency_code = json.get("global_currency_code")  # str
         self.grand_total = json.get("grand_total"),  # float

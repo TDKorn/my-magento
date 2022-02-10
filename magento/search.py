@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
-import settings.config as config
-from entities import Order
+import magento.config as config
+from .entities import Order, Entity
 
 
 class SearchQuery(object):
@@ -17,6 +17,33 @@ class SearchQuery(object):
         self._result = {}
 
     def add_criteria(self, field: str, value: str, **kwargs: object) -> SearchQuery:
+        """
+        :param field: the object attribute to evaluate in the search
+        :param value: the attribute value to evaluate in the search
+        :param kwargs: (optional)
+
+                        condition: condition to evaluate the attribute value
+                        (Default Value)     'eq'        ->      =
+                                            'gt'        ->      >
+                                            'lt'        ->      <
+                                            'gteq'      ->      >=
+                                            'lteq'      ->      <=
+                                            'in'        ->      []?
+                                            '?????
+
+                        group:      filter group number
+                        filter:     filter number within the filter group
+
+                        filters are {field:value} pairs
+
+                        Group 0 Filter 0                        ->      Filter 0
+                        Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 AND Filter 1
+                        Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 OR Filter
+
+        :return: self
+
+        """
+
         options = {
             'condition': 'eq',
             'group': 0,
@@ -50,12 +77,16 @@ class SearchQuery(object):
         return self
 
     def execute(self):
-        # Any search query is passed through execute(). Request is sent with client.get() so it will always login/validate
+        """
+            Sends the search request through the active client.
+
+            :return self.result
+        """
         response = self.client.get(self.query + self.fields)
         if response.ok:
             self._result = response.json()
         else:
-            self._result = {'Response': f'''
+            self._result = {'Bad Response': f'''
                 Status Code: {response.status_code}
                 Details:
                 {response.json()}
@@ -80,10 +111,9 @@ class SearchQuery(object):
         self.fields = ''
         self.query = self.client.BASE_URL + self.endpoint + '/?'
 
-    def get_result(self) -> {} | list[{}]:
+    def validate_result(self) -> {} | list[{}]:
         # API Request error
-        if self._result.get('Response'):
-            return self._result['Response']
+        assert not self._result.get('Bad Response')
         # If fields restricted      ->    result is dict with one key, 'items'
         # If fields unrestricted    ->    result will have 'total_count' and 'items' keys
         if self.fields or self._result.get('total_count', None) is not None:
@@ -91,9 +121,18 @@ class SearchQuery(object):
         # Direct request by ID will have result of single entity, as dict
         return self._result
 
+    def save_result(self, filepath):
+        if not self.result:
+            data = {}
+        else:
+            result = self.result if self.result_type is list else [self.result]
+            data = [obj.json if isinstance(obj, Entity) else obj for obj in result]
+
+        self.client.save(data, filepath)
+
     @property
     def result(self):
-        return self.get_result()
+        return self.validate_result()
 
     @property
     def result_count(self) -> int:
@@ -126,7 +165,7 @@ class OrderSearch(SearchQuery):
 
     @property
     def result(self):
-        result = self.get_result()
+        result = self.validate_result()
         if not result or isinstance(result, str):
             return {}
         if type(result) is list:
