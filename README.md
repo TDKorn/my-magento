@@ -5,8 +5,8 @@ A package to simplify the Magento 2 REST API.
 
 Temporary Readme!!  Taken from the commit message 😭😭
 
-##clients.py
-###MagentoClient
+## clients.py
+### MagentoClient
 >The main user interface class
 
 - ```authenticate()``` logs in with user credentials to retrieve access token
@@ -15,8 +15,8 @@ Temporary Readme!!  Taken from the commit message 😭😭
 
 
 
-##search.py
-###SearchQuery
+## search.py
+### SearchQuery
 >Default class for querying API endpoints
 
 - ```add_criteria()``` and restrict_fields() build the query
@@ -25,12 +25,12 @@ Temporary Readme!!  Taken from the commit message 😭😭
 - ```by_id()``` and ```by_number()``` methods should work for most endpoints
 
 
-###OrderSearch
+### OrderSearch
 >Subclass of SearchQuery with additional methods for orders
     
 - ```result``` returns magento.entities.Order objects
 
-###InvoiceSearch
+### InvoiceSearch
 >Subclass of SearchQuery with additional methods for invoices
 
 Methods are used to help simplify obtaining an order's invoice
@@ -40,7 +40,7 @@ Methods are used to help simplify obtaining an order's invoice
 * ```by_order_number()```
 
 
-##entities.py
+## entities.py
 >A module containing classes for the various models used by Magento. 
 
 All objects have an ```entity_id```

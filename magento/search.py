@@ -8,7 +8,7 @@ class SearchQuery(object):
 
     def __init__(self, endpoint: str):
         if config.client is None:
-            raise ProcessLookupError('No client client found. Please login using magento.Client()')
+            raise ProcessLookupError('No active client found. Please login using magento.Client()')
 
         self.client = config.client
         self.endpoint = endpoint
@@ -16,20 +16,19 @@ class SearchQuery(object):
         self.fields = ''
         self._result = {}
 
-    def add_criteria(self, field: str, value: str, **kwargs: object) -> SearchQuery:
+    def add_criteria(self, field, value, **kwargs) -> SearchQuery:
         """
         :param field: the object attribute to evaluate in the search
         :param value: the attribute value to evaluate in the search
         :param kwargs: (optional)
 
-                        condition: condition to evaluate the attribute value
-                        (Default Value)     'eq'        ->      =
-                                            'gt'        ->      >
-                                            'lt'        ->      <
-                                            'gteq'      ->      >=
-                                            'lteq'      ->      <=
-                                            'in'        ->      []?
-                                            '?????
+                        condition:  condition used to evaluate the attribute value
+                                    (Default Value)     'eq'            =
+                                                        'gt'            >
+                                                        'lt'            <
+                                                        'gteq'          >=
+                                                        'lteq'          <=
+                                                        'in'            []
 
                         group:      filter group number
                         filter:     filter number within the filter group
@@ -82,7 +81,7 @@ class SearchQuery(object):
 
             :return self.result
         """
-        response = self.client.get(self.query + self.fields)
+        response = self.client.request(self.query + self.fields)
         if response.ok:
             self._result = response.json()
         else:
@@ -95,8 +94,7 @@ class SearchQuery(object):
 
     def by_id(self, entity_id: int | str) -> {}:
         self.query = self.query.strip('?') + str(entity_id)
-        self.execute()
-        return self.result
+        return self.execute()
 
     def by_number(self, increment_id: str) -> dict:
         self.add_criteria('increment_id', increment_id).execute()
@@ -128,7 +126,7 @@ class SearchQuery(object):
             result = self.result if self.result_type is list else [self.result]
             data = [obj.json if isinstance(obj, Entity) else obj for obj in result]
 
-        self.client.save(data, filepath)
+        self.client.save_data(data, filepath)
 
     @property
     def result(self):
@@ -166,7 +164,7 @@ class OrderSearch(SearchQuery):
     @property
     def result(self):
         result = self.validate_result()
-        if not result or isinstance(result, str):
+        if not result:
             return {}
         if type(result) is list:
             return [Order(order) for order in result]

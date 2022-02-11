@@ -1,8 +1,5 @@
 from . import config
+from . import utils
 from . import search
 from . import entities
-from . import clients
-from . import utils
-
-Client = clients.MagentoClient
-
+from .clients import Client
