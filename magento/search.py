@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
 import magento.config as config
-from .entities import Order, Entity
+from .entities import Order, Entity, Category
 
 
 class SearchQuery(object):
@@ -36,8 +36,8 @@ class SearchQuery(object):
                         filters are {field:value} pairs
 
                         Group 0 Filter 0                        ->      Filter 0
-                        Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 AND Filter 1
-                        Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 OR Filter
+                        Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
+                        Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter 0
 
         :return: self
 
@@ -49,9 +49,7 @@ class SearchQuery(object):
             'filter': 0,
         }
         options.update(kwargs)
-        # Group 0 Filter 0 -> Filter 0
-        # Group 0 Filter 0 + Group 0 Filter 1 -< Filter 0 OR Filter 1
-        # Group 0 Filter 0 + Group 1 Filter 0 -< Filter 0 AND Filter 0
+
         criteria = (
                 f'searchCriteria[filter_groups][{options["group"]}][filters][{options["filter"]}][field]={field}' +
                 f'&searchCriteria[filter_groups][{options["group"]}][filters][{options["filter"]}][value]={value}' +
@@ -76,11 +74,7 @@ class SearchQuery(object):
         return self
 
     def execute(self):
-        """
-            Sends the search request through the active client.
-
-            :return self.result
-        """
+        """Sends the search request through the active client."""
         response = self.client.request(self.query + self.fields)
         if response.ok:
             self._result = response.json()
@@ -186,3 +180,29 @@ class InvoiceSearch(SearchQuery):
         order = OrderSearch().by_number(order_number)
         if order:
             return self.by_order_id(order[0]['entity_id'])
+
+
+class CategorySearch(SearchQuery):
+
+    def __init__(self):
+        super().__init__('categories')
+
+    @property
+    def result(self):
+        result = self.validate_result()
+        if not result:
+            return {}
+        if type(result) is list:
+            return [Category(category) for category in result]
+        return Category(result)
+
+    def all(self):
+        return Category(self.client.request(self.client.BASE_URL + 'categories').json())
+
+    def products_from_id(self, category_id):
+        return self.by_id(category_id).products
+
+    def order_items_from_id(self, category_id):
+        skus = self.products_from_id(category_id)
+        order_items = SearchQuery('orders/items')\
+            .add_criteria('sku', ','.join(skus), condition = 'in')
