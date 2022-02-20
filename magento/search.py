@@ -16,35 +16,43 @@ class SearchQuery(object):
         self.fields = ''
         self._result = {}
 
-    def add_criteria(self, field, value, **kwargs) -> SearchQuery:
+    def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
         """
-        :param field: the object attribute to evaluate in the search
-        :param value: the attribute value to evaluate in the search
-        :param kwargs: (optional)
+        :param field:       the object attribute to search by
+        :param value:       the value of the attribute to compare
+        :param condition:   the comparison condition
+        :param kwargs:      additional search option arguments
+        :return:            the calling SearchQuery object
 
-                        condition:  condition used to evaluate the attribute value
-                                    (Default Value)     'eq'            =
-                                                        'gt'            >
-                                                        'lt'            <
-                                                        'gteq'          >=
-                                                        'lteq'          <=
-                                                        'in'            []
+        Options
 
-                        group:      filter group number
-                        filter:     filter number within the filter group
+            condition:  condition used to evaluate the attribute value
 
-                        filters are {field:value} pairs
+                        (Default Value)     'eq'            =           (field=value)
+                                            'gt'            >
+                                            'lt'            <
+                                            'gteq'          >=
+                                            'lteq'          <=
+                                            'in'            []
 
-                        Group 0 Filter 0                        ->      Filter 0
-                        Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
-                        Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter 0
 
-        :return: self
+            group:      filter group number
+
+            filter:     filter number (within the specified filter group)
+
+
+        Using Filter Groups
+
+            Filter groups are filter criteria in the form of { field: value }
+
+            Group 0 Filter 0                        ->      Filter 0
+            Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
+            Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter
 
         """
 
         options = {
-            'condition': 'eq',
+            'condition': condition,
             'group': 0,
             'filter': 0,
         }
