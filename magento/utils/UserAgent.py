@@ -15,6 +15,10 @@ class UserAgent(object):
     def common(cls, amount=20):
         return cls(agents=UserAgent.default_agents[:amount])
 
+    @property
+    def default(self):
+        return self.default_agents[0]['useragent']
+
     def random(self):
         import random
         agent = random.choice(self.agents)

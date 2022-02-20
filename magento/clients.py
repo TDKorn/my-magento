@@ -1,28 +1,26 @@
 import json
 import requests
 import magento.config as config
-from .search import SearchQuery, OrderSearch, InvoiceSearch
+from .search import SearchQuery, OrderSearch, InvoiceSearch, CategorySearch
 from .utils.UserAgent import UserAgent
 
 
 class Client(object):
 
-    def __init__(self, domain, username, password, user_agent=None, login=True):
-
+    def __init__(self, domain, username, password, user_agent=None, token=None, login=True):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
             'username': username,
             'password': password
         }
-        self.ACCESS_TOKEN = None
+        self.ACCESS_TOKEN = token
         self.domain = domain
-        self.user_agent = user_agent
-
-        if not self.user_agent:
-            self.user_agent = UserAgent.common().random()
+        self.user_agent = user_agent if user_agent else UserAgent().default
+        self.activate()
 
         if login:
-            self.authenticate()
+        # validate() -> request() -> headers -> token -> return token or, if no token -> authenticate() -> if unsuccessful -> AuthenticationError
+            self.validate()
 
     @classmethod
     def new(cls):
@@ -40,6 +38,10 @@ class Client(object):
     @property
     def invoices(self):
         return InvoiceSearch()
+
+    @property
+    def categories(self):
+        return CategorySearch()
 
     def authenticate(self) -> None:
         """
@@ -61,9 +63,7 @@ class Client(object):
         if self.validate():
             print('Login successful')
         else:
-            raise AuthenticationError('Authentication Error\n' +
-                                      f'{response.status_code}' + '\n' +
-                                      f'{response.json()}')
+            raise AuthenticationError(f'{response.json()}')
 
     def search(self, endpoint: str) -> SearchQuery:
         """
@@ -76,6 +76,8 @@ class Client(object):
             return OrderSearch()
         if endpoint.lower() == 'invoices':
             return InvoiceSearch()
+        if endpoint.lower() == 'categories':
+            return CategorySearch()
         if endpoint.lower() == 'string':
             pass
         else:
@@ -101,6 +103,14 @@ class Client(object):
             config.client = None
         self.ACCESS_TOKEN = None
 
+    def request(self, url) -> requests.Response:
+        """Sends a request with the access token. Used for all internal requests"""
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 401:
+            self.authenticate()
+            return self.request(url)
+        return response
+
     def save_profile(self):
         """Validates and saves login credentials for this domain"""
         if not self.validate():
@@ -116,14 +126,6 @@ class Client(object):
             }
         )
         self.save_data(data, self.domain + '.txt')
-
-    def request(self, url) -> requests.Response:
-        """Sends a request with the access token. Used for all internal requests"""
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 401:
-            self.authenticate()
-            return self.request(url)
-        return response
 
     @property
     def headers(self) -> {}:

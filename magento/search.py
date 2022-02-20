@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
 import magento.config as config
-from .entities import Order, Entity
+from .entities import Order, Entity, Category, OrderItem
 
 
 class SearchQuery(object):
@@ -16,42 +16,46 @@ class SearchQuery(object):
         self.fields = ''
         self._result = {}
 
-    def add_criteria(self, field, value, **kwargs) -> SearchQuery:
+    def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
         """
-        :param field: the object attribute to evaluate in the search
-        :param value: the attribute value to evaluate in the search
-        :param kwargs: (optional)
+        :param field:       the object attribute to search by
+        :param value:       the value of the attribute to compare
+        :param condition:   the comparison condition
+        :param kwargs:      additional search option arguments
+        :return:            the calling SearchQuery object
 
-                        condition:  condition used to evaluate the attribute value
-                                    (Default Value)     'eq'            =
-                                                        'gt'            >
-                                                        'lt'            <
-                                                        'gteq'          >=
-                                                        'lteq'          <=
-                                                        'in'            []
+        *Options*
+                condition:  condition used to evaluate the attribute value
 
-                        group:      filter group number
-                        filter:     filter number within the filter group
+                            (Default Value)     'eq'            =           (field=value)
+                                                'gt'            >
+                                                'lt'            <
+                                                'gteq'          >=
+                                                'lteq'          <=
+                                                'in'            []
 
-                        filters are {field:value} pairs
 
-                        Group 0 Filter 0                        ->      Filter 0
-                        Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 AND Filter 1
-                        Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 OR Filter
+                group:      filter group number
 
-        :return: self
+                filter:     filter number (within the specified filter group)
 
+
+        *Using Filter Groups*
+
+            Filter groups are filter criteria in the form of { field: value }
+
+                Group 0 Filter 0                        ->      Filter 0
+                Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
+                Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter 0
         """
 
         options = {
-            'condition': 'eq',
+            'condition': condition,
             'group': 0,
             'filter': 0,
         }
         options.update(kwargs)
-        # Group 0 Filter 0 -> Filter 0
-        # Group 0 Filter 0 + Group 0 Filter 1 -< Filter 0 OR Filter 1
-        # Group 0 Filter 0 + Group 1 Filter 0 -< Filter 0 AND Filter 0
+
         criteria = (
                 f'searchCriteria[filter_groups][{options["group"]}][filters][{options["filter"]}][field]={field}' +
                 f'&searchCriteria[filter_groups][{options["group"]}][filters][{options["filter"]}][value]={value}' +
@@ -76,11 +80,7 @@ class SearchQuery(object):
         return self
 
     def execute(self):
-        """
-            Sends the search request through the active client.
-
-            :return self.result
-        """
+        """Sends the search request through the active client."""
         response = self.client.request(self.query + self.fields)
         if response.ok:
             self._result = response.json()
@@ -186,3 +186,41 @@ class InvoiceSearch(SearchQuery):
         order = OrderSearch().by_number(order_number)
         if order:
             return self.by_order_id(order[0]['entity_id'])
+
+
+class CategorySearch(SearchQuery):
+
+    def __init__(self):
+        super().__init__('categories')
+
+    @property
+    def result(self):
+        result = self.validate_result()
+        if not result:
+            return {}
+        if type(result) is list:
+            return [Category(category) for category in result]
+        return Category(result)
+
+    def all(self):
+        return Category(self.client.request(self.client.BASE_URL + 'categories').json())
+
+    def products_from_id(self, category_id):
+        return self.by_id(category_id).products
+
+    def order_items_from_id(self, category_id):
+        skus = self.products_from_id(category_id)
+        order_items = SearchQuery('orders/items').add_criteria('sku', ','.join(skus), condition='in')
+        return order_items.execute()
+
+    def orders_from_id(self, category_id, start, end=None):
+        # Doesn't seem possible to filter by order date when searching for order items
+        order_items = self.order_items_from_id(category_id)
+        order_ids = ','.join(set([str(item['order_id']) for item in order_items]))
+        orders = OrderSearch() \
+            .add_criteria('entity_id', order_ids, 'in') \
+            .add_criteria('created_at', start, 'gt', group=1)
+        if end:
+            orders.add_criteria('created_at', start, 'lteq', group=2)
+        return orders.execute()
+
