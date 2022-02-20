@@ -1,29 +1,26 @@
 import json
 import requests
 import magento.config as config
-from .entities import Category
-from .search import SearchQuery, OrderSearch, InvoiceSearch
+from .search import SearchQuery, OrderSearch, InvoiceSearch, CategorySearch
 from .utils.UserAgent import UserAgent
 
 
 class Client(object):
 
-    def __init__(self, domain, username, password, user_agent=None, login=True):
-
+    def __init__(self, domain, username, password, user_agent=None, token=None, login=True):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
             'username': username,
             'password': password
         }
-        self.ACCESS_TOKEN = None
+        self.ACCESS_TOKEN = token
         self.domain = domain
-        self.user_agent = user_agent
-
-        if not self.user_agent:
-            self.user_agent = UserAgent.common().random()
+        self.user_agent = user_agent if user_agent else UserAgent().default
+        self.activate()
 
         if login:
-            self.authenticate()
+        # validate() -> request() -> headers -> token -> return token or, if no token -> authenticate() -> if unsuccessful -> AuthenticationError
+            self.validate()
 
     @classmethod
     def new(cls):
@@ -41,6 +38,10 @@ class Client(object):
     @property
     def invoices(self):
         return InvoiceSearch()
+
+    @property
+    def categories(self):
+        return CategorySearch()
 
     def authenticate(self) -> None:
         """
@@ -75,6 +76,8 @@ class Client(object):
             return OrderSearch()
         if endpoint.lower() == 'invoices':
             return InvoiceSearch()
+        if endpoint.lower() == 'categories':
+            return CategorySearch()
         if endpoint.lower() == 'string':
             pass
         else:

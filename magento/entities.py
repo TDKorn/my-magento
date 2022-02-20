@@ -316,18 +316,18 @@ class Invoice(Entity):
 
     def __init__(self, json: {}):
         super().__init__(json)
-        self.billing_address_id = json.get("billing_address_id")
+        self.billing_address_id = json.get("billing_address_id", 0)
         self.comments = json.get("comments", [])
-        self.created = json.get("created_at"),
-        self.currency_code = json.get("global_currency_code")  # str
-        self.discount = json.get("discount_amount", 0)  # int
+        self.created = json.get("created_at", ''),
+        self.currency_code = json.get("global_currency_code", '')
+        self.discount = json.get("discount_amount", 0)
         self.subtotal = json.get('subtotal', 0)
         self.tax = json.get('tax_amount', 0)
         self.total_qty = json.get('total_qty', 0)
-        self.grand_total = json.get("grand_total")  # float
-        self.number = json.get("increment_id")  # str
-        self.used_for_refund = json.get("is_used_for_refund")  # int: 1,
-        self.items = json.get("items")  # []
+        self.grand_total = json.get("grand_total", 0)
+        self.number = json.get("increment_id", '')
+        self.used_for_refund = json.get("is_used_for_refund")
+        self.items = json.get("items", [])
 
 
 class InvoiceItem(Entity):
@@ -365,12 +365,13 @@ class Category(object):
         self.position = json['position']
         self.level = json['level']
         self.client = config.client
+        self._products = []
         # Only available from CategorySearch().add_criteria().execute()
         self.product_count = json.get('product_count')
         # Only available from CategorySearch().by_id()
         self.created_at = json.get('created_at')
         self.updated_at = json.get('updated_at')
-        self.custom_attributes = json.get('custom_attributes')
+        self.custom_attributes = json.get('custom_attributes', {})
 
     @property
     def subcategories(self):
@@ -386,8 +387,10 @@ class Category(object):
 
     @property
     def products(self):
-        products = self.client.request(self.client.BASE_URL + f'categories/{self.id}/products')
-        return [product['sku'] for product in products.json()]
+        if not self._products:
+            products = self.client.request(self.client.BASE_URL + f'categories/{self.id}/products')
+            self._products = [product['sku'] for product in products.json()]
+        return self._products
 
     @property
     def attributes(self):

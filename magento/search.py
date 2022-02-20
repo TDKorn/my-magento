@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
 import magento.config as config
-from .entities import Order, Entity, Category
+from .entities import Order, Entity, Category, OrderItem
 
 
 class SearchQuery(object):
@@ -24,31 +24,29 @@ class SearchQuery(object):
         :param kwargs:      additional search option arguments
         :return:            the calling SearchQuery object
 
-        Options
+        *Options*
+                condition:  condition used to evaluate the attribute value
 
-            condition:  condition used to evaluate the attribute value
-
-                        (Default Value)     'eq'            =           (field=value)
-                                            'gt'            >
-                                            'lt'            <
-                                            'gteq'          >=
-                                            'lteq'          <=
-                                            'in'            []
-
-
-            group:      filter group number
-
-            filter:     filter number (within the specified filter group)
+                            (Default Value)     'eq'            =           (field=value)
+                                                'gt'            >
+                                                'lt'            <
+                                                'gteq'          >=
+                                                'lteq'          <=
+                                                'in'            []
 
 
-        Using Filter Groups
+                group:      filter group number
+
+                filter:     filter number (within the specified filter group)
+
+
+        *Using Filter Groups*
 
             Filter groups are filter criteria in the form of { field: value }
 
-            Group 0 Filter 0                        ->      Filter 0
-            Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
-            Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter
-
+                Group 0 Filter 0                        ->      Filter 0
+                Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
+                Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter 0
         """
 
         options = {
@@ -212,5 +210,17 @@ class CategorySearch(SearchQuery):
 
     def order_items_from_id(self, category_id):
         skus = self.products_from_id(category_id)
-        order_items = SearchQuery('orders/items')\
-            .add_criteria('sku', ','.join(skus), condition = 'in')
+        order_items = SearchQuery('orders/items').add_criteria('sku', ','.join(skus), condition='in')
+        return order_items.execute()
+
+    def orders_from_id(self, category_id, start, end=None):
+        # Doesn't seem possible to filter by order date when searching for order items
+        order_items = self.order_items_from_id(category_id)
+        order_ids = ','.join(set([str(item['order_id']) for item in order_items]))
+        orders = OrderSearch() \
+            .add_criteria('entity_id', order_ids, 'in') \
+            .add_criteria('created_at', start, 'gt', group=1)
+        if end:
+            orders.add_criteria('created_at', start, 'lteq', group=2)
+        return orders.execute()
+
