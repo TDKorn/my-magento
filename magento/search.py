@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Union
 import magento.config as config
-from .entities import Order, Entity, Category, OrderItem
+from .entities import Order, Entity, Category, OrderItem, Invoice
 
 
 class SearchQuery(object):
@@ -96,10 +96,10 @@ class SearchQuery(object):
         self.query = self.query.strip('?') + str(entity_id)
         return self.execute()
 
-    def by_number(self, increment_id: str) -> dict:
+    def by_number(self, increment_id: str) -> Entity:
         self.add_criteria('increment_id', increment_id).execute()
         if not self.result:
-            return {}
+            return None
         if self.result_type is list:
             return self.result[0]
         return self.result
@@ -165,7 +165,7 @@ class OrderSearch(SearchQuery):
     def result(self):
         result = self.validate_result()
         if not result:
-            return {}
+            return None
         if type(result) is list:
             return [Order(order) for order in result]
         return Order(result)
@@ -176,6 +176,15 @@ class InvoiceSearch(SearchQuery):
     def __init__(self):
         super().__init__('invoices')
 
+    @property
+    def result(self):
+        result = self.validate_result()
+        if not result:
+            return None
+        if type(result) is list:
+            return Invoice(result[0])
+        return Invoice(result)
+
     def by_order_id(self, order_id):
         return self.add_criteria('order_id', order_id).execute()
 
@@ -183,9 +192,8 @@ class InvoiceSearch(SearchQuery):
         return self.by_order_id(order.id)
 
     def by_order_number(self, order_number):
-        order = OrderSearch().by_number(order_number)
-        if order:
-            return self.by_order_id(order[0]['entity_id'])
+        if order := OrderSearch().by_number(order_number):
+            return self.by_order(order)
 
 
 class CategorySearch(SearchQuery):
