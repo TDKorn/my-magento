@@ -1,3 +1,4 @@
+import copy
 import json
 import requests
 import magento.config as config
@@ -19,9 +20,14 @@ class Client(object):
         self.activate()
 
         if login:
-        # validate() -> request() -> headers -> token -> return token or, if no token -> authenticate() -> if unsuccessful -> AuthenticationError
             self.validate()
 
+    @classmethod
+    def from_json(cls, json_str):
+        kwargs = json.loads(json_str)
+        return cls(**kwargs)
+
+    # return json.loads(data.decode('utf-8'))
     @classmethod
     def new(cls):
         return cls(
@@ -111,21 +117,22 @@ class Client(object):
             return self.request(url)
         return response
 
-    def save_profile(self):
+    def to_json(self, validate=False):
         """Validates and saves login credentials for this domain"""
-        if not self.validate():
-            # Will raise error if login fails
-            self.authenticate()
-            return self.save_profile()
-
-        data = self.USER_CREDENTIALS.copy()
+        data = copy.deepcopy(self.USER_CREDENTIALS)
+        if validate:
+            try:
+                self.validate()
+            except AuthenticationError as e:
+                return e.args
         data.update(
             {  # Add more to this if you want!
                 'domain': self.domain,
-                'user-agent': self.user_agent
+                'user_agent': self.user_agent,
+                'token': self.token
             }
         )
-        self.save_data(data, self.domain + '.txt')
+        return json.dumps(data)
 
     @property
     def headers(self) -> {}:
