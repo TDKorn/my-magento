@@ -65,11 +65,11 @@ class Client(object):
         if response.ok:
             self.ACCESS_TOKEN = response.json()
             self.activate()
+        else:
+            raise AuthenticationError(f'{response.json()}')
 
         if self.validate():
             print('Login successful')
-        else:
-            raise AuthenticationError(f'{response.json()}')
 
     def search(self, endpoint: str) -> SearchQuery:
         """
