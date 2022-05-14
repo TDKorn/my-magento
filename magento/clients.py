@@ -1,9 +1,9 @@
 import copy
 import json
 import requests
+from .search import *
+from .utils import get_agent
 import magento.config as config
-from .search import SearchQuery, OrderSearch, InvoiceSearch, CategorySearch
-from .utils.UserAgent import UserAgent
 
 
 class Client(object):
@@ -16,7 +16,7 @@ class Client(object):
         }
         self.ACCESS_TOKEN = token
         self.domain = domain
-        self.user_agent = user_agent if user_agent else UserAgent().default
+        self.user_agent = user_agent if user_agent else get_agent()
         self.activate()
 
         if login:
@@ -39,15 +39,19 @@ class Client(object):
 
     @property
     def orders(self):
-        return OrderSearch()
+        return OrderSearch(self)
 
     @property
     def invoices(self):
-        return InvoiceSearch()
+        return InvoiceSearch(self)
 
     @property
     def categories(self):
-        return CategorySearch()
+        return CategorySearch(self)
+
+    @property
+    def products(self):
+        return ProductSearch(self)
 
     def authenticate(self) -> None:
         """
@@ -72,22 +76,23 @@ class Client(object):
             print('Login successful')
 
     def search(self, endpoint: str) -> SearchQuery:
-        """
-        Initiates query to a search endpoint and returns a SearchQuery object.
-        Some endpoints return SearchQuery subclass objects that have additional methods.
-
-        """
+        """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
         self.activate()
+        # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
         if endpoint.lower() == 'orders':
-            return OrderSearch()
+            return self.orders
         if endpoint.lower() == 'invoices':
-            return InvoiceSearch()
+            return self.invoices
         if endpoint.lower() == 'categories':
-            return CategorySearch()
+            return self.categories
+        if endpoint.lower() == 'products':
+            return self.products
         if endpoint.lower() == 'string':
             pass
         else:
-            return SearchQuery(endpoint)
+            # Any other endpoint is queried with a general SearchQuery object
+            return SearchQuery(endpoint=endpoint,
+                               client=self)
 
     def activate(self) -> None:
         """

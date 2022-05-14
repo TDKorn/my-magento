@@ -1,16 +1,19 @@
 from __future__ import annotations
 from typing import Union
+
+import magento
 import magento.config as config
 from .entities import Order, Entity, Category, OrderItem, Invoice
+from .models import Product
 
 
 class SearchQuery(object):
 
-    def __init__(self, endpoint: str):
-        if config.client is None:
-            raise ProcessLookupError('No active client found. Please login using magento.Client()')
+    def __init__(self, endpoint: str, client: magento.Client):
+        if not isinstance(client, magento.Client):
+            raise ValueError('Must provide a Client object to search with')
 
-        self.client = config.client
+        self.client = client
         self.endpoint = endpoint
         self.query = self.client.BASE_URL + endpoint + '/?'
         self.fields = ''
@@ -70,9 +73,9 @@ class SearchQuery(object):
     def restrict_fields(self, fields: Union[str, list, tuple]) -> SearchQuery:
         if not isinstance(fields, str):
             if not isinstance(fields, (list, tuple)):
-                raise AttributeError('Invalid argument.Must be comma separated string or list/tuple.')
+                raise TypeError('Invalid type for argument "fields". Must be a comma separated string or list/tuple.')
             fields = ','.join(fields)
-        # 'entity_id' field required to initialize any object that inherits Entity
+
         if 'entity_id' not in fields:
             fields = ','.join([fields, 'entity_id'])
 
@@ -158,8 +161,9 @@ class SearchQuery(object):
 
 class OrderSearch(SearchQuery):
 
-    def __init__(self):
-        super().__init__('orders')
+    def __init__(self, client):
+        super().__init__(endpoint='orders',
+                         client=client)
 
     @property
     def result(self):
@@ -173,8 +177,9 @@ class OrderSearch(SearchQuery):
 
 class InvoiceSearch(SearchQuery):
 
-    def __init__(self):
-        super().__init__('invoices')
+    def __init__(self, client):
+        super().__init__(endpoint='invoices',
+                         client=client)
 
     @property
     def result(self):
@@ -196,10 +201,34 @@ class InvoiceSearch(SearchQuery):
             return self.by_order(order)
 
 
+class ProductSearch(SearchQuery):
+
+    def __init__(self, client):
+        super().__init__(endpoint='products',
+                         client=client)
+
+    @property
+    def result(self):
+        result = self.validate_result()
+        if not result:
+            return None
+        if type(result) is list:
+            return [Product(p) for p in result]
+        return Product(result)
+
+    def by_sku(self, sku):
+        # Convert to url-encodable sku; Query url is same structure as for id
+        return self.by_id(sku.replace('/', '%2F'))
+
+    def get_stock(self, sku):
+        return self.by_sku(sku).stock
+
+
 class CategorySearch(SearchQuery):
 
-    def __init__(self):
-        super().__init__('categories')
+    def __init__(self, client):
+        super().__init__(endpoint='categories',
+                         client=client)
 
     @property
     def result(self):
