@@ -1,8 +1,9 @@
-import copy
+from __future__ import annotations
 import json
+import copy
 import requests
-from .search import *
 from .utils import get_agent
+from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
 
 
 class Client(object):
@@ -73,7 +74,7 @@ class Client(object):
             )
         return self.validate()
 
-    def search(self, endpoint: str) -> SearchQuery:
+    def search(self, endpoint: str):
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
         # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
         if endpoint.lower() == 'orders':
@@ -130,6 +131,9 @@ class Client(object):
             }
         )
         return json.dumps(data)
+
+    def url_for(self, endpoint):
+        return self.BASE_URL + endpoint
 
     @property
     def headers(self) -> {}:

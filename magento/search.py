@@ -1,22 +1,23 @@
 from __future__ import annotations
 from typing import Union
+from .utils import ItemManager
+from .entities import Order, Entity, OrderItem, Invoice
+from .models import Product, Category
+from . import clients
 
-import magento
-from .entities import Order, Entity, Category, OrderItem, Invoice
-from .models import Product
 
+class SearchQuery:
 
-class SearchQuery(object):
-
-    def __init__(self, endpoint: str, client: magento.Client):
-        if not isinstance(client, magento.Client):
-            raise ValueError('Must provide a Client object to search with')
+    def __init__(self, endpoint: str, client: clients.Client):
+        if not isinstance(client, clients.Client):
+            raise TypeError(f'client type must be {clients.Client}')
 
         self.client = client
         self.endpoint = endpoint
         self.query = self.client.BASE_URL + endpoint + '/?'
         self.fields = ''
         self._result = {}
+        self.__result = ItemManager()
 
     def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
         """
@@ -94,11 +95,11 @@ class SearchQuery(object):
 '''}
         return self.result
 
-    def by_id(self, entity_id: int | str) -> {}:
-        self.query = self.query.strip('?') + str(entity_id)
+    def by_id(self, item_id: int | str) -> {}:
+        self.query = self.query.strip('?') + str(item_id)
         return self.execute()
 
-    def by_number(self, increment_id: str) -> Entity:
+    def by_number(self, increment_id: str):
         self.add_criteria('increment_id', increment_id).execute()
         if not self.result:
             return None
@@ -204,8 +205,10 @@ class InvoiceSearch(SearchQuery):
 class ProductSearch(SearchQuery):
 
     def __init__(self, client):
-        super().__init__(endpoint='products',
-                         client=client)
+        super().__init__(
+            endpoint='products',
+            client=client
+        )
 
     @property
     def result(self):
@@ -276,4 +279,3 @@ class CategorySearch(SearchQuery):
                 group=2
             )
         return orders.execute()
-

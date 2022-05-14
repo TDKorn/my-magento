@@ -12,3 +12,19 @@ def get_agent():
             return soup_agents[0].text
     # If function fails to scrape, will use hardcoded user agent
     return BACKUP_AGENT
+
+
+class ItemManager:
+
+    def __init__(self):
+        self.items = []
+
+    def add(self, item):
+        if item not in self.items:
+            self.items.append(item)
+
+    def get_attrs(self, attr):
+        return [getattr(item, attr, 0) for item in self.items]
+
+    def sum_attrs(self, attr):
+        return sum(self.get_attrs(attr))

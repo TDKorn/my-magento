@@ -1,4 +1,6 @@
-import magento
+from __future__ import annotations
+from .utils import ItemManager
+from . import clients
 
 
 class Entity(object):
@@ -8,34 +10,19 @@ class Entity(object):
         self.id = json['entity_id']
 
 
-class ItemManager(object):
-
-    def __init__(self):
-        self.items = []
-
-    def add(self, item):
-        if item not in self.items:
-            self.items.append(item)
-
-    def get_attrs(self, attr):
-        return [getattr(item, attr, 0) for item in self.items]
-
-    def sum_attrs(self, attr):
-        return sum(self.get_attrs(attr))
-
-
 class Order(Entity):
 
-    def __init__(self, json: {}, client: magento.Client):
+    def __init__(self, json: {}, client: clients.Client):
         super().__init__(json)
         self.client = client
+        self.item_manager = OrderItemManager(self)
+        self.items = self.item_manager.items
+
         self.number = self.json.get('increment_id', '')
         self.purchase_date = self.json.get('created_at', '').split(' ')[0]
         self.status = self.json.get('status', '')
         self.raw_billing_address = self.json.get('billing_address', {})
 
-        self.item_manager = OrderItemManager(self)
-        self.items = self.item_manager.items
         self.item_count = self.json.get('total_item_count', 0)
         self.total_qty_ordered = self.json.get('total_qty_ordered', 0)
         self.total_qty_refunded = self.item_manager.qty_refunded
@@ -67,8 +54,7 @@ class Order(Entity):
         self.gross_total = self.payment.get('amount_ordered', 0)
         self.total_paid = self.payment.get('amount_paid', 0)
         self.adjustment_positive = abs(self.json.get('base_adjustment_positive', 0))
-        self.total_refund = abs(self.json.get('total_refunded',
-                                              0))  # Includes adjustment refund, tax refund, discount refund, shipping refund
+        self.total_refund = abs(self.json.get('total_refunded', 0))  # Includes adjustment refund, tax refund, discount refund, shipping refund
         self.total_canceled = abs(self.json.get('total_canceled', 0))
 
     def __str__(self):
@@ -356,46 +342,3 @@ class InvoiceItem(Entity):
         return self.client.products.add_criteria(field='product_id',
                                                  value=self.product_id).execute()
 
-
-class Category(object):
-
-    def __init__(self, json, client):
-        self.json = json
-        self.client = client
-
-        self.id = json['id']
-        self.parent_id = json['parent_id']
-        self.name = json['name']
-        self.is_active = json['is_active']
-        self.position = json['position']
-        self.level = json['level']
-        self._products = []
-        # Only available from CategorySearch().add_criteria().execute()
-        self.product_count = json.get('product_count')
-        # Only available from CategorySearch().by_id()
-        self.created_at = json.get('created_at')
-        self.updated_at = json.get('updated_at')
-        self.custom_attributes = json.get('custom_attributes', {})
-
-    @property
-    def subcategories(self):
-        return [Category(child, self.client) for child in self.json['children_data']]
-
-    @property
-    def subcategory_names(self):
-        return [category.name for category in self.subcategories]
-
-    @property
-    def subcategory_ids(self):
-        return [category.id for category in self.subcategories]
-
-    @property
-    def products(self):
-        if not self._products:
-            products = self.client.request(self.client.BASE_URL + f'categories/{self.id}/products')
-            self._products = [product['sku'] for product in products.json()]
-        return self._products
-
-    @property
-    def attributes(self):
-        return {attr['attribute_code']: attr['value'] for attr in self.custom_attributes}
