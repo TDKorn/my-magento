@@ -1,5 +1,4 @@
-from . import search
-import magento.config as config
+import magento
 
 
 class Entity(object):
@@ -27,8 +26,9 @@ class ItemManager(object):
 
 class Order(Entity):
 
-    def __init__(self, json: {}):
+    def __init__(self, json: {}, client: magento.Client):
         super().__init__(json)
+        self.client = client
         self.number = self.json.get('increment_id', '')
         self.purchase_date = self.json.get('created_at', '').split(' ')[0]
         self.status = self.json.get('status', '')
@@ -75,7 +75,7 @@ class Order(Entity):
         return "Order Number " + self.number + " placed on " + self.purchase_date
 
     def get_invoice(self) -> {}:
-        return search.InvoiceSearch().by_order(self)
+        return self.client.invoices.by_order(self)
 
     @property
     def bill_to(self) -> {}:
@@ -332,9 +332,10 @@ class Invoice(Entity):
 
 class InvoiceItem(Entity):
 
-    def __init__(self, item):
+    def __init__(self, item, client):
         super().__init__(item)
         self.json = item
+        self.client = client
         self.sku = item.get('sku', '')
         self.name = item.get('name', '')
         self.price = item.get('price', 0)
@@ -348,23 +349,26 @@ class InvoiceItem(Entity):
         self.parent_id = item.get('parent_id', 0)
 
     def get_order_item(self):
-        return search.SearchQuery('orders/items').add_criteria('item_id', self.order_item_id).execute()
+        return self.client.search('orders/items').add_criteria(field='item_id',
+                                                               value=self.order_item_id).execute()
 
     def get_product(self):
-        return search.SearchQuery('products').add_criteria('product_id', self.product_id).execute()
+        return self.client.products.add_criteria(field='product_id',
+                                                 value=self.product_id).execute()
 
 
 class Category(object):
 
-    def __init__(self, json):
+    def __init__(self, json, client):
         self.json = json
+        self.client = client
+
         self.id = json['id']
         self.parent_id = json['parent_id']
         self.name = json['name']
         self.is_active = json['is_active']
         self.position = json['position']
         self.level = json['level']
-        self.client = config.client
         self._products = []
         # Only available from CategorySearch().add_criteria().execute()
         self.product_count = json.get('product_count')
@@ -375,7 +379,7 @@ class Category(object):
 
     @property
     def subcategories(self):
-        return [Category(child) for child in self.json['children_data']]
+        return [Category(child, self.client) for child in self.json['children_data']]
 
     @property
     def subcategory_names(self):

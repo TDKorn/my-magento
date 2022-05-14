@@ -1,4 +1,6 @@
 # Everything without entity_id
+import magento
+
 
 class Product:
     STATUS_ENABLED = 1
@@ -9,10 +11,11 @@ class Product:
     VISIBILITY_SEARCH = 3
     VISIBILITY_BOTH = 4
 
-    def __init__(self, data: dict):
-        if not isinstance(data, dict):
+    def __init__(self, data: {}, client: magento.Client):
+        if not isinstance(data, dict) or not isinstance(client, magento.Client):
             raise ValueError
 
+        self.client = client
         for attr in data:
             if attr == 'custom_attributes':
                 # Unpack list of custom attribute dicts into a single dict

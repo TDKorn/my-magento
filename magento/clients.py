@@ -3,7 +3,6 @@ import json
 import requests
 from .search import *
 from .utils import get_agent
-import magento.config as config
 
 
 class Client(object):
@@ -17,7 +16,6 @@ class Client(object):
         self.ACCESS_TOKEN = token
         self.domain = domain
         self.user_agent = user_agent if user_agent else get_agent()
-        self.activate()
 
         if login:
             self.validate()
@@ -27,7 +25,6 @@ class Client(object):
         kwargs = json.loads(json_str)
         return cls(**kwargs)
 
-    # return json.loads(data.decode('utf-8'))
     @classmethod
     def new(cls):
         return cls(
@@ -53,11 +50,9 @@ class Client(object):
     def products(self):
         return ProductSearch(self)
 
-    def authenticate(self) -> None:
-        """
-        Requests a token from the authentication endpoint. If successful, sets active client to itself.
-        """
-        url = self.BASE_URL + 'integration/admin/token'
+    def authenticate(self) -> bool:
+        """Request access token from the authentication endpoint."""
+        endpoint = self.BASE_URL + 'integration/admin/token'
         payload = self.USER_CREDENTIALS
         headers = {
             'Content-Type': 'application/json',
@@ -65,19 +60,21 @@ class Client(object):
         }
 
         print(f'Authenticating {payload["username"]} on {self.domain}...')
-        response = requests.post(url, json=payload, headers=headers)
+        response = requests.post(
+            endpoint,
+            json=payload,
+            headers=headers
+        )
         if response.ok:
             self.ACCESS_TOKEN = response.json()
-            self.activate()
         else:
-            raise AuthenticationError(f'{response.json()}')
-
-        if self.validate():
-            print('Login successful')
+            raise AuthenticationError(
+                f'Failed to authenticate credentials: {response.json()}'
+            )
+        return self.validate()
 
     def search(self, endpoint: str) -> SearchQuery:
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
-        self.activate()
         # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
         if endpoint.lower() == 'orders':
             return self.orders
@@ -87,40 +84,35 @@ class Client(object):
             return self.categories
         if endpoint.lower() == 'products':
             return self.products
-        if endpoint.lower() == 'string':
-            pass
         else:
             # Any other endpoint is queried with a general SearchQuery object
             return SearchQuery(endpoint=endpoint,
                                client=self)
 
-    def activate(self) -> None:
-        """
-        Sets the active client to itself. If a different client was active, it is logged out.
-        Called during authentication and all search queries.
-
-        """
-        if isinstance(config.client, Client) and config.client is not self:
-            config.client.logout()
-        config.client = self
-
     def validate(self):
-        """Checks active client and sends an authorized request to a standard API endpoint"""
-        return config.client is self and self.request(self.BASE_URL + 'store/websites').status_code == 200
+        """Sends an authorized request to a standard API endpoint"""
+        return self.request(self.BASE_URL + 'store/websites').status_code == 200
 
     def logout(self):
-        """Deletes the access token and, if currently active, resets the active client"""
-        if config.client is self:
-            config.client = None
+        """Deletes the access token"""
         self.ACCESS_TOKEN = None
 
     def request(self, url) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
         response = requests.get(url, headers=self.headers)
         if response.status_code == 401:
-            self.authenticate()
+            # Invalid token, authenticate credentials and retry.
+            self.authenticate()  # Invalid credentials will raise exception
             return self.request(url)
-        return response
+        elif response.status_code != 200:
+            # Unknown error. Bad request url, nonexistent endpoint, etc.
+            raise RuntimeError(
+                "Request to {} failed with status code {} and message: \"{}\"".format(
+                    url, response.status_code, response.json())
+            )
+        else:
+            # Status Code is 200
+            return response
 
     def to_json(self, validate=False):
         """Validates and saves login credentials for this domain"""

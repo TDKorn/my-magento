@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import Union
 
 import magento
-import magento.config as config
 from .entities import Order, Entity, Category, OrderItem, Invoice
 from .models import Product
 
@@ -171,8 +170,8 @@ class OrderSearch(SearchQuery):
         if not result:
             return None
         if type(result) is list:
-            return [Order(order) for order in result]
-        return Order(result)
+            return [Order(order, self.client) for order in result]
+        return Order(result, self.client)
 
 
 class InvoiceSearch(SearchQuery):
@@ -191,13 +190,14 @@ class InvoiceSearch(SearchQuery):
         return Invoice(result)
 
     def by_order_id(self, order_id):
-        return self.add_criteria('order_id', order_id).execute()
+        return self.add_criteria(field='order_id',
+                                 value=order_id).execute()
 
     def by_order(self, order):
         return self.by_order_id(order.id)
 
     def by_order_number(self, order_number):
-        if order := OrderSearch().by_number(order_number):
+        if order := self.client.orders.by_number(order_number):
             return self.by_order(order)
 
 
@@ -213,8 +213,8 @@ class ProductSearch(SearchQuery):
         if not result:
             return None
         if type(result) is list:
-            return [Product(p) for p in result]
-        return Product(result)
+            return [Product(p, self.client) for p in result]
+        return Product(result, self.client)
 
     def by_sku(self, sku):
         # Convert to url-encodable sku; Query url is same structure as for id
@@ -236,28 +236,44 @@ class CategorySearch(SearchQuery):
         if not result:
             return {}
         if type(result) is list:
-            return [Category(category) for category in result]
-        return Category(result)
+            return [Category(category, self.client) for category in result]
+        return Category(result, self.client)
 
     def all(self):
-        return Category(self.client.request(self.client.BASE_URL + 'categories').json())
+        response = self.client.request(self.client.BASE_URL + 'categories')
+        if response.ok:
+            return Category(response.json(), self.client)
 
     def products_from_id(self, category_id):
         return self.by_id(category_id).products
 
     def order_items_from_id(self, category_id):
         skus = self.products_from_id(category_id)
-        order_items = SearchQuery('orders/items').add_criteria('sku', ','.join(skus), condition='in')
-        return order_items.execute()
+        return self.client.search('orders/items').add_criteria(field='sku',
+                                                               value=','.join(skus),
+                                                               condition='in').execute()
 
     def orders_from_id(self, category_id, start, end=None):
-        # Doesn't seem possible to filter by order date when searching for order items
         order_items = self.order_items_from_id(category_id)
         order_ids = ','.join(set([str(item['order_id']) for item in order_items]))
-        orders = OrderSearch() \
-            .add_criteria('entity_id', order_ids, 'in') \
-            .add_criteria('created_at', start, 'gt', group=1)
+        orders = self.client.orders.add_criteria(
+            # Criteria to match all order_ids we found
+            field='entity_id',
+            value=order_ids,
+            condition='in'
+        ).add_criteria(
+            # Criteria to match order date range
+            field='created_at',
+            value=start,
+            condition='gt',
+            group=1
+        )
         if end:
-            orders.add_criteria('created_at', start, 'lteq', group=2)
+            orders.add_criteria(
+                field='created_at',
+                value=end,
+                condition='lteq',
+                group=2
+            )
         return orders.execute()
 
