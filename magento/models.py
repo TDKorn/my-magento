@@ -18,14 +18,16 @@ class Product:
     def __init__(self, data: {}, client: clients.Client):
         if not isinstance(data, dict) or not isinstance(client, clients.Client):
             raise ValueError
-
-        self.data = data
-        self.client = client
         self.sku = None  # The only required API response field
-        self.set_attrs()
+        self.client = client
+        self.set_attrs(data)
 
-    def set_attrs(self):
-        for attr in (data := self.data):
+
+    def __str__(self):
+        return f'Magento Product: {self.sku}'
+
+    def set_attrs(self, data):
+        for attr in data:
             if attr == 'custom_attributes':
                 # Unpack list of custom attribute dicts into a single dict
                 custom_attrs = {
@@ -88,9 +90,8 @@ class Product:
         url = self.client.url_for(f'products/{self.encoded_sku}')
         response = self.client.request(url)
         if response.ok:
-            # Update/rehydrate existing object attributes
-            self.data = response.json()
-            self.set_attrs()
+            # Update existing object attributes
+            self.set_attrs(response.json())
             print('Refreshed ' + self.sku)
 
         elif response.status_code == 401:
