@@ -219,7 +219,7 @@ class ProductSearch(SearchQuery):
             return [Product(p, self.client) for p in result]
         return Product(result, self.client)
 
-    def by_sku(self, sku):
+    def by_sku(self, sku) -> Product:
         # Convert to url-encodable sku; Query url is same structure as for id
         return self.by_id(sku.replace('/', '%2F'))
 
