@@ -3,7 +3,7 @@ from .utils import ItemManager
 from . import clients
 
 
-class Entity(object):
+class Entity:
 
     def __init__(self, json: {}):
         self.json = json
