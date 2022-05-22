@@ -23,22 +23,6 @@ class Client(object):
         if login:
             self.authenticate()
 
-    def search(self, endpoint: str):
-        """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
-        # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
-        if endpoint.lower() == 'orders':
-            return self.orders
-        if endpoint.lower() == 'invoices':
-            return self.invoices
-        if endpoint.lower() == 'categories':
-            return self.categories
-        if endpoint.lower() == 'products':
-            return self.products
-        else:
-            # Any other endpoint is queried with a general SearchQuery object
-            return SearchQuery(endpoint=endpoint,
-                               client=self)
-
     @property
     def orders(self):
         return OrderSearch(self)
@@ -55,33 +39,33 @@ class Client(object):
     def products(self):
         return ProductSearch(self)
 
-    def request(self, url) -> requests.Response:
-        """Sends a request with the access token. Used for all internal requests"""
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 401:  # Invalid token, re-authenticate credentials and try again
-            self.authenticate()  # Will raise exception if unsuccessful
-            return self.request(url)
+    def search(self, endpoint: str):
+        """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
+        # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
+        if endpoint.lower() == 'orders':
+            return self.orders
+        if endpoint.lower() == 'invoices':
+            return self.invoices
+        if endpoint.lower() == 'categories':
+            return self.categories
+        if endpoint.lower() == 'products':
+            return self.products
         else:
-            # Any other response, successful or not, will be returned; error handling is left to methods
-            if response.status_code != 200:
-                print(
-                    "Request to {} failed with status code {} and message: \"{}\"".format(
-                        url, response.status_code, response.json()['message'])
-                )
-            return response
+            # Any other endpoint is queried with a general SearchQuery object
+            return SearchQuery(endpoint=endpoint,
+                               client=self)
 
     def authenticate(self) -> bool:
         """Request access token from the authentication endpoint."""
-        endpoint = self.BASE_URL + 'integration/admin/token'
+        endpoint = self.url_for('integration/admin/token')
         payload = self.USER_CREDENTIALS
         headers = {
             'Content-Type': 'application/json',
             'User-Agent': self.user_agent
         }
-
         print(f'Authenticating {payload["username"]} on {self.domain}...')
         response = requests.post(
-            endpoint,
+            url=endpoint,
             json=payload,
             headers=headers
         )
@@ -94,16 +78,27 @@ class Client(object):
             )
         return self.validate()
 
+    def request(self, url) -> requests.Response:
+        """Sends a request with the access token. Used for all internal requests"""
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 401:
+            self.authenticate()  # Will raise exception if unsuccessful (won't recurse infinitely)
+            return self.request(url)
+        else:
+            # Any other response, successful or not, will be returned; error handling is left to methods
+            if response.status_code != 200:
+                print(
+                    "Request to {} failed with status code {} and message: \"{}\"".format(
+                        url, response.status_code, response.json()['message'])
+                )
+            return response
+
     def url_for(self, endpoint):
         return self.BASE_URL + endpoint
 
     def validate(self):
         """Sends an authorized request to a standard API endpoint"""
-        return self.request(self.BASE_URL + 'store/websites').status_code == 200
-
-    def logout(self):
-        """Deletes the access token"""
-        self.ACCESS_TOKEN = None
+        return self.request(self.url_for('store/websites')).status_code == 200
 
     @property
     def headers(self) -> {}:

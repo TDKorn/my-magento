@@ -17,8 +17,9 @@ class Product:
 
     def __init__(self, data: {}, client: clients.Client):
         if not isinstance(data, dict) or not isinstance(client, clients.Client):
-            raise ValueError
-        self.sku = None  # The only required API response field
+            raise TypeError
+
+        self.sku = None  # Required API response field
         self.client = client
         self.set_attrs(data)
 
@@ -146,18 +147,16 @@ class Category:
 
     @property
     def subcategories(self):
-        if self._subcategories is None:  # Hasn't been checked before
-            if not self.json.get('children_data'):
-                if not self.json.get('children'):
-                    # Data comes from those two fields; must not have subcategories
-                    self._subcategories = []
-                else:
-                    # 'children' field is a comma separated string of child category ids
-                    child_ids = self.json['children'].split(',')
-                    self._subcategories = [self.client.categories.by_id(child_id) for child_id in child_ids]
-            else:
-                # 'children_data' is a list of child categories as (mostly) full json responses
+        """Retrieve and temporarily store the category's child categories"""
+        if self._subcategories is None:
+            self._subcategories = []    # Empty list returned if there's no data for the 2 fields below
+
+            if self.json.get('children_data'):  # 'children_data' - list of subcategories as (mostly) full API responses
                 self._subcategories = [Category(child, self.client) for child in self.json['children_data']]
+
+            elif self.json.get('children'):  # 'children' -  comma separated string of subcategory ids
+                child_ids = self.json['children'].split(',')
+                self._subcategories = [self.client.categories.by_id(child_id) for child_id in child_ids]
 
         return self._subcategories
 
