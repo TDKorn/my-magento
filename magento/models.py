@@ -58,6 +58,22 @@ class Product:
         if self.stock_item:
             return self.stock_item['item_id']
 
+    @property
+    def children(self):
+        if self.type_id != 'configurable':
+            return None  # Only configurable products have child skus
+
+        url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
+        response = self.client.request(url)
+        if response.ok:
+            children = [Product(child, self.client) for child in response.json()]
+            for child in children:
+                child.refresh()
+            return children
+        else:
+            print(f'Failed to get child products of {self.sku}')
+            return None
+
     def update_stock(self, qty):
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
         url = self.client.url_for(endpoint)

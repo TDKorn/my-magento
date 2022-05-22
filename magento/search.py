@@ -226,6 +226,17 @@ class ProductSearch(SearchQuery):
     def get_stock(self, sku):
         return self.by_sku(sku).stock
 
+    def get_enabled_simple_skus(self):
+        self.add_criteria(
+            field='type_id',
+            value='simple'
+        ).add_criteria(
+            field='status',
+            value=Product.STATUS_ENABLED,
+            group=1
+        )
+        return self.execute()
+
 
 class CategorySearch(SearchQuery):
 
@@ -259,13 +270,13 @@ class CategorySearch(SearchQuery):
     def orders_from_id(self, category_id, start, end=None):
         order_items = self.order_items_from_id(category_id)
         order_ids = ','.join(set([str(item['order_id']) for item in order_items]))
-        orders = self.client.orders.add_criteria(
-            # Criteria to match all order_ids we found
+        orders = self.client.orders
+
+        orders.add_criteria(  # Criteria to match all order_ids we found
             field='entity_id',
             value=order_ids,
             condition='in'
-        ).add_criteria(
-            # Criteria to match order date range
+        ).add_criteria(  # Criteria to match order date range
             field='created_at',
             value=start,
             condition='gt',

@@ -16,34 +16,35 @@ class Order(Entity):
         super().__init__(json)
         self.client = client
         self.item_manager = OrderItemManager(self)
-        self.items = self.item_manager.items
 
-        self.number = self.json.get('increment_id', '')
-        self.purchase_date = self.json.get('created_at', '').split(' ')[0]
         self.status = self.json.get('status', '')
+        self.number = self.json.get('increment_id', '')
+        self.created_at = self.json.get('created_at', '')
+        self.updated_at = self.json.get('updated_at','')
         self.raw_billing_address = self.json.get('billing_address', {})
 
+        self.items = self.item_manager.items
         self.item_count = self.json.get('total_item_count', 0)
         self.total_qty_ordered = self.json.get('total_qty_ordered', 0)
-        self.total_qty_refunded = self.item_manager.qty_refunded
         self.total_qty_invoiced = self.item_manager.qty_invoiced
         self.total_qty_shipped = self.item_manager.qty_shipped
+        self.total_qty_refunded = self.item_manager.qty_refunded
         self.total_qty_canceled = self.item_manager.qty_canceled
 
-        self.tax = self.json.get('tax_amount', 0)
-        self.tax_canceled = abs(self.json.get('tax_canceled', 0))
-        self.tax_refunded = abs(self.json.get('tax_refunded', 0))
-
         self.subtotal = self.json.get('subtotal', 0)
-        self.subtotal_canceled = abs(self.json.get('subtotal_canceled', 0))
         self.subtotal_refunded = abs(self.json.get('subtotal_refunded', 0))
+        self.subtotal_canceled = abs(self.json.get('subtotal_canceled', 0))
+
+        self.tax = self.json.get('tax_amount', 0)
+        self.tax_refunded = abs(self.json.get('tax_refunded', 0))
+        self.tax_canceled = abs(self.json.get('tax_canceled', 0))
 
         self.shipping = self.json.get('shipping_amount', 0)
-        self.shipping_canceled = abs(self.json.get('shipping_canceled', 0))
-        self.shipping_discount = abs(self.json.get('shipping_discount_amount', 0))
         self.shipping_tax = self.json.get('shipping_tax_amount', 0)
+        self.shipping_discount = abs(self.json.get('shipping_discount_amount', 0))
         self.shipping_refunded = abs(self.json.get('shipping_refunded', 0))
         self.shipping_tax_refunded = abs(self.json.get('shipping_tax_refunded', 0))
+        self.shipping_canceled = abs(self.json.get('shipping_canceled', 0))
         self.shipping_desc = self.json.get('shipping_description', '')
 
         self.discount = abs(self.json.get('discount_amount', 0))
@@ -53,12 +54,13 @@ class Order(Entity):
 
         self.gross_total = self.payment.get('amount_ordered', 0)
         self.total_paid = self.payment.get('amount_paid', 0)
-        self.adjustment_positive = abs(self.json.get('base_adjustment_positive', 0))
+
         self.total_refund = abs(self.json.get('total_refunded', 0))  # Includes adjustment refund, tax refund, discount refund, shipping refund
         self.total_canceled = abs(self.json.get('total_canceled', 0))
+        self.adjustment_positive = abs(self.json.get('base_adjustment_positive', 0))
 
     def __str__(self):
-        return "Order Number " + self.number + " placed on " + self.purchase_date
+        return "Order Number " + self.number + " placed on " + self.created_at
 
     def get_invoice(self) -> {}:
         return self.client.invoices.by_order(self)
@@ -170,6 +172,11 @@ class OrderItem(object):
         self.discount_invoiced = abs(item.get('discount_invoiced', 0))
         self.discount_refund = abs(item.get('discount_refunded', 0))
         self.row_total = item.get('row_total_incl_tax', 0)
+
+    @property
+    def qty_outstanding(self):
+        """Number of unshipped units"""
+        return self.qty_ordered - self.qty_shipped - self.qty_refunded - self.qty_canceled
 
     @property
     def gross_subtotal(self):
