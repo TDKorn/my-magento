@@ -75,6 +75,17 @@ class Product:
             print(f'Failed to get child products of {self.sku}')
             return None
 
+    def get_option_skus(self):
+        """If there are additional options, each one has its own SKU (and API Responses use this SKU)."""
+        option_skus = []
+        if hasattr(self, 'options'):
+            for option in self.options:
+                base_sku = option['product_sku']
+                for val in option['values']:
+                    if val.get('sku'):
+                        option_skus.append(base_sku + '-' + val['sku'])
+        return option_skus
+
     def update_stock(self, qty):
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
         url = self.client.url_for(endpoint)

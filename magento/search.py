@@ -85,14 +85,7 @@ class SearchQuery:
     def execute(self):
         """Sends the search request through the active client."""
         response = self.client.request(self.query + self.fields)
-        if response.ok:
-            self._result = response.json()
-        else:
-            self._result = {'Bad Response': f'''
-                Status Code: {response.status_code}
-                Details:
-                {response.json()}
-'''}
+        self._result = response.json()
         return self.result
 
     def by_id(self, item_id: int | str) -> {}:
@@ -113,14 +106,35 @@ class SearchQuery:
         self.query = self.client.BASE_URL + self.endpoint + '/?'
 
     def validate_result(self) -> {} | list[{}]:
-        # API Request error
-        assert not self._result.get('Bad Response')
-        # If fields restricted      ->    result is dict with one key, 'items'
-        # If fields unrestricted    ->    result will have 'total_count' and 'items' keys
-        if self.fields or self._result.get('total_count', None) is not None:
-            return self._result.get('items', [{}])
-        # Direct request by ID will have result of single entity, as dict
-        return self._result
+        """
+        Returns the actual result, regardless of search approach
+        Failed: response will always contain a "message" key
+        Success:
+            Search Query:   response contains up to 3 keys from ["items", "total_count", "search_criteria"]
+            Direct Query:   response is the full entity/model response dict; typically has 20+ keys
+        """
+        if self._result.get('message'):
+            print(
+                'Search failed with the following message: ' + '\t'
+                + self._result['message']
+            )
+            return None
+
+        if 'items' in self._result:     # Successful response will have items key
+            items = self._result['items']
+            if items:                   # Response can still be {'items': None}
+                if len(items) > 1:
+                    return items
+                return items[0]
+            else:
+                print("No matching {} for this search query".format(self.endpoint))
+                return None
+
+        if len(self._result.keys()) > 3:  # Direct request of entity/model by id/sku with full response dict
+            return self._result
+
+        else:   # I have no idea what could've gone wrong, sorry :/
+            raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
     def save_result(self, filepath):
         if not self.result:
@@ -136,23 +150,8 @@ class SearchQuery:
         return self.validate_result()
 
     @property
-    def result_count(self) -> int:
-        # Restricted fields -> result will be in the format {'items': None} or {'items': [{},{},...,{}]}
-        if self.fields:
-            items = self._result.get('items')
-            if items is None:
-                return 0
-            return len(items)
-        # Unrestricted fields, any result from a search endpoint will have 3 keys
-        # Therefore, if not 3 keys it must be either
-        #   1. Result from direct access by Id -> dict with 10+ keys
-        #   2. Query not executed yet -> {} -> 0 keys
-        if len(self._result) != 3:
-            if not self._result:
-                return 0
-            return 1
-        # Actual search queries will have result dict with 3 keys, one of which is 'total_count'
-        return self._result.get('total_count', 0)
+    def result_count(self):
+        return len(self.result) if self._result else 0
 
     @property
     def result_type(self):
@@ -219,9 +218,19 @@ class ProductSearch(SearchQuery):
             return [Product(p, self.client) for p in result]
         return Product(result, self.client)
 
+    def by_id(self, item_id: int | str) -> {}:
+        return self.add_criteria(
+            field='entity_id',      # Product has no "entity_id" field in API responses, just "id"
+            value=item_id           # But to search by the "id" field, need to use "entity_id"
+        ).execute()
+
     def by_sku(self, sku) -> Product:
-        # Convert to url-encodable sku; Query url is same structure as for id
-        return self.by_id(sku.replace('/', '%2F'))
+        self.query = self.client.url_for(
+            endpoint='products/{}'.format(
+                sku.replace('/', '%2F')
+            )
+        )
+        return self.execute()
 
     def get_stock(self, sku):
         return self.by_sku(sku).stock
