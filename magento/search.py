@@ -93,17 +93,10 @@ class SearchQuery:
         return self.execute()
 
     def by_number(self, increment_id: str):
-        self.add_criteria('increment_id', increment_id).execute()
-        if not self.result:
-            return None
-        if self.result_type is list:
-            return self.result[0]
-        return self.result
-
-    def reset(self) -> None:
-        self._result = {}
-        self.fields = ''
-        self.query = self.client.BASE_URL + self.endpoint + '/?'
+        return self.add_criteria(
+            field='increment_id',
+            value=increment_id
+        ).execute()
 
     def validate_result(self) -> {} | list[{}]:
         """
@@ -113,6 +106,9 @@ class SearchQuery:
             Search Query:   response contains up to 3 keys from ["items", "total_count", "search_criteria"]
             Direct Query:   response is the full entity/model response dict; typically has 20+ keys
         """
+        if not self._result:
+            return None
+
         if self._result.get('message'):
             print(
                 'Search failed with the following message: ' + '\t'
@@ -120,9 +116,12 @@ class SearchQuery:
             )
             return None
 
-        if 'items' in self._result:     # Successful response will have items key
-            items = self._result['items']
-            if items:                   # Response can still be {'items': None}
+        if len(self._result.keys()) > 3:    # Direct request of entity by id/sku with full response dict
+            return self._result
+
+        if 'items' in self._result:         # All successful response with search criteria will have items key
+            items = self._result['items']   # Note that some entities (ex. Order) have an items key too. Entity response won't reach this line though
+            if items:                       # Response can still be {'items': None} though
                 if len(items) > 1:
                     return items
                 return items[0]
@@ -130,20 +129,14 @@ class SearchQuery:
                 print("No matching {} for this search query".format(self.endpoint))
                 return None
 
-        if len(self._result.keys()) > 3:  # Direct request of entity/model by id/sku with full response dict
-            return self._result
 
         else:   # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
-    def save_result(self, filepath):
-        if not self.result:
-            data = {}
-        else:
-            result = self.result if self.result_type is list else [self.result]
-            data = [obj.json if isinstance(obj, Entity) else obj for obj in result]
-
-        self.client.save_data(data, filepath)
+    def reset(self) -> None:
+        self._result = {}
+        self.fields = ''
+        self.query = self.client.BASE_URL + self.endpoint + '/?'
 
     @property
     def result(self):

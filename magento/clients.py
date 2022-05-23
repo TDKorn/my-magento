@@ -89,7 +89,7 @@ class Client(object):
             if response.status_code != 200:
                 print(
                     "Request to {} failed with status code {} and message: \"{}\"".format(
-                        url, response.status_code, response.json()['message'])
+                        url, response.status_code, response.json().get('message', 'None'))
                 )
             return response
 
