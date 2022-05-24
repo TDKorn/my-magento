@@ -8,16 +8,21 @@ from . import clients
 
 class SearchQuery:
 
-    def __init__(self, endpoint: str, client: clients.Client):
+    def __init__(
+            self,
+            endpoint: str,
+            client: clients.Client,
+            entity=None
+    ):
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
         self.client = client
         self.endpoint = endpoint
+        self.Entity = entity
         self.query = self.client.BASE_URL + endpoint + '/?'
         self.fields = ''
         self._result = {}
-        self.__result = ItemManager()
 
     def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
         """
@@ -98,6 +103,16 @@ class SearchQuery:
             value=increment_id
         ).execute()
 
+    @property
+    def result(self):
+        result = self.validate_result()
+        if result is None:
+            return result
+        if isinstance(result, list):
+            return [self.create(item) for item in result]
+        if isinstance(result, dict):
+            return self.create(result)
+
     def validate_result(self) -> {} | list[{}]:
         """
         Returns the actual result, regardless of search approach
@@ -128,19 +143,21 @@ class SearchQuery:
             else:
                 print("No matching {} for this search query".format(self.endpoint))
                 return None
-
-
-        else:   # I have no idea what could've gone wrong, sorry :/
+        else:  # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
+
+    def create(self, data):
+        """Creates the corresponding entity/model object from an API response dict"""
+        if self.Entity is None:
+            # For general SearchQuery object, it will just return the raw data
+            return data
+        # Any SearchQuery subclass will specify the Entity it returns
+        return self.Entity(data, self.client)
 
     def reset(self) -> None:
         self._result = {}
         self.fields = ''
         self.query = self.client.BASE_URL + self.endpoint + '/?'
-
-    @property
-    def result(self):
-        return self.validate_result()
 
     @property
     def result_count(self):
@@ -154,44 +171,34 @@ class SearchQuery:
 class OrderSearch(SearchQuery):
 
     def __init__(self, client):
-        super().__init__(endpoint='orders',
-                         client=client)
-
-    @property
-    def result(self):
-        result = self.validate_result()
-        if not result:
-            return None
-        if type(result) is list:
-            return [Order(order, self.client) for order in result]
-        return Order(result, self.client)
+        super().__init__(
+            endpoint='orders',
+            client=client,
+            entity=Order
+        )
 
 
 class InvoiceSearch(SearchQuery):
 
     def __init__(self, client):
-        super().__init__(endpoint='invoices',
-                         client=client)
-
-    @property
-    def result(self):
-        result = self.validate_result()
-        if not result:
-            return None
-        if type(result) is list:
-            return Invoice(result[0])
-        return Invoice(result)
-
-    def by_order_id(self, order_id):
-        return self.add_criteria(field='order_id',
-                                 value=order_id).execute()
-
-    def by_order(self, order):
-        return self.by_order_id(order.id)
+        super().__init__(
+            endpoint='invoices',
+            client=client,
+            entity=Invoice
+        )
 
     def by_order_number(self, order_number):
         if order := self.client.orders.by_number(order_number):
             return self.by_order(order)
+
+    def by_order(self, order):
+        return self.by_order_id(order.id)
+
+    def by_order_id(self, order_id):
+        return self.add_criteria(
+            field='order_id',
+            value=order_id
+        ).execute()
 
 
 class ProductSearch(SearchQuery):
@@ -199,22 +206,14 @@ class ProductSearch(SearchQuery):
     def __init__(self, client):
         super().__init__(
             endpoint='products',
-            client=client
+            client=client,
+            entity=Product
         )
-
-    @property
-    def result(self):
-        result = self.validate_result()
-        if not result:
-            return None
-        if type(result) is list:
-            return [Product(p, self.client) for p in result]
-        return Product(result, self.client)
 
     def by_id(self, item_id: int | str) -> {}:
         return self.add_criteria(
-            field='entity_id',      # Product has no "entity_id" field in API responses, just "id"
-            value=item_id           # But to search by the "id" field, need to use "entity_id"
+            field='entity_id',  # Product has no "entity_id" field in API responses, just "id"
+            value=item_id  # But to search by the "id" field, need to use "entity_id"
         ).execute()
 
     def by_sku(self, sku) -> Product:
@@ -243,17 +242,11 @@ class ProductSearch(SearchQuery):
 class CategorySearch(SearchQuery):
 
     def __init__(self, client):
-        super().__init__(endpoint='categories',
-                         client=client)
-
-    @property
-    def result(self):
-        result = self.validate_result()
-        if not result:
-            return {}
-        if type(result) is list:
-            return [Category(category, self.client) for category in result]
-        return Category(result, self.client)
+        super().__init__(
+            endpoint='categories',
+            client=client,
+            entity=Category
+        )
 
     def all(self):
         response = self.client.request(self.client.BASE_URL + 'categories')

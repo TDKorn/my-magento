@@ -307,8 +307,9 @@ class OrderItemManager(ItemManager):
 
 class Invoice(Entity):
 
-    def __init__(self, json: {}):
+    def __init__(self, json: {}, client):
         super().__init__(json)
+        self.client = client
         self.billing_address_id = json.get("billing_address_id", 0)
         self.comments = json.get("comments", [])
         self.created = json.get("created_at", ''),
