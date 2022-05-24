@@ -248,10 +248,13 @@ class CategorySearch(SearchQuery):
             entity=Category
         )
 
+    def get_parent(self):
+        """The top level/default category. Every other category is a subcategory"""
+        return self.execute()
+
     def get_all(self):
         """Retrieve all categories"""
-        query = self.query.strip('/?')  # Request endpoint is just /categories
-        parent = self.execute()
+        parent = self.get_parent()
         if isinstance(parent, Category):
             return parent.subcategories
 
