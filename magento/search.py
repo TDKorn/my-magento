@@ -248,10 +248,12 @@ class CategorySearch(SearchQuery):
             entity=Category
         )
 
-    def all(self):
-        response = self.client.request(self.client.BASE_URL + 'categories')
-        if response.ok:
-            return Category(response.json(), self.client)
+    def get_all(self):
+        """Retrieve all categories"""
+        query = self.query.strip('/?')  # Request endpoint is just /categories
+        parent = self.execute()
+        if isinstance(parent, Category):
+            return parent.subcategories
 
     def products_from_id(self, category_id):
         return self.by_id(category_id).products
