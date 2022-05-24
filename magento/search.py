@@ -109,9 +109,9 @@ class SearchQuery:
         if result is None:
             return result
         if isinstance(result, list):
-            return [self.create(item) for item in result]
+            return [self.parse(item) for item in result]
         if isinstance(result, dict):
-            return self.create(result)
+            return self.parse(result)
 
     def validate_result(self) -> {} | list[{}]:
         """
@@ -146,8 +146,8 @@ class SearchQuery:
         else:  # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
-    def create(self, data):
-        """Creates the corresponding entity/model object from an API response dict"""
+    def parse(self, data):
+        """Parses the API response and returns the corresponding entity/model object"""
         if self.Entity is None:
             # For general SearchQuery object, it will just return the raw data
             return data
@@ -213,7 +213,7 @@ class ProductSearch(SearchQuery):
     def by_id(self, item_id: int | str) -> {}:
         return self.add_criteria(
             field='entity_id',  # Product has no "entity_id" field in API responses, just "id"
-            value=item_id  # But to search by the "id" field, need to use "entity_id"
+            value=item_id       # But to search by the "id" field, need to use "entity_id"
         ).execute()
 
     def by_sku(self, sku) -> Product:
