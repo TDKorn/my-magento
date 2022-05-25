@@ -2,29 +2,22 @@
 from __future__ import annotations
 import requests
 from . import clients
+from abc import ABC
 
 
-class Product:
-    STATUS_ENABLED = 1
-    STATUS_DISABLED = 2
+class Model(ABC):
 
-    VISIBILITY_NOT_VISIBLE = 1
-    VISIBILITY_CATALOG = 2
-    VISIBILITY_SEARCH = 3
-    VISIBILITY_BOTH = 4
+    def __init__(self, data: dict, client: clients.Client, endpoint: str):
+        if not isinstance(data, dict):
+            raise TypeError(f'Parameter "data" must be of type {dict}')
+        if not isinstance(endpoint, str):
+            raise TypeError(f'Parameter "endpoint" must be of type {str}')
+        if not isinstance(client, clients.Client):
+            raise TypeError(f'Parameter "client" must be of type {clients.Client}')
 
-    DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/products'
-
-    def __init__(self, data: {}, client: clients.Client):
-        if not isinstance(data, dict) or not isinstance(client, clients.Client):
-            raise TypeError
-
-        self.sku = None  # Required API response field
         self.client = client
+        self.endpoint = endpoint
         self.set_attrs(data)
-
-    def __str__(self):
-        return f'Magento Product: {self.sku}'
 
     def set_attrs(self, data):
         for key in data:
@@ -37,6 +30,38 @@ class Product:
             else:
                 setattr(self, key, data[key])  # Set attribute as is for all other API response fields
 
+    def query_endpoint(self):
+        """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
+        return self.client.search(self.endpoint)
+
+    def parse(self, raw_data):
+        return self.__class__(
+            data=raw_data,
+            client=self.client
+        )
+
+
+class Product(Model):
+    STATUS_ENABLED = 1
+    STATUS_DISABLED = 2
+
+    VISIBILITY_NOT_VISIBLE = 1
+    VISIBILITY_CATALOG = 2
+    VISIBILITY_SEARCH = 3
+    VISIBILITY_BOTH = 4
+
+    DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/products'
+
+    def __init__(self, data: dict, client: clients.Client):
+        super().__init__(
+            data=data,
+            client=client,
+            endpoint='products'
+        )
+
+    def __str__(self):
+        return f'Magento Product: {self.sku}'
+
     @property
     def encoded_sku(self):
         # Must URL encode forward slashes when making API requests
@@ -47,7 +72,7 @@ class Product:
         if hasattr(self, 'extension_attributes'):
             if stock_data := self.extension_attributes.get('stock_item', {}):  # Missing if product was retrieved by id
                 return stock_data
-        self.refresh()          # Use the SKU to get full product data and refresh attributes
+        self.refresh()  # Use the SKU to refresh attributes with full product data
         return self.stock_item
 
     @property
@@ -68,7 +93,7 @@ class Product:
         url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
         response = self.client.request(url)
         if response.ok:
-            children = [Product(child, self.client) for child in response.json()]
+            children = [self.parse(child) for child in response.json()]
             for child in children:
                 child.refresh()
             return children
@@ -134,27 +159,18 @@ class Product:
             )
 
 
-class Category:
+class Category(Model):
     DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/categories'
 
-    def __init__(self, json, client):
-        self.json = json
-        self.client = client
-
-        self.id = json['id']
-        self.parent_id = json['parent_id']
-        self.name = json['name']
-        self.is_active = json['is_active']
-        self.position = json['position']
-        self.level = json['level']
-        # Only available from CategorySearch().add_criteria().execute()
-        self.product_count = json.get('product_count')
-        # Only available from CategorySearch().by_id()
-        self.created_at = json.get('created_at')
-        self.updated_at = json.get('updated_at')
-        self.custom_attributes = json.get('custom_attributes', {})
-        # Attributes that require API interaction (and are therefore stored)
-        self._products = None
+    def __init__(self, data, client):
+        super().__init__(
+            data=data,
+            client=client,
+            endpoint='categories'
+        )
+        # self.id = None  # Attributes that are referenced within class methods (and are required response fields)
+        # self.name = None
+        self._products = None  # Attributes that are stored after retrieving the first time
         self._subcategories = None
 
     def __str__(self):
@@ -164,19 +180,20 @@ class Category:
     def subcategories(self):
         """Retrieve and temporarily store the category's child categories"""
         if self._subcategories is None:
-            if self.json.get('children_data'):  # children_data: a list of mostly complete subcategory API response dicts
-                self._subcategories = [Category(child, self.client) for child in self.json['children_data']]
-
-            elif self.json.get('children'):     # children: comma separated string of subcategory ids
-                self._subcategories = [self.client.categories.by_id(child_id) for child_id in self.subcategory_ids]
+            if hasattr(self, 'children_data'):
+                # children_data: a list of mostly complete subcategory API response dicts
+                self._subcategories = [self.parse(child) for child in self.children_data]
+            elif hasattr(self, 'children'):
+                # children: a comma separated string of subcategory ids; self.subcategory_ids returns them as list
+                self._subcategories = [self.query_endpoint().by_id(child_id) for child_id in self.subcategory_ids]
             else:
-                self._subcategories = []        # Data comes from those two fields... no subcategories
+                self._subcategories = []    # Data comes from those two fields... no subcategories
         return self._subcategories
 
     @property
     def subcategory_ids(self):
-        if self.json.get('children'):
-            return self.json['children'].split(',')
+        if hasattr(self, 'children'):
+            return self.children.split(',')
         else:
             return [category.id for category in self.subcategories]
 
@@ -201,7 +218,3 @@ class Category:
                 products.extend(child.products)
         # In case there are products in more than one subcategory
         return set(products)
-
-    @property
-    def attributes(self):
-        return {attr['attribute_code']: attr['value'] for attr in self.custom_attributes}
