@@ -34,12 +34,9 @@ class Model(ABC):
         """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
         return self.client.search(self.endpoint)
 
-    def parse(self, raw_data):
-        return self.__class__(
-            data=raw_data,
-            client=self.client
-        )
-
+    def parse(self, response):
+        return self.query_endpoint().parse(response)
+    
 
 class Product(Model):
     STATUS_ENABLED = 1
