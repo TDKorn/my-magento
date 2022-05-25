@@ -1,3 +1,5 @@
+import sys
+import logging
 import requests
 
 
@@ -38,3 +40,33 @@ def get_agents() -> []:
 def get_agent() -> str:
     """Returns a single user agent string"""
     return get_agents()[0]
+
+
+LOG_FORMATTER = logging.Formatter(
+    fmt="%(asctime)s %(levelname)-2s  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+
+def setup_logger(name, log_file='', level=logging.INFO):
+    """Configures and returns a logger. Uses existing loggers if possible"""
+    logger = logging.getLogger(name)
+    stdout_name = f'{name}_stdoutLogger'
+    for handler in logger.handlers:
+        if handler.name == stdout_name:
+            return logger
+
+    stdout_handler = logging.StreamHandler(stream=sys.stdout)
+    stdout_handler.setFormatter(LOG_FORMATTER)
+    stdout_handler.name = stdout_name
+
+    if not log_file:
+        log_file = f'{name}.log'
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(LOG_FORMATTER)
+
+    logger.setLevel(level)
+    logger.addHandler(stdout_handler)
+    logger.addHandler(file_handler)
+    return logger

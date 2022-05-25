@@ -1,10 +1,11 @@
 from __future__ import annotations
 import json
 import copy
+import logging
 import pickle
-
 import requests
-from .utils import get_agent
+
+from . import utils
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
 
 
@@ -18,7 +19,8 @@ class Client(object):
         }
         self.ACCESS_TOKEN = token
         self.domain = domain
-        self.user_agent = user_agent if user_agent else get_agent()
+        self.user_agent = user_agent if user_agent else utils.get_agent()
+        self.logger = self.get_logger()
 
         if login:
             self.authenticate()
@@ -70,13 +72,15 @@ class Client(object):
             headers=headers
         )
         if response.ok:
-            print(f'Logged in to {payload["username"]}')
+            self.logger.info('Logged in to {}'.format(payload["username"]))
             self.ACCESS_TOKEN = response.json()
         else:
-            raise AuthenticationError(
-                f'Failed to authenticate credentials: {response.json()}'
-            )
-        return self.validate()
+            msg = f'Failed to authenticate credentials: {response.json()}'
+            self.logger.error(msg)
+            raise AuthenticationError(msg)
+
+        if self.validate():
+            return True
 
     def request(self, url) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
@@ -102,7 +106,27 @@ class Client(object):
 
     def validate(self):
         """Sends an authorized request to a standard API endpoint"""
-        return self.request(self.url_for('store/websites')).status_code == 200
+        response = self.request(self.url_for('store/websites'))
+        if response.status_code == 200:
+            self.logger.debug("Client validated for {} on {}".format(
+                self.USER_CREDENTIALS['username'], self.domain))
+            return True
+        else:
+            message = response.json().get('message', response.json())
+            self.logger.debug(
+                "Client validation failed for {} on {}\nResponse: {}".format(
+                    self.USER_CREDENTIALS['username'], self.domain, message
+                )
+            )
+            return False
+
+    def get_logger(self) -> logging.Logger:
+        """Since the same client is to all wrapper classes, all activity will be recorded by this logger"""
+        log_name = self.USER_CREDENTIALS['username'] + '_' + self.domain
+        return utils.setup_logger(
+            name=log_name,
+            log_file=log_name + '.log'
+        )
 
     @property
     def headers(self) -> {}:
