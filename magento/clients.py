@@ -93,8 +93,12 @@ class Client(object):
                 )
             return response
 
-    def url_for(self, endpoint):
-        return self.BASE_URL + endpoint
+    def url_for(self, endpoint, scope=''):
+        """Returns the appropriate url for the given endpoint and store scope"""
+        if not scope:
+            return self.BASE_URL + endpoint
+        else:   # Must send request to a scoped url for some updates
+            return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
     def validate(self):
         """Sends an authorized request to a standard API endpoint"""
