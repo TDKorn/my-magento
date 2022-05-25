@@ -27,17 +27,15 @@ class Product:
         return f'Magento Product: {self.sku}'
 
     def set_attrs(self, data):
-        for attr in data:
-            if attr == 'custom_attributes':
-                # Unpack list of custom attribute dicts into a single dict
+        for key in data:
+            if key == 'custom_attributes':  # Unpack list of custom attribute dicts into a single attribute dict
                 custom_attrs = {
                     attr['attribute_code']: attr['value']
-                    for attr in data[attr]
+                    for attr in data['custom_attributes']
                 }
-                setattr(self, attr, custom_attrs)
+                setattr(self, key, custom_attrs)
             else:
-                # Set attribute as is for all other API response fields
-                setattr(self, attr, data[attr])
+                setattr(self, key, data[key])  # Set attribute as is for all other API response fields
 
     @property
     def encoded_sku(self):
@@ -46,8 +44,11 @@ class Product:
 
     @property
     def stock_item(self):
-        if hasattr(self, 'extension_attributes'):  # May be excluded depending on request endpoint
-            return self.extension_attributes.get('stock_item', {})
+        if hasattr(self, 'extension_attributes'):
+            if stock_data := self.extension_attributes.get('stock_item', {}):  # Missing if product was retrieved by id
+                return stock_data
+        self.refresh()          # Use the SKU to get full product data and refresh attributes
+        return self.stock_item
 
     @property
     def stock(self):
@@ -59,8 +60,8 @@ class Product:
         if self.stock_item:
             return self.stock_item['item_id']
 
-    @property
-    def children(self):
+    def get_children(self):
+        """Retrieve the child simple products of a configurable product"""
         if self.type_id != 'configurable':
             return None  # Only configurable products have child skus
 
@@ -117,8 +118,7 @@ class Product:
         url = self.client.url_for(f'products/{self.encoded_sku}')
         response = self.client.request(url)
         if response.ok:
-            # Update existing object attributes
-            self.set_attrs(response.json())
+            self.set_attrs(response.json())  # Update existing object attributes
             print('Refreshed ' + self.sku)
 
         elif response.status_code == 401:
@@ -135,6 +135,7 @@ class Product:
 
 
 class Category:
+    DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/categories'
 
     def __init__(self, json, client):
         self.json = json
@@ -156,19 +157,20 @@ class Category:
         self._products = None
         self._subcategories = None
 
+    def __str__(self):
+        return f'Magento Category: {self.name}'
+
     @property
     def subcategories(self):
         """Retrieve and temporarily store the category's child categories"""
         if self._subcategories is None:
-            self._subcategories = []    # Empty list returned if there's no data for the 2 fields below
-
-            if self.json.get('children_data'):  # 'children_data' - list of subcategories as (mostly) full API responses
+            if self.json.get('children_data'):  # children_data: a list of mostly complete subcategory API response dicts
                 self._subcategories = [Category(child, self.client) for child in self.json['children_data']]
 
-            elif self.json.get('children'):  # 'children' -  comma separated string of subcategory ids
-                child_ids = self.json['children'].split(',')
-                self._subcategories = [self.client.categories.by_id(child_id) for child_id in child_ids]
-
+            elif self.json.get('children'):     # children: comma separated string of subcategory ids
+                self._subcategories = [self.client.categories.by_id(child_id) for child_id in self.subcategory_ids]
+            else:
+                self._subcategories = []        # Data comes from those two fields... no subcategories
         return self._subcategories
 
     @property
@@ -185,8 +187,9 @@ class Category:
     @property
     def products(self):
         if self._products is None:
-            products = self.client.request(self.client.url_for(f'categories/{self.id}/products'))
-            self._products = [product['sku'] for product in products.json()]
+            endpoint = self.client.url_for(f'categories/{self.id}/products')
+            response = self.client.request(endpoint)
+            self._products = [product['sku'] for product in response.json()]
         return self._products
 
     @property
@@ -194,7 +197,8 @@ class Category:
         """Products of the category AND its subcategories"""
         products = self.products.copy()
         for child in self.subcategories:
-            products.extend(child.products)
+            if child.name != 'Default Category':
+                products.extend(child.products)
         # In case there are products in more than one subcategory
         return set(products)
 

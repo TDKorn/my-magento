@@ -155,6 +155,7 @@ class OrderItem(object):
         self.order = order
         self.sku = item.get('sku', '')
         self.name = item.get('name', '')
+        self.order_id = item.get('order_id', 0)
         self.product_id = item.get('product_id', 0)
         self.price = item.get('price', 0)
         self.qty_ordered = item.get('qty_ordered', 0)

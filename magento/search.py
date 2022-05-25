@@ -8,12 +8,7 @@ from . import clients
 
 class SearchQuery:
 
-    def __init__(
-            self,
-            endpoint: str,
-            client: clients.Client,
-            entity=None
-    ):
+    def __init__(self, endpoint: str, client: clients.Client, entity=None):
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
@@ -148,11 +143,10 @@ class SearchQuery:
 
     def parse(self, data):
         """Parses the API response and returns the corresponding entity/model object"""
-        if self.Entity is None:
-            # For general SearchQuery object, it will just return the raw data
-            return data
-        # Any SearchQuery subclass will specify the Entity it returns
-        return self.Entity(data, self.client)
+        if self.Entity is not None:
+            return self.Entity(data, self.client)   # SearchQuery subclasses return corresponding Entity/Model
+        # General SearchQuery returns the raw data
+        return data
 
     def reset(self) -> None:
         self._result = {}
