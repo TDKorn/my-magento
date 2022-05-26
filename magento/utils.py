@@ -21,6 +21,13 @@ class ItemManager:
 
 class MagentoLogger:
 
+    PACKAGE_LOG_NAME = "magento"
+    CLIENT_LOG_NAME = "{DOMAIN}_{USERNAME}"
+    PREFIX = "MyMagento"
+    # Use magento.logger.LOG_MESSAGE for easy access
+    LOG_MESSAGE = "|[ {pfx} | {name} ]|:  {message}".format(
+        pfx=PREFIX, name="{name}", message="{message}"
+    )
     FORMATTER = logging.Formatter(
         fmt="%(asctime)s %(levelname)-5s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
@@ -28,22 +35,17 @@ class MagentoLogger:
 
     def __init__(self, name, log_file='', stdout_level=logging.INFO):
         """
-        The logger class used for this package. Mostly taken from the PyCloudLogger class in my other repo
-        https://github.com/TDKorn/icloud-photos-to-google-drive/blob/main/pycloud/logger.py
-        > You should check it out, it's useful 😉
+        Logging class used within the package. An instance is attached to every client object.
+        Since the same Client is passed between the wrapper classes, each username/domain combination will have its own
+        logger, which will log its activity across all endpoints.
 
-        A MagentoLogger instance is attached to each Client object. Since the same Client will be passed between all the
-        wrapper classes, each user/domain combination will have its own log that tracks activity across all endpoints
-
-        A package-wide MagentoLogger also exists. It is never explicitly used for logging, though - rather, its FileHandler
-        is added to the MagentoLogger of every Client object, allowing the activity across all users to be logged to a single,
-        consolidated file (called "magento.log") in addition to the individual Client logs.
+        Each Client also logs to the consolidated "magento.log" file.
 
         NOTE: Log files have their logging level set to DEBUG, but the console logging level is your choice
 
-        :param name:        logger name                         for a Client, the default name is "<username>_<domain>"
-        :param log_file:    log file to save logs to            default is "<name>.log"; package log file is "magento.log"
-        :param stdout_level:logging level for stdout logger     default is logging.INFO
+        :param name:            logger name                         for a Client, the default name is "<username>_<domain>"
+        :param log_file:        log file to save logs to            default is "<name>.log"; package log file is "magento.log"
+        :param stdout_level:    logging level for stdout logger     default is logging.INFO
 
         """
         self.name = name
@@ -61,9 +63,9 @@ class MagentoLogger:
                 return logger
 
         stdout_handler = logging.StreamHandler(stream=sys.stdout)
-        stdout_handler.setFormatter(MagentoLogger.FORMATTER)
-        stdout_handler.setLevel(stdout_level)
         stdout_handler.name = stdout_name
+        stdout_handler.setLevel(stdout_level)
+        stdout_handler.setFormatter(MagentoLogger.FORMATTER)
 
         if not log_file:
             log_file = f'{self.name}.log'
@@ -72,16 +74,16 @@ class MagentoLogger:
         file_handler.setFormatter(MagentoLogger.FORMATTER)
 
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(file_handler)
         logger.addHandler(stdout_handler)
+        logger.addHandler(file_handler)
 
-        if self.name != 'MyMagento':
+        if self.name != MagentoLogger.PACKAGE_LOG_NAME:
             logger.addHandler(MagentoLogger.get_package_handler())
 
         return logger
 
     def format_msg(self, msg):
-        return "|[{name}]|:  {message}".format(
+        return MagentoLogger.LOG_MESSAGE.format(
             name=self.name,
             message=msg
         )
@@ -108,8 +110,8 @@ class MagentoLogger:
 
     @staticmethod
     def get_package_handler():
-        """Returns the FileHandler object for writing to the magento.log file"""
-        pkg_handlers = logging.getLogger('MyMagento').handlers
+        """Returns the FileHandler object that writes to the magento.log file"""
+        pkg_handlers = logging.getLogger(MagentoLogger.PACKAGE_LOG_NAME).handlers
         for handler in pkg_handlers:
             if isinstance(handler, logging.FileHandler):
                 return handler

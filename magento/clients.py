@@ -4,7 +4,7 @@ import copy
 import pickle
 import requests
 
-from . import utils
+from .utils import MagentoLogger, get_agent
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
 
 
@@ -18,10 +18,9 @@ class Client(object):
         }
         self.ACCESS_TOKEN = token
         self.domain = domain
-        self.user_agent = user_agent if user_agent else utils.get_agent()
-        self.logger = self.get_logger(
-            level=log_level
-        )
+        self.user_agent = user_agent if user_agent else get_agent()
+        self.logger = self.get_logger(log_level)
+
         if login:
             self.authenticate()
 
@@ -75,14 +74,14 @@ class Client(object):
             self.ACCESS_TOKEN = response.json()
         else:
             msg = f'Failed to authenticate credentials: {response.json()}'
-            self.logger.debug(msg)
+            self.logger.error(msg)
             raise AuthenticationError(msg)
 
-        if self.validate():
+        if not self.validate():
+            raise AuthenticationError  # validate() will have already logged the error msg
+        else:
             self.logger.info('Logged in to {}'.format(payload["username"]))
             return True
-
-        raise AuthenticationError()  # validate() will have already logged the error msg
 
     def request(self, url: str) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
@@ -91,13 +90,9 @@ class Client(object):
             self.authenticate()  # Will raise exception if unsuccessful (won't recurse infinitely)
             return self.request(url)
         else:
-            # Any other response, successful or not, will be returned; error handling is left to methods
-            if response.status_code != 200:
-                self.logger.info(
-                    "Request to {} failed with status code {} and message: \"{}\"".format(
-                        url, response.status_code, response.json().get('message', response.json())
-                    )
-                )
+            if response.status_code != 200:  # All other responses are returned; errors are handled by methods
+                self.logger.error("Request to {} failed with status code {} and message: \"{}\"".format(
+                        url, response.status_code, response.json().get('message', response.json())))
             return response
 
     def url_for(self, endpoint, scope=''):
@@ -116,22 +111,17 @@ class Client(object):
             return True
         else:
             message = response.json().get('message', response.json())
-            self.logger.error(
-                "Client validation failed for {} on {}\nResponse: {}".format(
-                    self.USER_CREDENTIALS['username'], self.domain, message
-                )
-            )
+            self.logger.error("Client validation failed for {} on {}\nResponse: {}".format(
+                self.USER_CREDENTIALS['username'], self.domain, message))
             return False
 
-    def get_logger(self, level='INFO') -> utils.MagentoLogger:
-        """
-        Retrieve the MagentoLogger for this Client. Logger names are of the form "<username>_<domain>"
-
-        :return:  the MagentoLogger associated with the current user/domain combination
-
-        """
-        log_name = self.USER_CREDENTIALS['username'] + '_' + self.domain.split('.')[0]
-        return utils.MagentoLogger(
+    def get_logger(self, level='INFO') -> MagentoLogger:
+        """Retrieve the MagentoLogger associated with the current user/domain combination"""
+        log_name = MagentoLogger.CLIENT_LOG_NAME.format(
+            DOMAIN=self.domain.split('.')[0],
+            USERNAME=self.USER_CREDENTIALS['username']
+        )
+        return MagentoLogger(     # No access to Client
             name=log_name,
             log_file=log_name + '.log',
             stdout_level=level
@@ -179,11 +169,11 @@ class Client(object):
         data = copy.deepcopy(self.USER_CREDENTIALS)
         if validate:
             if not self.validate():
-                raise AuthenticationError('Failed to validate credentials')
+                raise AuthenticationError(
+                    'Failed to validate credentials'
+                )
         data.update(
             {  # Add more to this if you want!
-                'username': self.USER_CREDENTIALS['username'],
-                'password': self.USER_CREDENTIALS['password'],
                 'domain': self.domain,
                 'user_agent': self.user_agent,
                 'token': self.token
