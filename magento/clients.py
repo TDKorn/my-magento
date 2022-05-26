@@ -7,6 +7,7 @@ import requests
 
 from . import utils
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
+from .utils import MagentoLogger
 
 
 class Client(object):
@@ -41,7 +42,7 @@ class Client(object):
     def products(self):
         return ProductSearch(self)
 
-    def search(self, endpoint: str):
+    def search(self, endpoint: str) -> SearchQuery:
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
         # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
         if endpoint.lower() == 'orders':
@@ -65,24 +66,26 @@ class Client(object):
             'Content-Type': 'application/json',
             'User-Agent': self.user_agent
         }
-        print(f'Authenticating {payload["username"]} on {self.domain}...')
+        self.logger.info(f'Authenticating {payload["username"]} on {self.domain}...')
         response = requests.post(
             url=endpoint,
             json=payload,
             headers=headers
         )
         if response.ok:
-            self.logger.info('Logged in to {}'.format(payload["username"]))
             self.ACCESS_TOKEN = response.json()
         else:
             msg = f'Failed to authenticate credentials: {response.json()}'
-            self.logger.error(msg)
+            self.logger.debug(msg)
             raise AuthenticationError(msg)
 
         if self.validate():
+            self.logger.info('Logged in to {}'.format(payload["username"]))
             return True
 
-    def request(self, url) -> requests.Response:
+        raise AuthenticationError()  # validate() will have already logged the error msg
+
+    def request(self, url: str) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
         response = requests.get(url, headers=self.headers)
         if response.status_code == 401:
@@ -91,9 +94,10 @@ class Client(object):
         else:
             # Any other response, successful or not, will be returned; error handling is left to methods
             if response.status_code != 200:
-                print(
+                self.logger.info(
                     "Request to {} failed with status code {} and message: \"{}\"".format(
-                        url, response.status_code, response.json().get('message', 'None'))
+                        url, response.status_code, response.json().get('message', response.json())
+                    )
                 )
             return response
 
@@ -104,7 +108,7 @@ class Client(object):
         else:   # Must send request to a scoped url for some updates
             return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
-    def validate(self):
+    def validate(self) -> bool:
         """Sends an authorized request to a standard API endpoint"""
         response = self.request(self.url_for('store/websites'))
         if response.status_code == 200:
@@ -113,20 +117,22 @@ class Client(object):
             return True
         else:
             message = response.json().get('message', response.json())
-            self.logger.debug(
+            self.logger.error(
                 "Client validation failed for {} on {}\nResponse: {}".format(
                     self.USER_CREDENTIALS['username'], self.domain, message
                 )
             )
             return False
 
-    def get_logger(self) -> logging.Logger:
-        """Since the same client is to all wrapper classes, all activity will be recorded by this logger"""
+    def get_logger(self) -> MagentoLogger:
+        """
+        Log files are created for each username/domain combination
+        :return:  the logger used for this user
+        """
         log_name = self.USER_CREDENTIALS['username'] + '_' + self.domain
-        return utils.setup_logger(
-            name=log_name,
-            log_file=log_name + '.log'
-        )
+        return utils.MagentoLogger(name=log_name,
+                                   log_file=log_name + '.log',
+                                   level=logging.INFO)
 
     @property
     def headers(self) -> {}:
