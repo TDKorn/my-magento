@@ -61,9 +61,9 @@ class MagentoLogger:
                 return logger
 
         stdout_handler = logging.StreamHandler(stream=sys.stdout)
-        stdout_handler.name = stdout_name
-        stdout_handler.setLevel(stdout_level)
         stdout_handler.setFormatter(MagentoLogger.FORMATTER)
+        stdout_handler.setLevel(stdout_level)
+        stdout_handler.name = stdout_name
 
         if not log_file:
             log_file = f'{self.name}.log'
@@ -72,8 +72,8 @@ class MagentoLogger:
         file_handler.setFormatter(MagentoLogger.FORMATTER)
 
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(stdout_handler)
         logger.addHandler(file_handler)
+        logger.addHandler(stdout_handler)
 
         if self.name != 'MyMagento':
             logger.addHandler(MagentoLogger.get_package_handler())
