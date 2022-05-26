@@ -5,9 +5,8 @@ from . import entities
 from . import utils
 
 import logging
-logging.basicConfig(filename=f'magento.log', level=logging.DEBUG)
-LOGGER = utils.setup_logger('MyMagento', log_file='magento.log')
-
+logger = utils.MagentoLogger(name='MyMagento', log_file='magento.log', level=logging.DEBUG)
 
 Client = clients.Client
+
 

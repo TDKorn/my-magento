@@ -42,31 +42,79 @@ def get_agent() -> str:
     return get_agents()[0]
 
 
-LOG_FORMATTER = logging.Formatter(
-    fmt="%(asctime)s %(levelname)-2s  %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
+class MagentoLogger:
 
+    FORMATTER = logging.Formatter(
+        fmt="%(asctime)s %(levelname)-5s  %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
 
-def setup_logger(name, log_file='', level=logging.INFO):
-    """Configures and returns a logger. Uses existing loggers if possible"""
-    logger = logging.getLogger(name)
-    stdout_name = f'{name}_stdoutLogger'
-    for handler in logger.handlers:
-        if handler.name == stdout_name:
-            return logger
+    def __init__(self, name, log_file='', level=logging.INFO):
+        """
+        The logger used for this package. Mostly taken from the PyCloudLogger class in my other repo (you should check it out, it's useful 😉)
+        (https://github.com/TDKorn/icloud-photos-to-google-drive/blob/main/pycloud/logger.py)
 
-    stdout_handler = logging.StreamHandler(stream=sys.stdout)
-    stdout_handler.setFormatter(LOG_FORMATTER)
-    stdout_handler.name = stdout_name
+        A MagentoLogger instance will be attached to each Client object. Since the same Client object will be passed to all wrapper classes,
+        each user will have all activity logged to their own file
 
-    if not log_file:
-        log_file = f'{name}.log'
+        The package itself also has a MagentoLogger attached, which logs all activity across all Clients (future commit)
 
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(LOG_FORMATTER)
+        :param name:        logger name - for a Client, the default name is "<username>_<domain>"
+        :param log_file:    log file to save logs to - default is "<name>.log"
+        :param level:       logging level for stdout logger; (files are set to DEBUG)
+        """
+        self.name = name
+        self.logger = self.setup_logger(
+            log_file=log_file,
+            level=level
+        )
 
-    logger.setLevel(level)
-    logger.addHandler(stdout_handler)
-    logger.addHandler(file_handler)
-    return logger
+    def setup_logger(self, log_file='', level=logging.DEBUG):
+        """Configures and returns a logger. Uses existing loggers if possible"""
+        logger = logging.getLogger(self.name)
+        stdout_name = f'{self.name}_stdoutLogger'
+        for handler in logger.handlers:
+            if handler.name == stdout_name:
+                return logger
+
+        stdout_handler = logging.StreamHandler(stream=sys.stdout)
+        stdout_handler.setFormatter(MagentoLogger.FORMATTER)
+        stdout_handler.name = stdout_name
+
+        if not log_file:
+            log_file = f'{self.name}.log'
+
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(MagentoLogger.FORMATTER)
+
+        logger.setLevel(level)
+        logger.addHandler(stdout_handler)
+        logger.addHandler(file_handler)
+        return logger
+
+    def format_msg(self, msg):
+        return "|[{name}]|:  {message}".format(
+            name=self.name,
+            message=msg
+        )
+
+    def info(self, msg):
+        return self.logger.info(
+            self.format_msg(msg)
+        )
+
+    def debug(self, msg):
+        return self.logger.debug(
+            self.format_msg(msg)
+        )
+
+    def warning(self, msg):
+        return self.logger.warning(
+            self.format_msg(msg)
+        )
+
+    def error(self, msg):
+        return self.logger.error(
+            self.format_msg(msg)
+        )
+
