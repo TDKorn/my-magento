@@ -1,18 +1,16 @@
 from __future__ import annotations
 import json
 import copy
-import logging
 import pickle
 import requests
 
 from . import utils
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
-from .utils import MagentoLogger
 
 
 class Client(object):
 
-    def __init__(self, domain, username, password, user_agent=None, token=None, login=True):
+    def __init__(self, domain, username, password, user_agent=None, token=None, log_level='INFO', login=True):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
             'username': username,
@@ -21,8 +19,9 @@ class Client(object):
         self.ACCESS_TOKEN = token
         self.domain = domain
         self.user_agent = user_agent if user_agent else utils.get_agent()
-        self.logger = self.get_logger()
-
+        self.logger = self.get_logger(
+            level=log_level
+        )
         if login:
             self.authenticate()
 
@@ -124,18 +123,22 @@ class Client(object):
             )
             return False
 
-    def get_logger(self) -> MagentoLogger:
+    def get_logger(self, level='INFO') -> utils.MagentoLogger:
         """
-        Log files are created for each username/domain combination
-        :return:  the logger used for this user
+        Retrieve the MagentoLogger for this Client. Logger names are of the form "<username>_<domain>"
+
+        :return:  the MagentoLogger associated with the current user/domain combination
+
         """
-        log_name = self.USER_CREDENTIALS['username'] + '_' + self.domain
-        return utils.MagentoLogger(name=log_name,
-                                   log_file=log_name + '.log',
-                                   level=logging.INFO)
+        log_name = self.USER_CREDENTIALS['username'] + '_' + self.domain.split('.')[0]
+        return utils.MagentoLogger(
+            name=log_name,
+            log_file=log_name + '.log',
+            stdout_level=level
+        )
 
     @property
-    def headers(self) -> {}:
+    def headers(self) -> dict:
         """Any time this is called, the token is validated"""
         return {
             'Authorization': f'Bearer {self.token}',
@@ -150,7 +153,7 @@ class Client(object):
         return self.ACCESS_TOKEN
 
     @classmethod
-    def new(cls):
+    def new(cls) -> Client:
         return cls(
             input('Domain: '),
             input('Username: '),
@@ -159,38 +162,39 @@ class Client(object):
         )
 
     @classmethod
-    def load(cls, pickle_bytes):
+    def load(cls, pickle_bytes) -> Client:
         return pickle.loads(pickle_bytes)
 
-    def to_pickle(self, validate=False):
+    def to_pickle(self, validate=False) -> bytes:
+        """Validates credentials (optional) and returns the Client object as a pickle string"""
         if validate:
-            try:
-                self.validate()
-            except AuthenticationError as e:
-                raise e
+            if not self.validate():
+                raise AuthenticationError(
+                    'Failed to validate credentials'
+                )
         return pickle.dumps(self)
 
-    @classmethod
-    def from_json(cls, json_str):
-        kwargs = json.loads(json_str)
-        return cls(**kwargs)
-
-    def to_json(self, validate=False):
+    def to_json(self, validate=False) -> str:
         """Validates and saves login credentials for this domain"""
         data = copy.deepcopy(self.USER_CREDENTIALS)
         if validate:
-            try:
-                self.validate()
-            except AuthenticationError as e:
-                return e.args
+            if not self.validate():
+                raise AuthenticationError('Failed to validate credentials')
         data.update(
             {  # Add more to this if you want!
+                'username': self.USER_CREDENTIALS['username'],
+                'password': self.USER_CREDENTIALS['password'],
                 'domain': self.domain,
                 'user_agent': self.user_agent,
                 'token': self.token
             }
         )
         return json.dumps(data)
+
+    @classmethod
+    def from_json(cls, json_str) -> Client:
+        kwargs = json.loads(json_str)
+        return cls(**kwargs)
 
 
 class AuthenticationError(Exception):
