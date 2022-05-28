@@ -64,7 +64,6 @@ class Product:
         """Retrieve the child simple products of a configurable product"""
         if self.type_id != 'configurable':
             return None  # Only configurable products have child skus
-
         url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
         response = self.client.request(url)
         if response.ok:
@@ -106,7 +105,6 @@ class Product:
             # Get updated product data
             self.refresh()
             print(f'Updated stock to {self.stock}')
-
         else:
             print(
                 f'Failed with status code {response.status_code}' + '\n' +
@@ -120,11 +118,6 @@ class Product:
         if response.ok:
             self.set_attrs(response.json())  # Update existing object attributes
             print('Refreshed ' + self.sku)
-
-        elif response.status_code == 401:
-            self.client.authenticate()
-            self.refresh()
-
         else:
             print(
                 f'Failed to refresh SKU {self.sku}',
@@ -132,6 +125,70 @@ class Product:
                 f'Message: {response.json()["message"]}',
                 sep='\n'
             )
+
+    def update_status(self, status):
+        if status not in [Product.STATUS_ENABLED, Product.STATUS_DISABLED]:
+            raise ValueError('Invalid status provided')
+        
+        endpoint = f'products/{self.encoded_sku}'
+        scopes = (
+            self.client.url_for(endpoint),  # No scope also updates default scope
+            self.client.url_for(endpoint, scope='all')  # Needed to update admin
+        )
+        payload = {
+            "product": {
+                "sku": self.sku,
+                "status": status
+            },
+            'save_options': True
+        }
+        for scope in scopes:
+            response = requests.put(
+                url=scope,
+                json=payload,
+                headers=self.client.headers
+            )
+            if not response.ok:
+                print(f'Error {response.status_code}: Failed to update product status',
+                      f'Message: {response.json()}',
+                      sep='\n')
+
+        def get_status(scope_url):
+            return self.client.request(scope_url).json()['status']
+
+        self.refresh()
+        success = True
+
+        for scope in scopes:  # Verify status was updated accordingly on all scopes
+            if get_status(scope) != status:
+                print(f'Failed to update status on {scope}')
+                success = False
+        print(
+            '{} Status: {}'.format(
+                'Success. Updated' if success else 'Failed. Current',
+                'Enabled' if self.status == Product.STATUS_ENABLED else 'Disabled')
+        )
+
+    def delete(self, scope='all'):
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope=scope)
+        response = requests.delete(
+            url=url,
+            headers=self.client.headers
+        )
+        if response.ok:
+            if response.json() is True:
+                # Request product details again bc I don't trust the response :)
+                if (check := self.client.request(url)).status_code == 404:
+                    print(f'Deleted {self.sku}')
+                    return True
+                else:
+                    raise RuntimeError(
+                        'Product was deleted but still exists...(?)' + '\n' +
+                        'Message:{}'.format(check.json())
+                    )
+        else:
+            print(f'Failed to delete {self.sku}. Message: {response.json()["message"]}')
+            return False
 
 
 class Category:
