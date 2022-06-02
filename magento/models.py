@@ -2,12 +2,13 @@
 from __future__ import annotations
 import requests
 from . import clients
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class Model(ABC):
 
     def __init__(self, data: dict, client: clients.Client, endpoint: str):
+        """The base class for all API response wrapper classes"""
         if not isinstance(data, dict):
             raise TypeError(f'Parameter "data" must be of type {dict}')
         if not isinstance(endpoint, str):
@@ -19,16 +20,20 @@ class Model(ABC):
         self.endpoint = endpoint
         self.set_attrs(data)
 
+    @property
+    @abstractmethod
+    def excluded_keys(self):
+        """Keys that should not be set by set_attrs() method"""
+        pass
+
     def set_attrs(self, data):
         for key in data:
-            if key == 'custom_attributes':  # Unpack list of custom attribute dicts into a single attribute dict
-                custom_attrs = {
-                    attr['attribute_code']: attr['value']
-                    for attr in data['custom_attributes']
-                }
-                setattr(self, key, custom_attrs)
-            else:
-                setattr(self, key, data[key])  # Set attribute as is for all other API response fields
+            if key not in self.excluded_keys:
+                if key != 'custom_attributes':
+                    setattr(self, key, data[key])
+                else:
+                    if data[key]:
+                        setattr(self, key, self.unpack_attributes(data[key]))
 
     def query_endpoint(self):
         """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
@@ -36,9 +41,15 @@ class Model(ABC):
 
     def parse(self, response):
         return self.query_endpoint().parse(response)
-    
+
+    @staticmethod
+    def unpack_attributes(attributes):
+        """Unpacks a list attribute dictionaries into a single dictionary"""
+        return {attr['attribute_code']: attr['value'] for attr in attributes}
+
 
 class Product(Model):
+
     STATUS_ENABLED = 1
     STATUS_DISABLED = 2
 
@@ -58,6 +69,10 @@ class Product(Model):
 
     def __str__(self):
         return f'Magento Product: {self.sku}'
+
+    @property
+    def excluded_keys(self):
+        return []
 
     @property
     def encoded_sku(self):
@@ -172,6 +187,10 @@ class Category(Model):
 
     def __str__(self):
         return f'Magento Category: {self.name}'
+
+    @property
+    def excluded_keys(self):
+        return []
 
     @property
     def subcategories(self):
