@@ -27,14 +27,20 @@ class Model(ABC):
         """Keys that should not be set by set_attrs() method"""
         pass
 
-    def set_attrs(self, data):
-        keys = [key for key in data if key not in self.excluded_keys]
+    def set_attrs(self, data: dict, set_private: bool = True):
+        """Initializes the object attributes using a dictionary as a data source"""
+        keys = set(data) - set(self.excluded_keys)
         for key in keys:
             if key == 'custom_attributes':
                 if attrs := data[key]:
                     setattr(self, key, self.unpack_attributes(attrs))
             else:
                 setattr(self, key, data[key])
+
+        if set_private:
+            for key in self.excluded_keys:
+                setattr(self, "_" + key, data.get(key))
+
 
     def query_endpoint(self):
         """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
@@ -66,14 +72,17 @@ class Product(Model):
             client=client,
             endpoint='products'
         )
+        self._media_gallery_entries = []
 
     def __str__(self):
         return f'Magento Product: {self.sku}'
 
     @property
     def excluded_keys(self):
-        return []
+        return ['media_gallery_entries']
 
+    @property
+    def
 
     @property
     def thumbnail(self):
