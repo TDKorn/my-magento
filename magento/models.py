@@ -1,5 +1,6 @@
 # Everything without entity_id
 from __future__ import annotations
+import copy
 import requests
 from . import clients
 from abc import ABC, abstractmethod
@@ -27,13 +28,13 @@ class Model(ABC):
         pass
 
     def set_attrs(self, data):
-        for key in data:
-            if key not in self.excluded_keys:
-                if key != 'custom_attributes':
-                    setattr(self, key, data[key])
-                else:
-                    if data[key]:
-                        setattr(self, key, self.unpack_attributes(data[key]))
+        keys = [key for key in data if key not in self.excluded_keys]
+        for key in keys:
+            if key == 'custom_attributes':
+                if attrs := data[key]:
+                    setattr(self, key, self.unpack_attributes(attrs))
+            else:
+                setattr(self, key, data[key])
 
     def query_endpoint(self):
         """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
@@ -44,12 +45,11 @@ class Model(ABC):
 
     @staticmethod
     def unpack_attributes(attributes):
-        """Unpacks a list attribute dictionaries into a single dictionary"""
+        """Unpacks a list of custom attribute dictionaries into a single dictionary"""
         return {attr['attribute_code']: attr['value'] for attr in attributes}
 
 
 class Product(Model):
-
     STATUS_ENABLED = 1
     STATUS_DISABLED = 2
 
@@ -73,6 +73,15 @@ class Product(Model):
     @property
     def excluded_keys(self):
         return []
+
+
+    @property
+    def thumbnail(self):
+        return self._get_media_entry('thumbnail', 'in', 'types')
+
+    @property
+    def thumbnail_link(self):
+        return self.get_media_link(self.thumbnail)
 
     @property
     def encoded_sku(self):
@@ -169,6 +178,48 @@ class Product(Model):
                 f'Message: {response.json()["message"]}',
                 sep='\n'
             )
+
+class MediaEntry(Model):
+
+    MEDIA_MAPPING = {
+        'id': int,
+        'media_type': str,
+        'label': str,
+        'position': int,
+        'disabled': bool,
+        'types': list,
+        'file': str
+    }
+
+    def __init__(self, product: Product, entry: dict):
+        super().__init__(
+            data=entry,
+            client=product.client,
+            endpoint='products/{}/media'.format(product.encoded_sku)
+        )
+        self.product = product
+
+    def get_media(self, entry_id):
+        return self._get_media_entry('id', '==', entry_id)
+
+    def get_media_link(self, entry):
+        return f'https://{self.client.domain}/media/catalog/product{entry["file"]}'
+
+    def _get_media_entry(self, val, condition, key):
+        for entry in self.media_gallery_entries:
+            if not isinstance(val, int):
+                val = f'"{val}"'
+
+            criteria = f'{val} {condition} entry["{key}"]'
+            try:
+                if eval(criteria):
+                    return copy.deepcopy(entry)
+
+            except Exception as e:
+                raise RuntimeError(f'Invalid Criteria: {criteria}') from e
+
+
+
 
 
 class Category(Model):
