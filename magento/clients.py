@@ -166,19 +166,15 @@ class Client(object):
 
     def to_json(self, validate=False) -> str:
         """Validates and saves login credentials for this domain"""
-        data = copy.deepcopy(self.USER_CREDENTIALS)
         if validate:
-            if not self.validate():
-                raise AuthenticationError(
-                    'Failed to validate credentials'
-                )
-        data.update(
-            {  # Add more to this if you want!
-                'domain': self.domain,
-                'user_agent': self.user_agent,
-                'token': self.token
-            }
-        )
+            self.validate()
+        data = {    # Add more to this if you want!
+            'domain': self.domain,
+            'user_agent': self.user_agent,
+            'token': self.token,
+            'log_level': self.logger.logger.level
+        }
+        data.update(self.USER_CREDENTIALS)
         return json.dumps(data)
 
     @classmethod
