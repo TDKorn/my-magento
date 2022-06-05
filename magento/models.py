@@ -240,7 +240,7 @@ class Product(Model):
     def update_status(self, status):
         if status not in [Product.STATUS_ENABLED, Product.STATUS_DISABLED]:
             raise ValueError('Invalid status provided')
-        
+
         endpoint = f'products/{self.encoded_sku}'
         scopes = (
             self.client.url_for(endpoint),  # No scope also updates default scope
