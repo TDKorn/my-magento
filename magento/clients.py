@@ -73,27 +73,30 @@ class Client(object):
         if response.ok:
             self.ACCESS_TOKEN = response.json()
         else:
-            msg = f'Failed to authenticate credentials: {response.json()}'
-            self.logger.error(msg)
-            raise AuthenticationError(msg)
+            raise AuthenticationError(self, response=response)
 
-        if not self.validate():
-            raise AuthenticationError  # validate() will have already logged the error msg
-        else:
-            self.logger.info('Logged in to {}'.format(payload["username"]))
-            return True
+        self.logger.debug('Validating token...')
+        try:
+            self.validate()
+        except AuthenticationError as e:
+            raise AuthenticationError(self, msg='Token validation failed') from e
+
+        self.logger.info('Logged in to {}'.format(payload["username"]))
+        return True
 
     def request(self, url: str) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
         response = requests.get(url, headers=self.headers)
         if response.status_code == 401:
-            self.authenticate()  # Will raise exception if unsuccessful (won't recurse infinitely)
+            self.logger.debug("Attempting to re-authenticate...")
+            self.authenticate()  # Will raise AuthenticationError if unsuccessful (won't recurse infinitely)
             return self.request(url)
-        else:
-            if response.status_code != 200:  # All other responses are returned; errors are handled by methods
-                self.logger.error("Request to {} failed with status code {} and message: \"{}\"".format(
-                        url, response.status_code, response.json().get('message', response.json())))
-            return response
+
+        if response.status_code != 200:  # All other responses are returned; errors are handled by methods
+            self.logger.error("Request to {} failed with status code {} and message: \"{}\"".format(
+                url, response.status_code, response.json().get('message', response.json()))
+            )
+        return response
 
     def url_for(self, endpoint, scope=''):
         """Returns the appropriate url for the given endpoint and store scope"""
@@ -103,25 +106,26 @@ class Client(object):
             return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
     def validate(self) -> bool:
-        """Sends an authorized request to a standard API endpoint"""
+        """Sends an authorized request to a base API endpoint"""
         response = self.request(self.url_for('store/websites'))
         if response.status_code == 200:
-            self.logger.debug("Client validated for {} on {}".format(
-                self.USER_CREDENTIALS['username'], self.domain))
+            self.logger.debug("Token validated for {} on {}".format(
+                self.USER_CREDENTIALS['username'], self.domain)
+            )
             return True
         else:
-            message = response.json().get('message', response.json())
-            self.logger.error("Client validation failed for {} on {}\nResponse: {}".format(
-                self.USER_CREDENTIALS['username'], self.domain, message))
-            return False
+            msg = "Token validation failed for {} on {}".format(
+                self.USER_CREDENTIALS['username'], self.domain
+            )
+            raise AuthenticationError(self, msg=msg, response=response)
 
     def get_logger(self, level='INFO') -> MagentoLogger:
-        """Retrieve the MagentoLogger associated with the current user/domain combination"""
+        """Retrieve the MagentoLogger associated with the current username/domain combination"""
         log_name = MagentoLogger.CLIENT_LOG_NAME.format(
             DOMAIN=self.domain.split('.')[0],
             USERNAME=self.USER_CREDENTIALS['username']
         )
-        return MagentoLogger(     # No access to Client
+        return MagentoLogger(  # Note that there is one-way access to the logger
             name=log_name,
             log_file=log_name + '.log',
             stdout_level=level
@@ -158,10 +162,7 @@ class Client(object):
     def to_pickle(self, validate=False) -> bytes:
         """Validates credentials (optional) and returns the Client object as a pickle string"""
         if validate:
-            if not self.validate():
-                raise AuthenticationError(
-                    'Failed to validate credentials'
-                )
+            self.validate()
         return pickle.dumps(self)
 
     def to_json(self, validate=False) -> str:
@@ -184,4 +185,34 @@ class Client(object):
 
 
 class AuthenticationError(Exception):
-    pass
+
+    DEFAULT_MSG = 'Failed to authenticate credentials. '
+
+    def __init__(self, client: Client, msg=None, response: requests.Response = None):
+        self.msg = msg if msg else AuthenticationError.DEFAULT_MSG
+        self.logger = client.logger
+
+        if response:
+            self.parse(response)
+
+        self.logger.error(self.msg)
+        super().__init__(self.msg)
+
+    def parse(self, response: requests.Response) -> None:
+        """Parses the error message from the response, including message parameters when available"""
+        message = response.json().get('message')
+        errors = response.json().get('errors')
+
+        if message:
+            self.msg += message + '\n'
+
+        if errors:
+            for error in errors:
+                err_msg = error['message']
+                err_params = error.get('parameters')
+
+                if err_params:
+                    for param in err_params:
+                        err_msg = err_msg.replace(f'%{param}', err_params[param])
+
+                self.msg += err_msg + '\n'
