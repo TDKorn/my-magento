@@ -27,7 +27,7 @@ class Model(ABC):
             corresponding SearchQuery object, if it exists
 
         :param private_keys: If set to True, the keys denoted in the excluded_keys property will be set as attributes
-            prefixed with "_". For example, if "status" is an excluded key,  and private_keys=True, the object
+            prefixed with "__". For example, if "status" is an excluded key,  and private_keys=True, the object
             will be initialized with an "_status" attribute instead of completely excluding it.
         """
 
@@ -38,16 +38,18 @@ class Model(ABC):
         if not isinstance(client, clients.Client):
             raise TypeError(f'Parameter "client" must be of type {clients.Client}')
 
+        self.data = data
         self.client = client
         self.endpoint = endpoint
         self.set_attrs(data, private_keys=private_keys)
 
     def set_attrs(self, data: dict, private_keys: bool = True) -> None:
-        """Sets object attributes, using an API response dict as the data source
+        """Sets object attributes, using an API response dict as the data source. Called at the time of object
+         initialization, but can also be used to replace the source data, allowing for reuse of the Model object
 
         :param data: The API response to use as the object source data
         :param private_keys: If set to True, will set the keys in the "excluded_keys" property as attributes
-                                prefixed with an "_", instead of fully excluding them
+            prefixed with an "__", instead of fully excluding them
         """
         keys = set(data) - set(self.excluded_keys)
         for key in keys:
@@ -58,8 +60,11 @@ class Model(ABC):
                 setattr(self, key, data[key])
 
         if private_keys:
+            private = '_' + self.__class__.__name__ + '__'
             for key in self.excluded_keys:
-                setattr(self, "_" + key, data.get(key))
+                setattr(self, private + key, data.get(key))
+
+        self.data = data
 
     @property
     @abstractmethod
@@ -69,15 +74,6 @@ class Model(ABC):
         :returns the list of API response keys that should not be set as attributes
         """
         pass
-
-    @staticmethod
-    def unpack_attributes(attributes: list):
-        """Unpacks a list of custom attribute dictionaries into a single dictionary
-
-        :param attributes: A list of custom attribute dictionaries of the form
-                            [{'attribute_code': 'attr', 'value': 'val'},]
-        """
-        return {attr['attribute_code']: attr['value'] for attr in attributes}
 
     def query_endpoint(self):
         """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
@@ -89,6 +85,21 @@ class Model(ABC):
         :param response: The API response dict to generate the object from
         """
         return self.query_endpoint().parse(response)
+
+    @staticmethod
+    def unpack_attributes(attributes: list):
+        """Unpacks a list of custom attribute dictionaries into a single dictionary
+
+        :param attributes: A list of custom attribute dictionaries of the form
+                            [{'attribute_code': 'attr', 'value': 'val'},]
+        """
+        return {attr['attribute_code']: attr['value'] for attr in attributes}
+
+    @staticmethod
+    def encode(string):
+        """Returns a URL-encoded string"""
+        import urllib.parse
+        return urllib.parse.quote_plus(string)
 
 
 class Product(Model):
@@ -109,6 +120,7 @@ class Product(Model):
             endpoint='products',
             private_keys=True
         )
+        self._media_gallery_entries = []
 
     def __str__(self):
         return f'Magento Product: {self.sku}'
@@ -119,46 +131,78 @@ class Product(Model):
 
     @property
     def media_gallery_entries(self):
-        return [MediaEntry(self, entry) for entry in self._media_gallery_entries]
+        """Returns the media gallery entries as a list of MediaEntry objects"""
+        if not self._media_gallery_entries:
+            if entries := self.__media_gallery_entries:
+                self._media_gallery_entries = [MediaEntry(self, entry) for entry in entries]
+        return self._media_gallery_entries
 
     @property
     def thumbnail(self):
-        return self._get_media_entry('thumbail', 'in', 'types')
+        return self._get_media_entry('is_thumbnail', True)
+
+    @property
+    def thumbnail_link(self):
+        if self.thumbnail:
+            return self.thumbnail.link
 
     def get_media(self, entry_id):
-        return self._get_media_entry('id', '==', entry_id)
+        return self._get_media_entry('id', entry_id)
 
-    def _get_media_entry(self, val: Union[str, int], condition: str, attribute: str):
-        if not isinstance(val, int):
-            val = f'\"{val}\"'
+    def _get_media_entry(self, attribute: str, value: Union[str, int, bool], condition: str = '=='):
+        """Filter media gallery entries based on attribute values. Specifying params as keyword arguments allows for
+        method calls to be ordered in a more natural way
+
+        :param attribute: The media gallery attribute to filter on
+        :param value: The value of the attribute to match
+        :param condition: The condition used to evaluate a match on. Default is '=='
+
+        Sample Usage:
+            Get Thumbnail Image:
+                product._get_media_entry(value='thumbnail', condition='in', attribute='types')
+                    - Matches the media entry containing the string "thumbnail" within its "types" list
+                product._get_media_entry('is_thumbnail', True)
+                    - Simpler way; Matches the 'is_thumbnail' property of MediaEntry class
+
+            Get Entries in Position 0 or 1:
+                product.__get_media_entry(attribute='position', condition = '<', value=2)
+                    - Matches media entries with position < 2
+        """
+        result = []
+
+        if not isinstance(value, int):
+            value = f'\"{value}\"'
 
         for entry in self.media_gallery_entries:
             if hasattr(entry, attribute):
                 attr = getattr(entry, attribute)
-                criteria = f'{val} {condition} {attr}'
-
+                if condition == 'in':
+                    criteria = f'{value} {condition} {attr}'    # Ex. "thumbnail" in types
+                else:
+                    criteria = f'{attr} {condition} {value}'    # Ex. "position" < 2; "id" == 34531
                 try:
                     if eval(criteria):
-                        return entry
-
-                except Exception as e:
+                        result.append(entry)
+                except Exception as e:  # All criteria within package will work. This is for anyone else (:
                     raise RuntimeError(f'Invalid Criteria: {criteria}') from e
 
-    @property
-    def thumbnail_link(self):
-        return self.thumbnail.link
+        if len(result) == 1:
+            return result[0]
+        return result
+
 
     @property
     def encoded_sku(self):
-        # Must URL encode forward slashes when making API requests
-        return self.sku.replace('/', '%2F')
+        """URL-encoded SKU, which is required when an endpoint URL contains a SKU"""
+        return self.encode(self.sku)
 
     @property
     def stock_item(self):
-        if hasattr(self, 'extension_attributes'):
-            if stock_data := self.extension_attributes.get('stock_item', {}):  # Missing if product was retrieved by id
+        if hasattr(self, 'extension_attributes'):  # Missing if product was retrieved by id
+            if stock_data := self.extension_attributes.get('stock_item', {}):
                 return stock_data
-        self.refresh()  # Use the SKU to refresh attributes with full product data
+        # Use the SKU to refresh attributes with full product data
+        self.refresh()
         return self.stock_item
 
     @property
@@ -173,8 +217,8 @@ class Product(Model):
 
     def get_children(self):
         """Retrieve the child simple products of a configurable product"""
-        if self.type_id != 'configurable':
-            return None  # Only configurable products have child skus
+        if self.type_id != 'configurable':  # Only configurable products have child skus
+            return None
 
         url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
         response = self.client.request(url)
@@ -286,8 +330,6 @@ class Category(Model):
             client=client,
             endpoint='categories'
         )
-        # self.id = None  # Attributes that are referenced within class methods (and are required response fields)
-        # self.name = None
         self._products = None  # Attributes that are stored after retrieving the first time
         self._subcategories = None
 
