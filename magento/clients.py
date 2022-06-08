@@ -189,22 +189,22 @@ class AuthenticationError(Exception):
     DEFAULT_MSG = 'Failed to authenticate credentials. '
 
     def __init__(self, client: Client, msg=None, response: requests.Response = None):
-        self.msg = msg if msg else AuthenticationError.DEFAULT_MSG
+        self.message = msg if msg else AuthenticationError.DEFAULT_MSG
         self.logger = client.logger
 
-        if response:
+        if response is not None:
             self.parse(response)
 
-        self.logger.error(self.msg)
-        super().__init__(self.msg)
+        self.logger.error(self.message)
+        super().__init__(self.message)
 
     def parse(self, response: requests.Response) -> None:
         """Parses the error message from the response, including message parameters when available"""
-        message = response.json().get('message')
+        msg = response.json().get('message')
         errors = response.json().get('errors')
 
-        if message:
-            self.msg += message + '\n'
+        if msg:
+            self.message += ' ' + '\n' + f'Response: {msg}'
 
         if errors:
             for error in errors:
@@ -215,4 +215,4 @@ class AuthenticationError(Exception):
                     for param in err_params:
                         err_msg = err_msg.replace(f'%{param}', err_params[param])
 
-                self.msg += err_msg + '\n'
+                self.message += err_msg + '\n'
