@@ -41,7 +41,6 @@ class Client(object):
 
     def search(self, endpoint: str):
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
-        # Common endpoints are queried with SearchQuery subclasses containing endpoint-specific methods
         if endpoint.lower() == 'orders':
             return self.orders
         if endpoint.lower() == 'invoices':
@@ -50,10 +49,8 @@ class Client(object):
             return self.categories
         if endpoint.lower() == 'products':
             return self.products
-        else:
-            # Any other endpoint is queried with a general SearchQuery object
-            return SearchQuery(endpoint=endpoint,
-                               client=self)
+        # Any other endpoint is queried with a general SearchQuery object
+        return SearchQuery(endpoint=endpoint, client=self)
 
     def authenticate(self) -> bool:
         """Request access token from the authentication endpoint."""
@@ -97,7 +94,7 @@ class Client(object):
         """Returns the appropriate url for the given endpoint and store scope"""
         if not scope:
             return self.BASE_URL + endpoint
-        else:   # Must send request to a scoped url for some updates
+        else:  # Must send POST/PUT requests to a scoped url for some updates
             return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
     def validate(self):

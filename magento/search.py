@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Union
-from .utils import ItemManager
-from .entities import Order, Entity, OrderItem, Invoice
+from .entities import Order, Invoice
 from .models import Product, Category
 from . import clients
 
@@ -256,10 +255,13 @@ class CategorySearch(SearchQuery):
         return self.by_id(category_id).products
 
     def order_items_from_id(self, category_id):
-        skus = self.products_from_id(category_id)
-        return self.client.search('orders/items').add_criteria(field='sku',
-                                                               value=','.join(skus),
-                                                               condition='in').execute()
+        skus = ','.join(self.products_from_id(category_id))
+        query = self.client.search('orders/items')
+        return query.add_criteria(
+            field='sku',
+            value=','.join(skus),
+            condition = 'in'
+        ).execute()
 
     def orders_from_id(self, category_id, start, end=None):
         order_items = self.order_items_from_id(category_id)
