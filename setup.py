@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='MyMagento',
+    name='my-magento',
     packages=['magento'],
-    version='1.1.0',
+    version='1.1.1',
     license='MIT',
     description='Python Magento 2 REST API Client',
     author='Adam Korn',
