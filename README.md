@@ -1,8 +1,30 @@
-# my-magento
-MyMagento is a Python package that acts as both a Python client and wrapper for the Magento 2 REST API. 
+# MyMagento (my-magento)
+A Python package to help simplify interaction with the Magento 2 REST API.
 
-It utilizes a central `Client` class, endpoint specific `SearchQuery` classes, and various API response wrapper `Model`/`Entity` classes, which, as a whole, offers a comprehensive yet intuitive interface that greatly simplifies and facilitates interaction with the Magento API.
-<br>
+***
+
+## Why MyMagento?
+
+After you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L55) 
+a [`Client`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L11),
+you'll never have to worry about formatting your Magento 2 REST API calls again - simply build your store's custom [`url_for()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L93)
+the API `endpoint` of your choice, then call [`request()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78)
+
+If an [`endpoint`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L44)
+supports the [`searchCriteria`](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html)
+interface, you can use a [`SearchQuery`](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) 
+object to perform a [`search()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L42) 
+— just [`add_criteria()`](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria)
+, [`restrict_fields()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L72)
+, and [`execute()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L84) 
+your [`query`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L17). 
+It will [`parse()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L143)
+the response data, and, when possible, return the [`result`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L101)
+wrapped in one of the [`Model`](https://github.com/TDKorn/my-magento/blob/c2e7f6d11dd541e1ff3f2d5fd7f9f329d51f95b8/magento/models.py) 
+or [`Entity`](https://github.com/TDKorn/my-magento/blob/c2e7f6d11dd541e1ff3f2d5fd7f9f329d51f95b8/magento/entities.py)
+classes
+
+***
 
 ## Installation
 To install this package with pip:
@@ -10,10 +32,43 @@ To install this package with pip:
 pip install my-magento
 ```
 
-## Getting Started: Configuring the Client
-MyMagento uses the `Client` class for all interaction with the Magento API, and every other class in the package can only be instantiated if a `Client` object is passed to their constructor. This means that, to do literally anything, you'll first need to create and authenticate a `Client`
+
+## Documentation
+
+Please see the [wiki](https://github.com/TDKorn/my-magento/wiki) for slightly more information
 
 ***
+
+## Sample Usage
+As mentioned above, you can use a [```Client```](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L11) to login and make requests to any Magento 2 REST API endpoint
+```python
+from magento import Client
+
+api = Client('website.com','username', 'password')
+endpoint = api.url_for("products/links/types", scope='')
+
+response = api.request(endpoint)
+print(url, response.json(), sep='\n')
+```
+Output:
+```python
+2022-06-14 00:55:42 INFO   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
+2022-06-14 00:55:43 INFO   |[ MyMagento | website_username ]|:  Logged in to username
+
+https://www.website.com/rest/V1/products/links/types
+[{'code': 1, 'name': 'related'}, {'code': 5, 'name': 'crosssell'}, {'code': 4, 'name': 'upsell'}, {'code': 3, 'name': 'associated'}]
+```
+
+ <br>
+ 
+ -  **TIP**: For detailed response data, search an endpoint [`by_id()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L90)
+
+
+***
+
+
+## Getting Started
+
 
 ### Configure the Magento Account
 
@@ -29,23 +84,16 @@ and ensuring that `Sales`, `Catalog`, `Customers`, and all other desired resourc
 
 ### Initialize and Authenticate a Client
 
-Authentication is very straightforward
-1. Initialize a `Client` using your Magento Admin login credentials
-2. Request a token either by specifying `login=True` at the time of `Client` instantiation, or by calling `authenticate()` at any point afterwards
+Authentication is very straightforward. For full details please see the [client setup tutorial](https://github.com/TDKorn/my-magento/wiki/Client-Tutorial-Overview) in the wiki
 
 ```python
 from magento import Client
 
-api = Client(
-  domain='website.com',
-  username='username',
-  password='password',
-  login = False
-)
+api = Client('website.com','username', 'password', login=False)
 api.authenticate()
 ```
 
-Alternatively, use `Client.new()` to login with input prompts
+You can also use ```Client.new()``` to login with input prompts
 
 ```python
 api = Client.new()
@@ -65,62 +113,11 @@ User Agent: >?
 Access Token:  eyJraWQiIxIiwiYWxnIjoiSFMyNTYifQ.eyJ1aWQiOjI3LCJ1dHlwaWQiOjIsImlhdCI6MTY1NTE4MjU0MywiZXhwIjoxNjU1MTg2MTQzfQ.AbtkboAG_5R6CTsHmZwu_DiINJ7BKQ0_5sqHGJqcJVk
 ```
 
-***
-
-### View/Validate the Access Token
-The access token currently in use by a `Client` object can be accessed via its
-- `ACCESS_TOKEN` - instance attribute that stores the token
-- `token` - property that calls `authenticate()` if no `ACCESS_TOKEN` has been set
-
-You can call the `validate()` method to verify that the access token isn't expired
 
 ***
 
-### Saving/Loading Client Configurations
+####  ⚠ 🔥 🥵 DISCLAIMER 😩 🩸 ⚠ ❗
 
-A `Client` instance can be saved to/loaded from various formats
-```python
-import json
-from magento import Client
 
-# Save to/Load from JSON string, pickle string, or dict
-json_str = api.to_json()
-json_api = Client.from_json(json_str)
 
-pickle_bytes = api.to_pickle() 
-pickle_api = Client.load(pickle_bytes)
-
-json_dict = json.loads(api.to_json())
-dict_api = Client(**json_dict, login=False)
-```
-
-***
-
-### Manually Set the Access Token
-
-If you'd like to use this package but your site doesn't use the standard token authentication endpoint/workflow (ex. it uses 2FA), you can simply generate the token as you normally would, then set the `Client` access token manually. This can be done multiple ways: 
-
-1. Directly set the `ACCESS_TOKEN` on an already initialized `Client`. Verify it by calling `validate()`
-
-```python
-token = "fsdkjgnewofgnQ$r@FDN8FJ38NDJKIINvblbahgfjgjgjgjfjfASJHNAHKSJDNKJASFDhoeodiqwahhahahahr02389jfd3nm981"
-api.ACCESS_TOKEN = token
-api.validate()
-```
-
-2. Initialize the `Client` and specify the `token` parameter. Ensure to use `login=False` so no attempt is made to generate a token
-
-```python
-api = magento.Client(
-  domain="website.com",
-  username="username",
-  password="password",
-  token=token,
-  login=False   
-)
-```
-3. Load the configuration from a previously saved pickle string, JSON string, or dictionary.
-
-<br>
-
-Regardless of how it's done, the key is to avoid calling `authenticate()`, as it would request a new token
+This package (and README) is fr a work in progress, so raw data will be returned if no wrapper class exists for a given endpoint yet. It will always [`validate_result`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L110) first though so you should be okay. I am just disclaiming the disclaim here.

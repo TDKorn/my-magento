@@ -1,4 +1,6 @@
 from setuptools import setup
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(
     name='my-magento',
@@ -6,6 +8,8 @@ setup(
     version='1.1.1',
     license='MIT',
     description='Python Magento 2 REST API Client',
+    long_description=f"""{long_description}""",
+    long_description_content_type='text/markdown',
     author='Adam Korn',
     author_email='hello@dailykitten.net',
     url='https://www.github.com/TDKorn/my-magento',
