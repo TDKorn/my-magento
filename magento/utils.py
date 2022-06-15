@@ -98,10 +98,22 @@ class LoggerUtils:
 
 
 class MagentoLogger:
-    PACKAGE_LOG_NAME = "magento"
-    CLIENT_LOG_NAME = "{DOMAIN}_{USERNAME}"
+    """Logging class used within the package
+
+    :cvar PREFIX:           hardcoded prefix to use in log messages
+    :cvar PACKAGE_LOG_NAME: the default name for the package logger
+    :cvar CLIENT_LOG_NAME:  the default format for the client logger name
+    :cvar LOG_MESSAGE:      the default format for the message component of log messages.
+                            (Use magento.logger.LOG_MESSAGE for easy access)
+    :cvar FORMATTER:        the default logging format
+    :type FORMATTER:        logging.Formatter
+    :cvar HANDLER_NAME      the default format for the names of handlers created by this package
+    """
+
     PREFIX = "MyMagento"
-    # Use magento.logger.LOG_MESSAGE for easy access
+    PACKAGE_LOG_NAME = "my-magento"
+    CLIENT_LOG_NAME = "{domain}_{username}"
+
     LOG_MESSAGE = "|[ {pfx} | {name} ]|:  {message}".format(
         pfx=PREFIX, name="{name}", message="{message}"
     )
@@ -109,60 +121,72 @@ class MagentoLogger:
         fmt="%(asctime)s %(levelname)-5s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
+    HANDLER_NAME = '{}__{}__{}'.format(PREFIX, '{name}', '{stdout_level}')
 
-    def __init__(self, name: str, log_file: str = '', stdout_level: Union[int, str] = 'INFO'):
-        """Logging class used within the package. An instance is attached to every Client upon object initialization.
+    def __init__(self, name: str, log_file: str = None, stdout_level: Union[int, str] = 'INFO',
+                 log_requests: bool = True):
+        """Initialize the logger
 
-        Currently, a single Client object is created for each username/domain combination, and this same Client object
-        is passed between all wrapper classes in the package. Since a logger/log file is uniquely associated with a
-        particular user, this allows all activity, across all endpoints, to be logged every time that user logs in
-        (Please don't be creepy with that)
-        All activity from the package, regardless of user, will be logged to the central "magento.log" package log file
-
-        NOTE: Logging level for stdout logging can be set (default is "INFO") but log files are forced to use "DEBUG"
+        Each Client object corresponds to a unique username/domain combination, which is used to attach it to its
+        associated MagentoLogger and log file, allowing all activity across all endpoints to be tracked.
+        A package logger exists as well, which logs all activity from the package.
+        All log files have their log level set to DEBUG
 
         :param name: logger name
-            :var MagentoLogger.CLIENT_LOG_NAME:  the default client logger name
-            :var MagentoLogger.PACKAGE_LOG_NAME: the default package logger name
-
         :param log_file: log file name; default is {name}.log
         :param stdout_level: logging level for stdout logger; default is "INFO" (which is also logging.INFO and 10)
+        :param log_requests: set to True to add logging from the requests package logger
         """
         self.name = name
-        self.logger = self.setup_logger(
-            log_file=log_file,
-            stdout_level=stdout_level
-        )
+        self.logger = None
+        self.handler_name = MagentoLogger.HANDLER_NAME.format(name=name, stdout_level=stdout_level)
+        self.log_file = log_file if log_file else f'{self.handler_name}.log'
+        self.setup_logger(stdout_level, log_requests=log_requests)
 
-    def setup_logger(self, log_file: str = '', stdout_level: Union[int, str] = 'INFO'):
-        """Configures and returns a logger. Uses existing loggers if possible"""
+    def setup_logger(self, stdout_level: Union[int, str] = 'INFO', log_requests: bool = True) -> bool:
+        """Configures a logger and assigns it to the `logger` attribute.
+
+        :param stdout_level: logging level to use for logging to console
+        :param log_requests: set to True to add logs from the requests package (ie. API call logging)
+        """
         logger = logging.getLogger(self.name)
-        stdout_name = f'{self.name}_stdoutLogger'
-        for handler in logger.handlers:
-            if handler.name == stdout_name:
-                return logger
+        handler_map = LoggerUtils.map_handlers_by_name(logger)
 
-        stdout_handler = logging.StreamHandler(stream=sys.stdout)
-        stdout_handler.name = stdout_name
-        stdout_handler.setLevel(stdout_level)
-        stdout_handler.setFormatter(MagentoLogger.FORMATTER)
+        if self.handler_name in handler_map['stream'] and self.handler_name in handler_map['file']:
+            self.logger = logger      # It's already configured
+            return True
 
-        if not log_file:
-            log_file = f'{self.name}.log'
+        if self.handler_name not in handler_map['stream']:
+            if len(handler_map['stream']) > 0:
+                self.clear_magento_handlers(logger, handler_type=StreamHandler)
+            # Resetting ensures only the desired level is logged to console
+            stdout_handler = logging.StreamHandler(stream=sys.stdout)
+            stdout_handler.setFormatter(MagentoLogger.FORMATTER)
+            stdout_handler.name = self.handler_name
+            stdout_handler.setLevel(stdout_level)
+            logger.addHandler(stdout_handler)
 
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setFormatter(MagentoLogger.FORMATTER)
+        # Remove all FileHandlers created by this package (except handler for magento.log)
+        if self.handler_name not in handler_map['file']:
+            if len(handler_map['file']) > 0:
+                self.clear_magento_file_handlers(logger)
+            f_handler = logging.FileHandler(self.log_file)
+            f_handler.setFormatter(MagentoLogger.FORMATTER)
+            f_handler.name = self.handler_name
+            f_handler.setLevel("DEBUG")
+            logger.addHandler(f_handler)
+
+        if log_requests:
+            f_handler = LoggerUtils.get_handler_by_log_file(logger, self.log_file)  # In case it wasn't just created
+            MagentoLogger.add_request_logging(f_handler)
+
+        if self.name != MagentoLogger.PACKAGE_LOG_NAME:  # All clients have the handler added to them
+            pkg_handler = MagentoLogger.get_package_handler()   # For writing to {PACKAGE_LOG_NAME}.log
+            logger.addHandler(pkg_handler)
 
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(stdout_handler)
-        logger.addHandler(file_handler)
-
-        MagentoLogger.add_request_logging(file_handler)
-
-        if self.name != MagentoLogger.PACKAGE_LOG_NAME:
-            logger.addHandler(MagentoLogger.get_package_handler())
-
-        return logger
+        self.logger = logger
+        return True
 
     def format_msg(self, msg: str) -> str:
         """Formats MagentoLogger.LOG_MESSAGE using the specified message"""
@@ -171,15 +195,15 @@ class MagentoLogger:
             message=msg
         )
 
-    def info(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.info()"""
-        return self.logger.info(
-            self.format_msg(msg)
-        )
-
     def debug(self, msg):
         """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.debug()"""
         return self.logger.debug(
+            self.format_msg(msg)
+        )
+
+    def info(self, msg):
+        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.info()"""
+        return self.logger.info(
             self.format_msg(msg)
         )
 
@@ -195,6 +219,42 @@ class MagentoLogger:
             self.format_msg(msg)
         )
 
+    def critical(self, msg):
+        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.critical()"""
+        return self.logger.critical(
+            self.format_msg(msg)
+        )
+
+    @staticmethod
+    def get_magento_handlers(logger):
+        return [handler for handler in logger.handlers if MagentoLogger.owns_handler(handler)]
+
+    @staticmethod
+    def clear_magento_handlers(logger: Logger, handler_type: Union[FileHandler | StreamHandler], clear_pkg: bool = False) -> None:
+        for handler in MagentoLogger.get_magento_handlers(logger):
+            if type(handler) == handler_type:
+                if clear_pkg:  # Remove handlers for package logger (my-magento.log)
+                    logger.removeHandler(handler)
+                elif handler != MagentoLogger.get_package_handler():  # Keep the magento.log FileHandler
+                    logger.removeHandler(handler)
+
+    @staticmethod
+    def clear_magento_file_handlers(logger: Logger, clear_pkg: bool = False):
+        return MagentoLogger.clear_magento_handlers(logger, FileHandler, clear_pkg)
+
+    @staticmethod
+    def clear_magento_stdout_handlers(logger: Logger, clear_pkg: bool = False):
+        return MagentoLogger.clear_magento_handlers(logger, StreamHandler, clear_pkg)
+
+    @staticmethod
+    def owns_handler(handler: Handler):
+        """Checks if a handler is a Stream/FileHandler from this package or not"""
+        try:  # Match handler name to MagentoLogger.HANDLER_NAME format
+            prefix, name, stdoutlevel = handler.name.split('__')
+            return prefix == MagentoLogger.PREFIX
+        except:  # Wrong format or not set
+            return False
+
     @staticmethod
     def get_package_handler() -> logging.FileHandler:
         """Returns the FileHandler object that writes to the magento.log file"""
@@ -204,16 +264,38 @@ class MagentoLogger:
                 return handler
 
     @staticmethod
-    def add_request_logging(handler: Union[logging.FileHandler, logging.StreamHandler]):
+    def add_request_logging(handler: Union[FileHandler, StreamHandler]):
         """Adds the specified handler to the requests package logger, allowing for easier debugging of API calls"""
-        req_logger = logging.getLogger('urllib3.connectionpool')
-        req_logger.setLevel(logging.DEBUG)
+        if not isinstance(handler, StreamHandler):  # FileHandler is subclass of StreamHandler
+            return False
+
+        import requests
+        req_logger = requests.urllib3.connectionpool.log
+        req_logger.setLevel("DEBUG")
+
         if handler not in req_logger.handlers:
             req_logger.addHandler(handler)
 
+        return True
+
+    @property
+    def handlers(self):
+        return self.logger.handlers
+
+    @property
+    def handler_names(self):
+        return LoggerUtils.get_handler_names(self.logger)
+
+    @property
+    def filehandlers(self):
+        return LoggerUtils.get_file_handlers(self.logger)
+
+    @property
+    def log_files(self):
+        return LoggerUtils.get_log_files(self.logger)
 
 
-AGENTS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36']
+AGENTS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36']
 
 
 def get_agents() -> list:
@@ -225,10 +307,14 @@ def get_agents() -> list:
         for a in agents:
             if a not in AGENTS:
                 AGENTS.append(a)
-    # If function fails will return the hardcoded list
+    # If function fails, will still return the hardcoded list
     return AGENTS
 
 
-def get_agent() -> str:
-    """Returns a single user agent string"""
-    return get_agents()[0]
+def get_agent(index=0) -> str:
+    """Returns a single user agent string from the specified index of the AGENTS list"""
+    return get_agents()[index]  # Specify index only if you hardcode more than 1
+
+
+def get_package_file_handler():
+    return MagentoLogger.get_package_handler()

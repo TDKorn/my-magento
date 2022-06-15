@@ -10,7 +10,7 @@ from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, Cate
 
 class Client(object):
 
-    def __init__(self, domain, username, password, user_agent=None, token=None, log_level='INFO', login=True):
+    def __init__(self, domain, username, password, user_agent=None, token=None, log_level='INFO', login=True, **kwargs):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
             'username': username,
@@ -19,8 +19,11 @@ class Client(object):
         self.ACCESS_TOKEN = token
         self.domain = domain
         self.user_agent = user_agent if user_agent else get_agent()
-        self.logger = self.get_logger(log_level)
-
+        self.logger = self.get_logger(
+            stdout_level=log_level,
+            log_file=kwargs.get('log_file', None),
+            log_requests=kwargs.get('log_requests', True)
+        )
         if login:
             self.authenticate()
 
@@ -119,16 +122,23 @@ class Client(object):
             )
             raise AuthenticationError(self, msg=msg, response=response)
 
-    def get_logger(self, level='INFO') -> MagentoLogger:
-        """Retrieve the MagentoLogger associated with the current username/domain combination"""
-        log_name = MagentoLogger.CLIENT_LOG_NAME.format(
-            DOMAIN=self.domain.split('.')[0],
-            USERNAME=self.USER_CREDENTIALS['username']
-        )
-        return MagentoLogger(  # Note that there is one-way access to the logger
-            name=log_name,
-            log_file=log_name + '.log',
-            stdout_level=level
+    def get_logger(self, log_file = None, stdout_level='INFO', log_requests = True) -> MagentoLogger:
+        """Retrieve a MagentoLogger for the current username/domain combination. Log files are DEBUG.
+
+        :param log_file: the file to log to
+        :param stdout_level: the logging level for stdout logging
+        :param log_requests: if True, will add the logger's FileHandler to the urllib3.connectionpool logger
+        :rtype MagentoLogger: the Magento logger for the username/domain combination of the Client
+        """
+        logger_name = MagentoLogger.CLIENT_LOG_NAME.format(
+            domain=self.domain.split('.')[0],
+            username=self.USER_CREDENTIALS['username']
+        )  # Note there's only one-way access to the logger
+        return MagentoLogger(
+            name=logger_name,
+            log_file=log_file,
+            stdout_level=stdout_level,
+            log_requests=log_requests
         )
 
     @property
