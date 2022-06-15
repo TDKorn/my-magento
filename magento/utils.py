@@ -109,10 +109,10 @@ class MagentoLogger:
     :type FORMATTER:        logging.Formatter
     :cvar HANDLER_NAME      the default format for the names of handlers created by this package
     """
-
     PREFIX = "MyMagento"
     PACKAGE_LOG_NAME = "my-magento"
     CLIENT_LOG_NAME = "{domain}_{username}"
+    HANDLER_NAME = '{}__{}__{}'.format(PREFIX, '{name}', '{stdout_level}')
 
     LOG_MESSAGE = "|[ {pfx} | {name} ]|:  {message}".format(
         pfx=PREFIX, name="{name}", message="{message}"
@@ -121,7 +121,6 @@ class MagentoLogger:
         fmt="%(asctime)s %(levelname)-5s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
-    HANDLER_NAME = '{}__{}__{}'.format(PREFIX, '{name}', '{stdout_level}')
 
     def __init__(self, name: str, log_file: str = None, stdout_level: Union[int, str] = 'INFO',
                  log_requests: bool = True):
@@ -139,9 +138,13 @@ class MagentoLogger:
         """
         self.name = name
         self.logger = None
-        self.handler_name = MagentoLogger.HANDLER_NAME.format(name=name, stdout_level=stdout_level)
-        self.log_file = log_file if log_file else f'{self.handler_name}.log'
+        self.handler_name = None
+        self.log_file = log_file if log_file else f'{self.name}.log'
         self.setup_logger(stdout_level, log_requests=log_requests)
+
+    @property
+    def log_path(self):
+        return os.path.abspath(self.log_file)
 
     def setup_logger(self, stdout_level: Union[int, str] = 'INFO', log_requests: bool = True) -> bool:
         """Configures a logger and assigns it to the `logger` attribute.
@@ -151,10 +154,15 @@ class MagentoLogger:
         """
         logger = logging.getLogger(self.name)
         handler_map = LoggerUtils.map_handlers_by_name(logger)
-
+        log_files = LoggerUtils.get_log_files(logger)
+        self.handler_name = MagentoLogger.HANDLER_NAME.format(
+            name=self.name,             # Format handler_name here so that the method
+            stdout_level=stdout_level   # will still work if called manually after initial setup
+        )
         if self.handler_name in handler_map['stream'] and self.handler_name in handler_map['file']:
-            self.logger = logger      # It's already configured
-            return True
+            if self.log_path in log_files:
+                self.logger = logger  # Log levels and log files are correct
+                return True
 
         if self.handler_name not in handler_map['stream']:
             if len(handler_map['stream']) > 0:
@@ -167,7 +175,7 @@ class MagentoLogger:
             logger.addHandler(stdout_handler)
 
         # Remove all FileHandlers created by this package (except handler for magento.log)
-        if self.handler_name not in handler_map['file']:
+        if self.handler_name not in handler_map['file'] or self.log_path not in log_files:
             if len(handler_map['file']) > 0:
                 self.clear_magento_file_handlers(logger)
             f_handler = logging.FileHandler(self.log_file)
@@ -225,6 +233,10 @@ class MagentoLogger:
             self.format_msg(msg)
         )
 
+    @property
+    def handler_map(self):
+        return LoggerUtils.map_handlers_by_name(self.logger)
+
     @staticmethod
     def get_magento_handlers(logger):
         return [handler for handler in logger.handlers if MagentoLogger.owns_handler(handler)]
@@ -256,25 +268,33 @@ class MagentoLogger:
             return False
 
     @staticmethod
-    def get_package_handler() -> logging.FileHandler:
+    def get_package_handler() -> FileHandler:
         """Returns the FileHandler object that writes to the magento.log file"""
         pkg_handlers = logging.getLogger(MagentoLogger.PACKAGE_LOG_NAME).handlers
         for handler in pkg_handlers:
-            if isinstance(handler, logging.FileHandler):
-                return handler
+            if isinstance(handler, FileHandler):
+                if handler.baseFilename == os.path.abspath(MagentoLogger.PACKAGE_LOG_NAME + '.log'):
+                    return handler
 
     @staticmethod
     def add_request_logging(handler: Union[FileHandler, StreamHandler]):
         """Adds the specified handler to the requests package logger, allowing for easier debugging of API calls"""
-        if not isinstance(handler, StreamHandler):  # FileHandler is subclass of StreamHandler
-            return False
+        if type(handler) not in (FileHandler, StreamHandler):
+            raise TypeError(f"Parameter handler must be of type {FileHandler} or {StreamHandler}")
 
-        import requests
         req_logger = requests.urllib3.connectionpool.log
         req_logger.setLevel("DEBUG")
+        if handler in req_logger.handlers:
+            return True  # Already added
 
-        if handler not in req_logger.handlers:
-            req_logger.addHandler(handler)
+        if type(handler) is FileHandler:
+            if handler.baseFilename not in LoggerUtils.get_log_files(req_logger):
+                req_logger.addHandler(handler)  # Might be same handler new file (or level)
+
+        elif type(handler) is StreamHandler:
+            stdout_names = LoggerUtils.map_handlers_by_name(req_logger)['stream']
+            if handler.name not in stdout_names: # Might be same handler new level
+                req_logger.addHandler(handler)
 
         return True
 
