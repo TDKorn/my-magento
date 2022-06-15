@@ -1,8 +1,10 @@
+import os
 import sys
 import logging
 import requests
 
-from typing import Union
+from typing import Union, List
+from logging import Logger, FileHandler, StreamHandler, Handler
 
 
 class ItemManager:
@@ -19,6 +21,80 @@ class ItemManager:
 
     def sum_attrs(self, attr):
         return sum(self.get_attrs(attr))
+
+
+class LoggerUtils:
+    """Utility class that simplifies access to logger handler info"""
+
+    @staticmethod
+    def get_handler_names(logger) -> List[str]:
+        """Get all handler names"""
+        return [handler.name for handler in logger.handlers]
+
+    @staticmethod
+    def get_stream_handlers(logger: Logger) -> List[Handler]:
+        """Get all the StreamHandlers of the current logger (NOTE: StreamHandler subclasses excluded)"""
+        return [handler for handler in logger.handlers if type(handler) == StreamHandler]
+
+    @staticmethod
+    def get_file_handlers(logger: Logger) -> List[FileHandler]:
+        """Get all the FileHandlers of the current logger"""
+        return [handler for handler in logger.handlers if isinstance(handler, FileHandler)]
+
+    @staticmethod
+    def get_log_files(logger: Logger) -> List[str]:
+        """Get the log file paths from all FileHandlers of a logger"""
+        return [handler.baseFilename for handler in LoggerUtils.get_file_handlers(logger)]
+
+    @staticmethod
+    def get_handler_by_log_file(logger: Logger, log_file: str) -> FileHandler:
+        """Returns the FileHandler logging to the specified file, given it exists"""
+        for handler in LoggerUtils.get_file_handlers(logger):
+            if os.path.basename(handler.baseFilename) == log_file:
+                return handler
+
+    @staticmethod
+    def clear_handlers(logger: Logger) -> bool:
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+        return logger.handlers == []
+
+    @staticmethod
+    def clear_stream_handlers(logger: Logger) -> bool:
+        """Removes all StreamHandlers from a logger"""
+        for handler in LoggerUtils.get_stream_handlers(logger):
+            logger.removeHandler(handler)
+        return LoggerUtils.get_stream_handlers(logger) == []
+
+    @staticmethod
+    def clear_file_handlers(logger: Logger) -> bool:
+        """Removes all FileHandlers from a logger"""
+        for handler in LoggerUtils.get_file_handlers(logger):
+            logger.removeHandler(handler)
+        return LoggerUtils.get_file_handlers(logger) == []
+
+    @staticmethod
+    def map_handlers_by_name(logger: Logger):
+        """Map the handlers of a logger first by type, and then by their name
+
+        FileHandlers are mapped to both their handlers and log file, while StreamHandlers are just mapped to the handler
+        Handlers without a name will be skipped, because look at the method name (:
+        """
+        mapping = {
+            'stream': {},
+            'file': {}
+        }
+        for stream_handler in LoggerUtils.get_stream_handlers(logger):
+            if stream_handler.name:
+                mapping['stream'][stream_handler.name] = stream_handler
+
+        for file_handler in LoggerUtils.get_file_handlers(logger):
+            if file_handler.name:
+                entry = mapping['file'].setdefault(file_handler.name, {})
+                entry['handler'] = file_handler
+                entry['file'] = file_handler.baseFilename
+
+        return mapping
 
 
 class MagentoLogger:
