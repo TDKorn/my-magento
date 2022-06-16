@@ -3,7 +3,7 @@ import sys
 import logging
 import requests
 
-from typing import Union, List
+from typing import Union, List, Type
 from logging import Logger, FileHandler, StreamHandler, Handler
 
 
@@ -109,6 +109,7 @@ class MagentoLogger:
     :type FORMATTER:        logging.Formatter
     :cvar HANDLER_NAME      the default format for the names of handlers created by this package
     """
+
     PREFIX = "MyMagento"
     PACKAGE_LOG_NAME = "my-magento"
     CLIENT_LOG_NAME = "{domain}_{username}"
@@ -117,12 +118,13 @@ class MagentoLogger:
     LOG_MESSAGE = "|[ {pfx} | {name} ]|:  {message}".format(
         pfx=PREFIX, name="{name}", message="{message}"
     )
+
     FORMATTER = logging.Formatter(
         fmt="%(asctime)s %(levelname)-5s  %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    def __init__(self, name: str, log_file: str = None, stdout_level: Union[int, str] = 'INFO',
+    def __init__(self, name: str, log_file: str = None, stdout_level: Union[int | str] = 'INFO',
                  log_requests: bool = True):
         """Initialize the logger
 
@@ -142,11 +144,7 @@ class MagentoLogger:
         self.log_file = log_file if log_file else f'{self.name}.log'
         self.setup_logger(stdout_level, log_requests=log_requests)
 
-    @property
-    def log_path(self):
-        return os.path.abspath(self.log_file)
-
-    def setup_logger(self, stdout_level: Union[int, str] = 'INFO', log_requests: bool = True) -> bool:
+    def setup_logger(self, stdout_level: Union[int | str] = 'INFO', log_requests: bool = True) -> bool:
         """Configures a logger and assigns it to the `logger` attribute.
 
         :param stdout_level: logging level to use for logging to console
@@ -234,21 +232,49 @@ class MagentoLogger:
         )
 
     @property
+    def handlers(self):
+        return self.logger.handlers
+
+    @property
+    def handler_names(self):
+        return LoggerUtils.get_handler_names(self.logger)
+
+    @property
     def handler_map(self):
         return LoggerUtils.map_handlers_by_name(self.logger)
+
+    @property
+    def file_handlers(self):
+        return LoggerUtils.get_file_handlers(self.logger)
+
+    @property
+    def stream_handlers(self):
+        return LoggerUtils.get_stream_handlers(self.logger)
+
+    @property
+    def log_files(self):
+        return LoggerUtils.get_log_files(self.logger)
+
+    @property
+    def log_path(self):
+        return os.path.abspath(self.log_file)
 
     @staticmethod
     def get_magento_handlers(logger):
         return [handler for handler in logger.handlers if MagentoLogger.owns_handler(handler)]
 
     @staticmethod
-    def clear_magento_handlers(logger: Logger, handler_type: Union[FileHandler | StreamHandler], clear_pkg: bool = False) -> None:
+    def clear_magento_handlers(logger: Logger, handler_type: Union[Type[FileHandler] | Type[StreamHandler]], clear_pkg: bool = False) -> None:
+        """Clear all handlers from a logger that were created by MagentoLogger
+
+        :param logger: any logger
+        :param handler_type: the logging handler type to check for and remove
+        :param clear_pkg: if True, will delete the package handler for writing to my-magento.log | (Default is False)
+        """
         for handler in MagentoLogger.get_magento_handlers(logger):
             if type(handler) == handler_type:
-                if clear_pkg:  # Remove handlers for package logger (my-magento.log)
-                    logger.removeHandler(handler)
-                elif handler != MagentoLogger.get_package_handler():  # Keep the magento.log FileHandler
-                    logger.removeHandler(handler)
+                if clear_pkg is True or handler != MagentoLogger.get_package_handler():
+                    logger.removeHandler(handler)  # Either remove all handlers, or all but pkg handler
 
     @staticmethod
     def clear_magento_file_handlers(logger: Logger, clear_pkg: bool = False):
@@ -262,7 +288,7 @@ class MagentoLogger:
     def owns_handler(handler: Handler):
         """Checks if a handler is a Stream/FileHandler from this package or not"""
         try:  # Match handler name to MagentoLogger.HANDLER_NAME format
-            prefix, name, stdoutlevel = handler.name.split('__')
+            prefix, name, stdout_level = handler.name.split('__')
             return prefix == MagentoLogger.PREFIX
         except:  # Wrong format or not set
             return False
@@ -277,7 +303,7 @@ class MagentoLogger:
                     return handler
 
     @staticmethod
-    def add_request_logging(handler: Union[FileHandler, StreamHandler]):
+    def add_request_logging(handler: Union[FileHandler | StreamHandler]):
         """Adds the specified handler to the requests package logger, allowing for easier debugging of API calls"""
         if type(handler) not in (FileHandler, StreamHandler):
             raise TypeError(f"Parameter handler must be of type {FileHandler} or {StreamHandler}")
@@ -297,22 +323,6 @@ class MagentoLogger:
                 req_logger.addHandler(handler)
 
         return True
-
-    @property
-    def handlers(self):
-        return self.logger.handlers
-
-    @property
-    def handler_names(self):
-        return LoggerUtils.get_handler_names(self.logger)
-
-    @property
-    def filehandlers(self):
-        return LoggerUtils.get_file_handlers(self.logger)
-
-    @property
-    def log_files(self):
-        return LoggerUtils.get_log_files(self.logger)
 
 
 AGENTS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36']
