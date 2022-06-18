@@ -1,11 +1,22 @@
+import os.path
 from setuptools import setup
-with open('README.md', 'r') as f:
-    long_description = f.read()
+
+
+def get_description():
+    file = os.path.abspath('README.md')
+    with open(file, 'r', encoding='utf-8') as f:
+        long_description = u'{}'.format(f.read())
+        return long_description
+
+
+long_description = get_description()
+print(long_description)
+
 
 setup(
     name='my-magento',
     packages=['magento'],
-    version='1.1.1',
+    version='1.2.0',
     license='MIT',
     description='Python Magento 2 REST API Client',
     long_description=f"""{long_description}""",
