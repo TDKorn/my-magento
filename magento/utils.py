@@ -47,11 +47,16 @@ class LoggerUtils:
         return [handler.baseFilename for handler in LoggerUtils.get_file_handlers(logger)]
 
     @staticmethod
-    def get_handler_by_log_file(logger: Logger, log_file: str) -> FileHandler:
+    def get_handler_by_log_file(logger: Logger, log_file: str) -> Union[FileHandler | List[FileHandler]]:
         """Returns the FileHandler logging to the specified file, given it exists"""
-        for handler in LoggerUtils.get_file_handlers(logger):
-            if os.path.basename(handler.baseFilename) == log_file:
-                return handler
+        handlers = [
+            handler for handler in LoggerUtils.get_file_handlers(logger)
+            if os.path.basename(handler.baseFilename) == log_file
+        ]
+        if handlers:
+            if len(handlers) == 1:
+                return handlers[0]
+            return handlers
 
     @staticmethod
     def clear_handlers(logger: Logger) -> bool:
