@@ -81,13 +81,6 @@ class Client(object):
         except AuthenticationError as e:
             raise AuthenticationError(self, msg='Token validation failed') from e
 
-
-        self.logger.debug('Validating token...')
-        try:
-            self.validate()
-        except AuthenticationError as e:
-            raise AuthenticationError(self, msg='Token validation failed') from e
-
         self.logger.info('Logged in to {}'.format(payload["username"]))
         return True
 

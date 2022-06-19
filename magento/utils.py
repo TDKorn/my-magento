@@ -151,12 +151,6 @@ class MagentoLogger:
         :param log_requests: set to True to add logs from the requests package (ie. API call logging)
         """
         logger = logging.getLogger(self.name)
-        handler_map = LoggerUtils.map_handlers_by_name(logger)
-        log_files = LoggerUtils.get_log_files(logger)
-        self.handler_name = MagentoLogger.HANDLER_NAME.format(
-            name=self.name,             # Format handler_name here so that the method
-            stdout_level=stdout_level   # will still work if called manually after initial setup
-        )
         log_files = LoggerUtils.get_log_files(logger)
         handler_map = LoggerUtils.map_handlers_by_name(logger)
 
@@ -172,7 +166,7 @@ class MagentoLogger:
             if len(handler_map['stream']) > 0:
                 self.clear_magento_handlers(logger, handler_type=StreamHandler)
             # Resetting ensures only the desired level is logged to console
-            stdout_handler = logging.StreamHandler(stream=sys.stdout)
+            stdout_handler = StreamHandler(stream=sys.stdout)
             stdout_handler.setFormatter(MagentoLogger.FORMATTER)
             stdout_handler.name = self.handler_name
             stdout_handler.setLevel(stdout_level)
@@ -182,7 +176,7 @@ class MagentoLogger:
         if self.handler_name not in handler_map['file'] or self.log_path not in log_files:
             if len(handler_map['file']) > 0:
                 self.clear_magento_file_handlers(logger)
-            f_handler = logging.FileHandler(self.log_file)
+            f_handler = FileHandler(self.log_file)
             f_handler.setFormatter(MagentoLogger.FORMATTER)
             f_handler.name = self.handler_name
             f_handler.setLevel("DEBUG")
