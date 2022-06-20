@@ -13,7 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
-
+sys.path.append(os.path.abspath('exts'))
 
 # -- Project information -----------------------------------------------------
 
@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
+    'sphinxcontrib.restbuilder'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,7 +58,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-master_doc = 'magento'
+master_doc = 'index'
 
 #-- something about magic methods #
 def skip(app, what, name, obj, would_skip, options):

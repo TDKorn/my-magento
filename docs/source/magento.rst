@@ -1,10 +1,18 @@
-magento package
-===============
+The ``magento`` Package
+====================================
 
-Submodules
-----------
+Package Contents
+------------------------------
+Everything you need is in the ``magento`` package, which includes
 
-magento.clients module
+   *  `The clients module <magento.rst#module-magento.clients>`_
+   *  `The search module <magento.rst#module-magento.search>`_
+   *  `The models module <magento.rst#module-magento.models>`_
+   *  `The entities module <magento.rst#module-magento.entities>`_
+   *  `The utils module <magento.rst#module-magento.utils>`_
+
+
+The ``clients`` module
 ----------------------
 
 .. automodule:: magento.clients
@@ -13,7 +21,7 @@ magento.clients module
    :show-inheritance:
 
 
-magento.search module
+The ``search`` module
 ---------------------
 
 .. automodule:: magento.search
@@ -21,7 +29,7 @@ magento.search module
    :undoc-members:
    :show-inheritance:
 
-magento.models module
+The ``models`` module
 ---------------------
 
 .. automodule:: magento.models
@@ -31,7 +39,7 @@ magento.models module
 
 
 
-magento.entities module
+The ``entities`` module
 -----------------------
 
 .. automodule:: magento.entities
@@ -40,7 +48,7 @@ magento.entities module
    :show-inheritance:
 
 
-magento.utils module
+The ``utils`` module
 --------------------
 
 .. automodule:: magento.utils
