@@ -110,10 +110,10 @@ class SearchQuery:
     def validate_result(self) -> {} | list[{}]:
         """
         Returns the actual result, regardless of search approach
-        Failed: response will always contain a "message" key
-        Success:
-            Search Query:   response contains up to 3 keys from ["items", "total_count", "search_criteria"]
-            Direct Query:   response is the full entity/model response dict; typically has 20+ keys
+        Failed  ->  response will always contain a "message" key
+        Success
+        Result from Advanced Search Query   ->  response contains up to 3 keys from ["items", "total_count", "search_criteria"]
+        Result from Simple/Direct Query     ->  response is the full entity/model response dict; typically has 20+ keys
         """
         if not self._result:
             return None
