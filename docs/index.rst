@@ -9,12 +9,18 @@ Welcome to the my-magento documentation! 😩
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
-   magento
+   :caption: Overview:
 
    README
    examples
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Documentation:
+
+   magento
+
 
 Indices and tables
 ==================

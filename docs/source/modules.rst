@@ -1,43 +1,15 @@
-The ``clients`` module
-----------------------
+Package Modules
+============================
+The MyMagento ``magento`` package provides all the tools you'll need to manage your store through
+the Magento 2 API.
 
-.. automodule:: magento.clients
-   :members:
-   :undoc-members:
-   :show-inheritance:
+See below for documentation on each module in the package
 
+.. toctree::
+   :maxdepth: 2
 
-The ``search`` module
----------------------
-
-.. automodule:: magento.search
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-The ``models`` module
----------------------
-
-.. automodule:: magento.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-
-The ``entities`` module
------------------------
-
-.. automodule:: magento.entities
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-The ``utils`` module
---------------------
-
-.. automodule:: magento.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   clients
+   search_module
+   models
+   entities
+   utils
