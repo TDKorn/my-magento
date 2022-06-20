@@ -109,7 +109,7 @@ class MagentoLogger:
                             (Use magento.logger.LOG_MESSAGE for easy access)
     :cvar FORMATTER:        the default logging format
     :type FORMATTER:        logging.Formatter
-    :cvar HANDLER_NAME      the default format for the names of handlers created by this package
+    :cvar HANDLER_NAME:     the default format for the names of handlers created by this package
     """
 
     PREFIX = "MyMagento"
