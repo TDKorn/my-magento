@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.append(os.path.abspath('exts'))
 
@@ -23,7 +24,6 @@ author = 'Adam Korn'
 
 # The full version, including alpha/beta/rc tags
 release = '1.2.0'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -45,7 +45,6 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -60,11 +59,14 @@ html_static_path = ['_static']
 
 master_doc = 'index'
 
-#-- something about magic methods #
+
 def skip(app, what, name, obj, would_skip, options):
-    if name in ( '__init__',):
+    """Includes magic methods in docs... allegedly"""
+    if name in ('__init__',):
         return False
     return would_skip
 
+
 def setup(app):
     app.connect('autodoc-skip-member', skip)
+    app.add_css_file("property.css")  # To prevent horizontally stacking them
