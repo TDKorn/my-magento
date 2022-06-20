@@ -5,8 +5,9 @@ A Python package to help simplify interaction with the Magento 2 REST API.
 ## Why Use MyMagento?
 
 Once you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L55)
-your Magento 2 account on a [`Client`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L11),
-you'll never have to ~~deal with~~ worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78) to the REST API ever again.
+your account on a [`Client`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L11),
+you'll never have to ~~deal with~~ worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78)
+to the Magento 2 REST API ever again.
 
 Simply build your store's custom [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)
 any API endpoint, retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L42),
@@ -27,8 +28,7 @@ class when possible.
 
 ### Features
 * #### Easily build the custom  [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)  any REST API endpoint of your Magento 2 store
-* #### Make a REST authorized [`request()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78) to any url
-* #### Automatically [```validate()```] and [```authenticate()```][`authenticate()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L55) the  [```ACCESS_TOKEN```] as needed
+* #### Make a REST authorized [`request()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78) to any url and automatically [```validate()```] and [```authenticate()```][`authenticate()`](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L55) the  [```ACCESS_TOKEN```] as needed
 * #### [```search.py```](https://github.com/TDKorn/my-magento/blob/main/magento/search.py) module provides simplified yet high level support for [search using REST endpoints](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html)
 * #### [```Model```](https://github.com/TDKorn/my-magento/blob/c2e7f6d11dd541e1ff3f2d5fd7f9f329d51f95b8/magento/models.py) and [```Entity```](https://github.com/TDKorn/my-magento/blob/c2e7f6d11dd541e1ff3f2d5fd7f9f329d51f95b8/magento/entities.py) API response wrapper classes make [```result```](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/search.py#L101) data easier to work with and provide access to endpoint specific methods
 * #### ```SearchQuery``` subclasses like ```ProductSearch``` or [```InvoiceSearch```](https://github.com/TDKorn/my-magento/blob/51bb78cfff2dcd41f5530f9f79a2d8fed3e33f25/magento/search.py#L174) provide additional specialized methods
@@ -174,7 +174,6 @@ https://www.website.com/rest/V1/products/?searchCriteria[filter_groups][0][filte
 ```
 ## 😯 NAUSEATING LUV 😪
 
-```
 
 #### Model/Entity Methods
 The wrapper classes provide extra methods to update/access data, like ```Order.get_invoice()``` above
