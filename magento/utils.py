@@ -47,7 +47,7 @@ class LoggerUtils:
         return [handler.baseFilename for handler in LoggerUtils.get_file_handlers(logger)]
 
     @staticmethod
-    def get_handler_by_log_file(logger: Logger, log_file: str) -> Union[FileHandler | List[FileHandler]]:
+    def get_handler_by_log_file(logger: Logger, log_file: str) -> Union[FileHandler, List[FileHandler]]:
         """Returns the FileHandler logging to the specified file, given it exists"""
         handlers = [
             handler for handler in LoggerUtils.get_file_handlers(logger)
