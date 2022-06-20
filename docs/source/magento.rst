@@ -12,10 +12,11 @@ magento.clients module
    :undoc-members:
    :show-inheritance:
 
-magento.entities module
------------------------
 
-.. automodule:: magento.entities
+magento.search module
+---------------------
+
+.. automodule:: magento.search
    :members:
    :undoc-members:
    :show-inheritance:
@@ -28,13 +29,16 @@ magento.models module
    :undoc-members:
    :show-inheritance:
 
-magento.search module
----------------------
 
-.. automodule:: magento.search
+
+magento.entities module
+-----------------------
+
+.. automodule:: magento.entities
    :members:
    :undoc-members:
    :show-inheritance:
+
 
 magento.utils module
 --------------------
@@ -44,10 +48,3 @@ magento.utils module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: magento
-   :members:
-   :undoc-members:
-   :show-inheritance:
