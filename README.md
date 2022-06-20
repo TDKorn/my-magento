@@ -9,16 +9,6 @@ your account on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_H
 you'll never need to worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
 to the Magento 2 REST API again.
 
-Let's say you want to find the SKUs of all products over $10 that have been purchased over the past month.
-
-```python
-from magento import Client
-
-api = Client('website.com', 'username', 'password', login=False)
-search = api.products
-search.add_criteria('price', 10, condition='gt').add_criteria()
-```
-
 Simply build your store's custom [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)
 any API endpoint, retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42),
 or, if supported, use a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery)
