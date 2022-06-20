@@ -5,26 +5,71 @@ A Python package to help simplify interaction with the Magento 2 REST API.
 ## Why Use MyMagento?
 
 Once you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L55)
-your account on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11),
-you'll never need to worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
+your credentials on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11),
+you'll never worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
 to the Magento 2 REST API again.
 
-Simply build your store's custom [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)
-any API endpoint, retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42),
-or, if supported, use a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery)
-to perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42)
-[using REST endpoints](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) — just
-[```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria),
+```python
+# Login using MyMagento
+from magento import Client
+
+>>> api = Client('website.com','username', 'password', login=False)
+>>> api.authenticate()
+
+2022-06-14 00:55:42 INFO   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
+2022-06-14 00:55:43 INFO   |[ MyMagento | website_username ]|:  Logged in to username
+```
+
+&nbsp;
+
+## MyMagento provides multiple ways to interact with the API
+
+You can use the package solely for generating URLs, or you can use the built in search and response wrappers
+
+&nbsp;
+
+> NOTE: After obtaining a [```token```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py) , the package will [```validate()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L77) and regenerate it as needed
+
+&nbsp;
+
+### Build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then send a REST authorized  [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
+
+```python
+# URL to get the comments from credit memo 593
+endpoint = api.url_for("creditmemo/593/comments")
+response = api.request(endpoint)
+print(response.json())
+
+>>> {'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
+```
+
+### Retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42)
+```python
+>>> product = api.products.by_sku("SKU62")
+>>> print(product)
+
+Magento Product: SKU62
+
+# Access all data through attributes
+>>> print("Product ID:", product.id, "\nProduct Stock:", product.stock)
+
+Product ID: 24
+Product Stock: 50
+```
+
+### Perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) on a [valid REST ```endpoint```](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) using a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) object
+#### Simply [```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria),
 [```restrict_fields()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L72),
 and [```execute()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L84)
-your [```query```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L17),
-then let the package [```parse()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L143)
+your [```query```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L17)
+##### Then let the package [```parse()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L143)
 the response data and return the [```result```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L101),
-wrapped in a [```Model```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/models.py)
+using a [```Model```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/models.py)
 or [```Entity```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/entities.py)
 class when possible.
 
-***
+
+
 
 ### Features
 * #### Easily build the custom  [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)  any REST API endpoint of your Magento 2 store
@@ -50,17 +95,7 @@ Please see the [wiki](https://github.com/TDKorn/my-magento/wiki) for slightly mo
 
 ## Sample Usage
 
-### Login
 
-```python
-from magento import Client
-
-api = Client('website.com','username', 'password')
-```
-```shell
-2022-06-14 00:55:42 INFO   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
-2022-06-14 00:55:43 INFO   |[ MyMagento | website_username ]|:  Logged in to username
-```
 
 ### Make Raw Requests
 
@@ -73,7 +108,7 @@ endpoint = api.url_for("creditmemo/593/comments")
 response = api.request(endpoint)
 print(response.json())
 
->>> {'items': [{'comment': 'Refund of Sales Tax - Prescription Supplied', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
+>>> {'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
 ```
 
 Please see https://magento.redoc.ly/ for a full list of API endpoints for your store's version of Magento.
