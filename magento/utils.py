@@ -49,9 +49,11 @@ class LoggerUtils:
     @staticmethod
     def get_handler_by_log_file(logger: Logger, log_file: str) -> FileHandler:
         """Returns the FileHandler logging to the specified file, given it exists"""
+        handlers = []
         for handler in LoggerUtils.get_file_handlers(logger):
             if os.path.basename(handler.baseFilename) == log_file:
-                return handler
+                handlers.append(handler)
+        return handlers
 
     @staticmethod
     def clear_handlers(logger: Logger) -> bool:
