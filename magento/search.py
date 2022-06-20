@@ -87,7 +87,7 @@ class SearchQuery:
         self._result = response.json()
         return self.result
 
-    def by_id(self, item_id: int | str) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> {}:
         self.query = self.query.strip('?') + str(item_id)
         return self.execute()
 
@@ -107,7 +107,7 @@ class SearchQuery:
         if isinstance(result, dict):
             return self.parse(result)
 
-    def validate_result(self) -> {} | list[{}]:
+    def validate_result(self) -> Union[dict, list[dict]]:
         """
         Returns the actual result, regardless of search approach
         Failed: response will always contain a "message" key
@@ -203,7 +203,7 @@ class ProductSearch(SearchQuery):
             entity=Product
         )
 
-    def by_id(self, item_id: int | str) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> {}:
         return self.add_criteria(
             field='entity_id',  # Product has no "entity_id" field in API responses, just "id"
             value=item_id       # But to search by the "id" field, need to use "entity_id"

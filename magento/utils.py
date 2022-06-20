@@ -47,7 +47,7 @@ class LoggerUtils:
         return [handler.baseFilename for handler in LoggerUtils.get_file_handlers(logger)]
 
     @staticmethod
-    def get_handler_by_log_file(logger: Logger, log_file: str) -> Union[FileHandler | List[FileHandler]]:
+    def get_handler_by_log_file(logger: Logger, log_file: str) -> Union[FileHandler, List[FileHandler]]:
         """Returns the FileHandler logging to the specified file, given it exists"""
         handlers = [
             handler for handler in LoggerUtils.get_file_handlers(logger)
@@ -129,7 +129,7 @@ class MagentoLogger:
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    def __init__(self, name: str, log_file: str = None, stdout_level: Union[int | str] = 'INFO', log_requests: bool = True):
+    def __init__(self, name: str, log_file: str = None, stdout_level: Union[int, str] = 'INFO', log_requests: bool = True):
 
         """Initialize the logger
 
@@ -149,7 +149,7 @@ class MagentoLogger:
         self.log_file = log_file if log_file else f'{self.name}.log'
         self.setup_logger(stdout_level, log_requests=log_requests)
 
-    def setup_logger(self, stdout_level: Union[int | str] = 'INFO', log_requests: bool = True) -> bool:
+    def setup_logger(self, stdout_level: Union[int, str] = 'INFO', log_requests: bool = True) -> bool:
         """Configures a logger and assigns it to the `logger` attribute.
 
         :param stdout_level: logging level to use for logging to console
@@ -275,12 +275,12 @@ class MagentoLogger:
         return [handler for handler in logger.handlers if MagentoLogger.owns_handler(handler)]
 
     @staticmethod
-    def clear_magento_handlers(logger: Logger, handler_type: Union[Type[FileHandler] | Type[StreamHandler]], clear_pkg: bool = False) -> None:
+    def clear_magento_handlers(logger: Logger, handler_type: Union[Type[FileHandler], Type[StreamHandler]], clear_pkg: bool = False) -> None:
         """Clear all handlers from a logger that were created by MagentoLogger
 
         :param logger: any logger
         :param handler_type: the logging handler type to check for and remove
-        :param clear_pkg: if True, will delete the package handler for writing to my-magento.log | (Default is False)
+        :param clear_pkg: if True, will delete the package handler for writing to my-magento.log (Default is False)
         """
         for handler in MagentoLogger.get_magento_handlers(logger):
             if type(handler) == handler_type:
@@ -314,7 +314,7 @@ class MagentoLogger:
                     return handler
 
     @staticmethod
-    def add_request_logging(handler: Union[FileHandler | StreamHandler]):
+    def add_request_logging(handler: Union[FileHandler, StreamHandler]):
         """Adds the specified handler to the requests package logger, allowing for easier debugging of API calls"""
         if type(handler) not in (FileHandler, StreamHandler):
             raise TypeError(f"Parameter handler must be of type {FileHandler} or {StreamHandler}")
