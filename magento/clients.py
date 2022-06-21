@@ -10,6 +10,8 @@ from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, Cate
 
 class Client(object):
 
+    """The class that handles all interaction with the API"""
+
     def __init__(self, domain, username, password, user_agent=None, token=None, log_level='INFO', login=True, **kwargs):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
@@ -29,22 +31,26 @@ class Client(object):
 
     @property
     def orders(self):
+        """Returns a :class:`magento.search.OrderSearch` object"""
         return OrderSearch(self)
 
     @property
     def invoices(self):
+        """Returns a :class:`magento.search.InvoiceSearch` object"""
         return InvoiceSearch(self)
 
     @property
     def categories(self):
+        """Returns a :class:`magento.search.CategorySearch` object"""
         return CategorySearch(self)
 
     @property
     def products(self):
+        """Returns a :class:`magento.search.ProductSearch` object"""
         return ProductSearch(self)
 
     def search(self, endpoint: str) -> SearchQuery:
-        """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
+        """Initializes and returns a :class:`~.search.SearchQuery` object corresponding to the specified endpoint"""
         if endpoint.lower() == 'orders':
             return self.orders
         if endpoint.lower() == 'invoices':
@@ -140,7 +146,7 @@ class Client(object):
 
     @property
     def headers(self) -> dict:
-        """Any time this is called, the token is validated"""
+        """Returns authorization headers, generating a new token if needed"""
         return {
             'Authorization': f'Bearer {self.token}',
             'User-Agent': self.user_agent
@@ -155,6 +161,7 @@ class Client(object):
 
     @classmethod
     def new(cls) -> Client:
+        """Prompts for input to log in to the API. Returns a client after validating the token"""
         return cls(
             input('Domain: '),
             input('Username: '),

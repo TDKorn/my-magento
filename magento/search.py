@@ -7,7 +7,15 @@ from . import clients
 
 class SearchQuery:
 
+    """Base class for all API endpoint search queries"""
+
     def __init__(self, endpoint: str, client: clients.Client, entity=None):
+        """Initialize a search query
+
+        :param endpoint: the base API endpoint. For example, "orders"
+        :param client:   the Client object that will be used to create and make the search query request
+        :param entity:   the API wrapper class to parse the response with; uses raw data if not specified
+        """
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
@@ -19,36 +27,29 @@ class SearchQuery:
         self._result = {}
 
     def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
-        """
-        :param field:       the object attribute to search by
-        :param value:       the value of the attribute to compare
-        :param condition:   the comparison condition
-        :param kwargs:      additional search option arguments
-        :return:            the calling SearchQuery object
+        """Add criteria to the search query
 
-        *Options*
-                condition:  condition used to evaluate the attribute value
+        :param field:       the API response field to apply search criteria to
+        :param value:       the value of the API response field to filter by
+        :param condition:   the condition used to evaluate criteria and determine if there is a match
+        :param kwargs:      additional search option arguments (ie. group and filter)
+        :return:            the calling :class:`SearchQuery` object
 
-                            (Default Value)     'eq'            =           (field=value)
-                                                'gt'            >
-                                                'lt'            <
-                                                'gteq'          >=
-                                                'lteq'          <=
-                                                'in'            []
+        *Full Instructions*
+            Please see <https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#additional-search-criteria-options>
 
+        *Keyword Arguments*
+            condition:  the condition used to determine if there is a match
+            group:      filter group number
+            filter:     filter number (within the specified filter group)
 
-                group:      filter group number
+        *Using Filters/Filter Groups*
+            Filters are criteria in the form of {field: value}
+                * Filters within the same Group are evaluated using logical OR
+            Filter Groups are groups of 1+ filters
+                * Two groups are evaluated using logical AND
 
-                filter:     filter number (within the specified filter group)
-
-
-        *Using Filter Groups*
-
-            Filter groups are filter criteria in the form of { field: value }
-
-                Group 0 Filter 0                        ->      Filter 0
-                Group 0 Filter 0 + Group 0 Filter 1     ->      Filter 0 OR Filter 1
-                Group 0 Filter 0 + Group 1 Filter 0     ->      Filter 0 AND Filter 0
+        Please read the full explanation in the link above
         """
 
         options = {
