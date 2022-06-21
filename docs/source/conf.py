@@ -33,7 +33,6 @@ release = '1.2.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.todo',
     'sphinxcontrib.restbuilder'
 ]
 
@@ -57,7 +56,11 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# I don't think i need this but..
 master_doc = 'index'
+
+# Documentation order based on source files
+autodoc_member_order = 'bysource'
 
 
 def skip(app, what, name, obj, would_skip, options):
