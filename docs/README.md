@@ -4,10 +4,7 @@ A Python package to help simplify interaction with the Magento 2 REST API.
 
 ## Why Use MyMagento?
 
-Once you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L55)
-your credentials on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11),
-you'll never worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
-to the Magento 2 REST API again.
+### Once you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L55) your credentials on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11), you'll never need to format a request to the Magento 2 REST API again.
 
 ```python
 # Login using MyMagento
@@ -20,19 +17,7 @@ from magento import Client
 2022-06-14 00:55:43 INFO   |[ MyMagento | website_username ]|:  Logged in to username
 ```
 
-&nbsp;
-
-## MyMagento provides multiple ways to interact with the API
-
-You can use the package solely for generating URLs, or you can use the built in search and response wrappers
-
-&nbsp;
-
-> NOTE: After obtaining a [```token```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py) , the package will [```validate()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L77) and regenerate it as needed
-
-&nbsp;
-
-### Build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then send a REST authorized  [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
+### Simply build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then send a REST authorized  [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
 
 ```python
 # URL to get the comments from credit memo 593
@@ -43,7 +28,50 @@ print(response.json())
 >>> {'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
 ```
 
-### Retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42)
+> NOTE: After obtaining a [```token```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py) , the package will [```validate()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L77) and regenerate it as needed
+***
+
+### Search for and retrieve data from any [```endpoint```] using a [```SearchQuery```](https://github.com/TDKorn/my-magento/blob/main/magento/search.py) or one of its subclasses
+<!-- using a :class:`magento.search.SearchQuery` -->
+
+
+
+```python
+>>> api.search('orders')
+>>> api.orders
+>>> api.search('orders/items')
+
+>>> search_orders = api.orders
+>>> search_items = api.search('orders/items')
+>>> search_orders.add_criteria(
+'created_at',
+'2022-01-01 00:00:00',
+condition='gt'
+).execute()
+>>> search_items.add_criteria('created_at', '2022-01-01 00:00:00', condition='gt').execute()
+>>> print(type(search_orders), type(search_items))
+
+
+```
+
+```
+>>> api.invoices.by_id(1099)
+<~..>
+>>> order = api.orders.by_number(000001112) # (number is "increment_id" field)
+>>> 
+
+
+```
+#### Every class in the ```search``` module, and any user-created ```SearchQuery``` object, can
+- Request data for an individual entity using built-in methods like [```by_id()```] or through user-defined queries through [```add_criteria()```]
+- Build complex queries with search criteria to filter store data
+- Return the response data using a wrapper class when possible (see [```models```] and [```entities```] modules)
+
+
+### Search [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py)
+
+#### You can search [```by_id()```] for any endpoint that uses the ```/{endpoint}/"{id}"``` request format (almost all of them).
+
 ```python
 >>> product = api.products.by_sku("SKU62")
 >>> print(product)
@@ -56,6 +84,14 @@ Magento Product: SKU62
 Product ID: 24
 Product Stock: 50
 ```
+ - Create a ```SearchQuery``` with the endpoint of your choice, or use an existing subclass
+ - Either
+    1. Call `by_id()`, `by_number()`, or a subclass-specific search method
+    OR
+    2. add_criteria()` and `restrict_fields()` to define your own search filters, then `execute()` your query
+
+
+:meth:`magento.search.SearchQuery.by_id()`
 
 ### Perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) on a [valid REST ```endpoint```](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) using a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) object
 #### Simply [```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria),
