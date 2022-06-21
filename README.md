@@ -4,82 +4,56 @@ A Python package to help simplify interaction with the Magento 2 REST API.
 
 ## Why Use MyMagento?
 
+MyMagento greatly simplifies interaction with the Magento 2 REST API in an intuitive and flexible manner. 
+It offers several entry points for querying the API through its [```Client```](https://github.com/TDKorn/my-magento/wiki/Client-Tutorial-Overview) and ```SearchQuery``` classes, two modules containing endpoint-specific API response wrapper classes, and a high level of control over its involvement in your workflow.
+
 Once you [`authenticate()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L55)
 your credentials on a [`Client`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11),
-you'll never worry about formatting a [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
-to the Magento 2 REST API again.
+you'll never need to format a Magento 2 API [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78) ever again.
+
+&nbsp;
+
+## Features
+* Build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then use it to make a REST authorized [```request()```](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L78)
+
+
+* Automatically ```validate()``` and [```authenticate()```](https://github.com/TDKorn/my-magento/blob/e2ee60805387551f835b81a8dc80e320381a7695/magento/clients.py#L55) the ```ACCESS_TOKEN``` as needed
+
+
+* Retrieve data from any endpoint ```by_id()```
+
+
+* Simplified yet comprehensive support for [search using REST endpoints](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) through the [```search```](https://github.com/TDKorn/my-magento/blob/main/magento/search.py) module
+
+
+* Perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) on a [valid REST endpoint](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) using a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) object
+  
+    * ```SearchQuery``` subclasses like ```ProductSearch``` or [```InvoiceSearch```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L174) provide additional, endpoint-specific search methods
+
+* Build complex search queries without punching a wall - just [```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria), [```restrict_fields()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L72), and [```execute()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L84) your [```query```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L17)
+
+
+* [```Model```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/models.py) and [```Entity```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/entities.py) API response wrapper classes make [```result```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L101) data easier to work with and offer access to endpoint specific methods
+
+&nbsp;
+
+## QuickStart: Login to the Magento 2 API
+Getting started with MyMagento requires 2 lines of code. Full details can be found in the [Client configuration guide](https://github.com/TDKorn/my-magento/wiki/Client-Tutorial-Overview)
 
 ```python
-# Login using MyMagento
 from magento import Client
 
->>> api = Client('website.com','username', 'password', login=False)
->>> api.authenticate()
+>>> api = Client('website.com', 'username', 'password')
+```
 
+```shell
 2022-06-14 00:55:42 INFO   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
 2022-06-14 00:55:43 INFO   |[ MyMagento | website_username ]|:  Logged in to username
 ```
-
 &nbsp;
-
-## MyMagento provides multiple ways to interact with the API
-
-You can use the package solely for generating URLs, or you can use the built in search and response wrappers
-
-&nbsp;
-
 > NOTE: After obtaining a [```token```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py) , the package will [```validate()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L77) and regenerate it as needed
 
 &nbsp;
-
-### Build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then send a REST authorized  [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
-
-```python
-# URL to get the comments from credit memo 593
-endpoint = api.url_for("creditmemo/593/comments")
-response = api.request(endpoint)
-print(response.json())
-
->>> {'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
-```
-
-### Retrieve data [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42)
-```python
->>> product = api.products.by_sku("SKU62")
->>> print(product)
-
-Magento Product: SKU62
-
-# Access all data through attributes
->>> print("Product ID:", product.id, "\nProduct Stock:", product.stock)
-
-Product ID: 24
-Product Stock: 50
-```
-
-### Perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) on a [valid REST ```endpoint```](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) using a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) object
-#### Simply [```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria),
-[```restrict_fields()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L72),
-and [```execute()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L84)
-your [```query```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L17)
-##### Then let the package [```parse()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L143)
-the response data and return the [```result```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L101),
-using a [```Model```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/models.py)
-or [```Entity```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/entities.py)
-class when possible.
-
-
-
-
-### Features
-* #### Easily build the custom  [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93)  any REST API endpoint of your Magento 2 store
-* #### Make a REST authorized [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78) to any url
-* #### Automatically [```validate()```] and [`authenticate()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L55) the  [```token```] as needed
-
-* #### [```search.py```](https://github.com/TDKorn/my-magento/blob/main/magento/search.py) module provides simplified yet high level support for [search using REST endpoints](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html)
-* #### [```Model```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/models.py) and [```Entity```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/entities.py) API response wrapper classes make [```result```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L101) data easier to work with and provide access to endpoint specific methods
-* #### ```SearchQuery``` subclasses like ```ProductSearch``` or [```InvoiceSearch```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L174) provide additional specialized methods
-
 
 ## Installation
 To install this package with pip:
@@ -87,40 +61,49 @@ To install this package with pip:
 pip install my-magento
 ```
 
+&nbsp;
+
 ## Documentation
 
 Please see the [wiki](https://github.com/TDKorn/my-magento/wiki) for slightly more information
 
-***
-
-## Sample Usage
+&nbsp;
 
 
+# MyMagento: Sample Usage
 
-### Make Raw Requests
+Let's go into a bit more detail for some of the features above
 
-As mentioned above, the [```Client```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L11) is used to build and make requests to any Magento 2 REST API endpoint
+> NOTE: the following examples are by no means an extensive, exhaustive, or representative list of what can be done.
 
-Build the request for an endpoint with ```url_for()```, then send it with ```request()```. Note that scoped URLs can be built if needed.
+&nbsp;
+
+## Making Raw Requests
+
+### Build your store's [```url_for()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L93) any API endpoint, then send a REST authorized  [`request()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L78)
 ```python
-# URL to get the comments from credit memo 593
-endpoint = api.url_for("creditmemo/593/comments")
-response = api.request(endpoint)
-print(response.json())
-
->>> {'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
+# Example: get the comments from credit memo 593
+>>> endpoint = api.url_for("creditmemo/593/comments")
+>>> response = api.request(endpoint)
+>>> print(response.json())
 ```
+```shell
+{'items': [{'comment': 'Order was a "mistake"', 'created_at': '2022-01-20 16:28:49', 'entity_id': 531, 'is_customer_notified': 1, 'is_visible_on_front': 0, 'parent_id': 593}], 'search_criteria': {'filter_groups': [{'filters': [{'field': 'parent_id', 'value': '593', 'condition_type': 'eq'}]}]}, 'total_count': 1}
+```
+- Build an endpoint request URL with ```url_for()```
+- Send it with ```request()```, which ensures authorization headers are included
+    - Alternatively, use the Client's ```headers``` or ```token``` property and make your own request  
+- Any endpoint listed in the [official API reference](https://magento.redoc.ly/) can be used 
+- Note that the raw ```requests.Response``` object is returned
 
-Please see https://magento.redoc.ly/ for a full list of API endpoints for your store's version of Magento.
+&nbsp;
 
-***
-
-### Simple Searches Using a SearchQuery (or Subclass)
+## Simple Searches Using a SearchQuery (or Subclass)
 
 If you'd prefer not to work with raw data or URLs, that's what ```MyMagento``` is for!
 
 The [```search```](https://github.com/tdkorn/my-magento/wiki/search-tutorial-overview)
-module contains a variety of ways to access data about your store. Each ```SearchQuery``` subclass has a corresponding API response wrapper class defined in the ```models``` or ```entities``` modules,
+module contains a variety of ways to access data about your store. Each ```SearchQuery``` subclass has a corresponding API response wrapper class defined in the ```Models``` or ```Entities``` module,
 which parses responses and provides extra methods to update the store.
 
 The `Client` provides easy access to ```SearchQuery``` objects
@@ -131,11 +114,25 @@ The `Client` provides easy access to ```SearchQuery``` objects
 >>> api.orders
 <magento.search.OrderSearch object at 0x000002973FD282B0>
 ```
-Predefined simple search methods exist to retrieve a single item ```by_id()``` (or ```by_sku()``` for products), but
-some subclasses have additional ways to search, which may return information with varying degrees of detail.
 
+If a ```SearchQuery``` subclass isn't defined for a particular endpoint, a general ```SearchQuery``` object will still be returned
 
 ```python
+>>> api.search('orders/items')
+
+
+>>> print(api.search('customers').endpoint)
+>>> print(api.search('customers').query)
+"customers"
+xxx.com/
+```
+
+### Retrieve data from an endpoint [```by_id()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) or [```by_sku()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py)
+- Data about individual entities of an endpoint can typically be retrieved using base ```SearchQuery``` methods
+- Create/Access the ```SearchQuery``` object for the desired endpoint, then call ```by_id()``` or ```by_sku()```
+
+```python
+# Get the ProductSearch object to search products by sku
 >>> product = api.products.by_sku("SKU62")
 >>> print(product)
 
@@ -154,7 +151,9 @@ Product Stock: 50
 "Order Number 000009949 placed on 2022-01-19 21:18:20"
 [<magento.entities.OrderItem object at 0x000002973FD28B50>, <magento.entities.OrderItem object at 0x000002933FD28D59>]
 ```
-The extra methods mean there are many ways to retrieve data for a given entity
+
+The package is highly interconnected, so there are many ways to access data about the same entity
+
 ```python
 # Get the order's corresponding invoice
 >>> api.search('invoices').by_order_number("000009949")
@@ -165,16 +164,23 @@ The extra methods mean there are many ways to retrieve data for a given entity
 <magento.entities.Invoice object at 0x000002973FCD1E70>
 ```
 
+
+### Perform a [```search()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L42) on a [valid REST endpoint](https://devdocs.magento.com/guides/v2.4/rest/performing-searches.html) using a [```SearchQuery```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#SearchQuery) object
+
+Simply [```add_criteria()```](https://github.com/TDKorn/my-magento/wiki/Search-Tutorial-Overview#adding-criteria), [```restrict_fields()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L72), and [```execute()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L84) your [```query```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L17)
+- The package will [```parse()```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L143) the response data and, if possible, the [```result```](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L101) will be returned as one of the ```Model``` or ```Entity``` response wrapper classes
+
+
+
+
 ### Advanced Search
 
 If you've used the Magento 2 API before, you'll know that trying to search an endpoint using its ```searchCriteria``` interface
 leads to request URLs that are actually insane. It's one of the most painful things about Magento's API (and the motivation for the package).
 
 With MyMagento, full searches can be constructed and queried in a straightforward and understandable way.
-Please see the wiki for full information on how to build a query.
 
-
-Searches using criteria can be advanced, or simple - for example, searching by entity id is just
+Searches using criteria can be advanced, or simple - for example, searching by ```entity_id``` is just
 ```python
 def by_entity_id(api, endpoint, entity_id):
     return api.search(endpoint).add_criteria(
@@ -185,7 +191,8 @@ def by_entity_id(api, endpoint, entity_id):
 But one thing that's guaranteed is that the URL is NEVER simple
 ```python
 >>> print(search.query)
-
+```
+```shell
 https://www.website.com/rest/V1/orders/?searchCriteria[filter_groups][0][filters][0][field]=entity_id&searchCriteria[filter_groups][0][filters][0][value]=92&searchCriteria[filter_groups][0][filters][0][condition_type]=eq
 ```
 
@@ -210,7 +217,7 @@ Simple, right? But then the URL...
 https://www.website.com/rest/V1/products/?searchCriteria[filter_groups][0][filters][0][field]=status&searchCriteria[filter_groups][0][filters][0][value]=2&searchCriteria[filter_groups][0][filters][0][condition_type]=eq&searchCriteria[filter_groups][0][filters][1][field]=type_id&searchCriteria[filter_groups][0][filters][1][value]=virtual&searchCriteria[filter_groups][0][filters][1][condition_type]=eq&searchCriteria[filter_groups][1][filters][0][field]=created_at&searchCriteria[filter_groups][1][filters][0][value]=2018-01-01&searchCriteria[filter_groups][1][filters][0][condition_type]=lt
 ```
 
-#### Model/Entity Methods
+### Model/Entity Methods
 The wrapper classes provide extra methods to update/access data, like ```Order.get_invoice()``` above
 ```python
 # Get all child products that are in stock and more than $20  |   Endpoint -> f'configurable-products/{encoded_sku}/children'
@@ -240,19 +247,6 @@ The wrapper classes provide extra methods to update/access data, like ```Order.g
 
 
 > **TIP**: For the most detailed response data, search an endpoint [`by_id()`](https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/search.py#L90)
-
-
-***
-
-```PYTHON
-file = get_read_me('my-magento')
-COMMIT_HASH = file.text.find("SHA").(... # or whatever)
-link = f"https://github.com/TDKorn/my-magento/blob/{COMMIT_HASH}/magento/clients.py#L{line-num}"  # like .py#L22
-
-for link ln file.text -> replace {COMMIT_HASH} --> ammend comment --> force push --> automate?? or just press ctrl + r
-
-```
-
 
 
 ***
