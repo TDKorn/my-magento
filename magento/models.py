@@ -10,27 +10,35 @@ from . import clients
 class Model(ABC):
     """The base class for all API response wrapper classes
 
-    Each Model subclass is a representation of an API response, typically from an endpoint that can
-    be searched/filtered using search criteria. Thus, most Models also have a corresponding SearchQuery subclass,
-    accessible through its query_endpoint() method
+    **Overview**
+
+    * A :class:`Model` is the object representation of any Magento API response
+    * Initialized using the JSON response ``data`` from any API ``endpoint``
+    * Most predefined subclasses use an ``endpoint`` that can be searched with criteria
+    * Access the corresponding :class:`~magento.search.SearchQuery` object via :meth:`~.query_endpoint`
     """
 
     def __init__(self, data: dict, client: clients.Client, endpoint: str, private_keys: bool = True):
-        """Initialize a Model object using the json dict from an API response
+        """Initialize a :class:`Model` object from an API response and the ``endpoint`` that it came from
 
-        :param data: The API response to use as the source data for the object
+        ...
 
-        :param client: An initialized Client object. Note that the Client does not need to be logged in, or have a
-            valid access token; the credentials will be authenticated as needed
+        **NOTE** that the ``endpoint`` is used to:
 
-        :param endpoint: The base endpoint that will be used for any API requests; used to match the object with its
-            corresponding SearchQuery object, if it exists
+        * Generate the :meth:`~.url_for` any requests made by subclass-specific methods
+        * Match the :class:`Model` to its corresponding :class:`~magento.search.SearchQuery` object,
+          which is returned by :meth:`~.query_endpoint`
+        * Determine how to :meth:`~Model.parse` new :class:`Model` objects from API responses
 
-        :param private_keys: If set to True, the keys denoted in the excluded_keys property will be set as attributes
-            prefixed with "__". For example, if "status" is an excluded key,  and private_keys=True, the object
-            will be initialized with an "_status" attribute instead of completely excluding it.
+        ...
+
+        :param data: the JSON from an API response to use as source data
+        :param client: an initialized :class:`~.Client`
+        :param endpoint: the base API endpoint that the :class:`Model` represents
+        :param private_keys: if set to True, will set the keys in the :attr:`~.excluded_keys` as private attributes
+            (prefixed with ``__``) instead of fully excluding them
+
         """
-
         if not isinstance(data, dict):
             raise TypeError(f'Parameter "data" must be of type {dict}')
         if not isinstance(endpoint, str):
@@ -44,12 +52,23 @@ class Model(ABC):
         self.set_attrs(data, private_keys=private_keys)
 
     def set_attrs(self, data: dict, private_keys: bool = True) -> None:
-        """Sets object attributes, using an API response dict as the data source. Called at the time of object
-         initialization, but can also be used to replace the source data, allowing for reuse of the Model object
+        """Initializes object attributes using the JSON from an API response as the data source
 
-        :param data: The API response to use as the object source data
-        :param private_keys: If set to True, will set the keys in the "excluded_keys" property as attributes
-            prefixed with an "__", instead of fully excluding them
+        Called at the time of object initialization, but can also be used to update the source data and
+        reinitialize the attributes without creating a new object
+
+        :param data: the API response JSON to use as the object source data
+        :param private_keys: if set to True, will set the :attr:`~.excluded_keys` as private attributes
+            (prefixed with ``__``) instead of fully excluding them
+
+        **Private Keys Clarification**
+
+        Let's say that ``"status"`` is in the :attr:`~.excluded_keys`
+
+        * No matter what, the :class:`Model` object will not have a ``status`` attribute set
+        * If ``private_keys=True``, it **will** have a ``__status`` attribute set though
+        * If ``private_keys=False``, then the attribute/key is completely excluded
+
         """
         keys = set(data) - set(self.excluded_keys)
         for key in keys:
@@ -71,33 +90,54 @@ class Model(ABC):
     def excluded_keys(self) -> list[str]:
         """Keys that should not be set by set_attrs() method
 
-        :returns the list of API response keys that should not be set as attributes
+        :returns: list of API response keys that should not be set as attributes
+        :rtype: list[str]
         """
         pass
 
     def query_endpoint(self):
-        """Depending on the endpoint, will return either a SearchQuery or a SearchQuery subclass"""
+        """Initializes and returns the :class:`~.SearchQuery` object corresponding to the Model's ``endpoint``
+
+        :returns: a :class:`~.SearchQuery` or subclass, depending on the ``endpoint``
+        :rtype: :class:`~.SearchQuery`
+        """
         return self.client.search(self.endpoint)
 
-    def parse(self, response: dict):
-        """If a SearchQuery subclass exists, initializes a Model of the same type from an API response
+    def parse(self, response: dict) -> Model:
+        """Initializes and returns a new :class:`~.Model` object from an API response
 
-        :param response: The API response dict to generate the object from
+        :param response: JSON dictionary from the API to use as source data
+        :return: a :class:`~.Model` initialized from the provided ``response``; uses ``endpoint`` of calling instance
+        :rtype: :class:`~.Model`
         """
         return self.query_endpoint().parse(response)
 
     @staticmethod
-    def unpack_attributes(attributes: list):
+    def unpack_attributes(attributes: list[dict]) -> dict:
         """Unpacks a list of custom attribute dictionaries into a single dictionary
 
-        :param attributes: A list of custom attribute dictionaries of the form
-                            [{'attribute_code': 'attr', 'value': 'val'},]
+        **Example**
+
+        >>> custom_attrs = [{'attribute_code': 'attr', 'value': 'val'},{'attribute_code': 'will_to_live', 'value': '0'}]
+        >>> print(Model.unpack_attributes(custom_attrs))
+        {'attr': 'val', 'will_to_live': '0'}
+
+        :param attributes: a list of custom attribute dictionaries
+        :returns: a single dictionary of all custom attributes formatted as ``{"attr": "val"}``
+
         """
         return {attr['attribute_code']: attr['value'] for attr in attributes}
 
     @staticmethod
-    def encode(string):
-        """Returns a URL-encoded string"""
+    def encode(string: str) -> str:
+        """URL-encode with :mod:`urllib`; used for requests that could contain special characters
+
+        |  **Example:** requests to the ``products`` endpoint contain a ``sku`` path parameter
+        |      **‣** Since a ``sku`` can contain characters like ``/`` and ``*``, it will always be encoded first
+        |      **‣** See :meth:`~.by_sku` or :attr:`~.encoded_sku`
+
+        :param string: the string to URL-encode
+        """
         import urllib.parse
         return urllib.parse.quote_plus(string)
 
@@ -130,7 +170,7 @@ class Product(Model):
         return ['media_gallery_entries']
 
     @property
-    def media_gallery_entries(self):
+    def media_gallery_entries(self) -> list[MediaEntry]:
         """Returns the media gallery entries as a list of MediaEntry objects"""
         if not self._media_gallery_entries:
             if entries := self.__media_gallery_entries:
