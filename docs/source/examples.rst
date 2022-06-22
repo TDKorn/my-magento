@@ -13,7 +13,7 @@ Use the :class:`~.Client` to login to the API
 
     >>> api = Client('website.com','username', 'password')
 
-If ``login=False`` is specified, the :class:`~.Client` will not request an :attr:`~.ACCESS_TOKEN`
+If ``login=False`` is specified, the :class:`~.Client` will not request a :attr:`~.token`
 until you call :meth:`~.authenticate`
 
 .. code-block:: python
