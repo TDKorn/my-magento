@@ -61,6 +61,7 @@ master_doc = 'index'
 
 # Documentation order based on source files
 autodoc_member_order = 'bysource'
+autodoc_typehints = 'both'
 
 
 def skip(app, what, name, obj, would_skip, options):
