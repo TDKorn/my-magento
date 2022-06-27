@@ -68,7 +68,6 @@ class Model(ABC):
         * No matter what, the :class:`Model` object will not have a ``status`` attribute set
         * If ``private_keys=True``, it **will** have a ``__status`` attribute set though
         * If ``private_keys=False``, then the attribute/key is completely excluded
-
         """
         keys = set(data) - set(self.excluded_keys)
         for key in keys:
@@ -88,10 +87,9 @@ class Model(ABC):
     @property
     @abstractmethod
     def excluded_keys(self) -> list[str]:
-        """Keys that should not be set by set_attrs() method
+        """API response keys that shouldn't be set as object attributes by :meth:`~.set_attrs`
 
-        :returns: list of API response keys that should not be set as attributes
-        :rtype: list[str]
+        :returns: list of API response keys that shouldn't be set as attributes
         """
         pass
 
@@ -104,11 +102,11 @@ class Model(ABC):
         return self.client.search(self.endpoint)
 
     def parse(self, response: dict) -> Model:
-        """Initializes and returns a new :class:`~.Model` object from an API response
+        """Uses the instance's corresponding :class:`~.SearchQuery` to parse an API response
 
         :param response: JSON dictionary from the API to use as source data
-        :return: a :class:`~.Model` initialized from the provided ``response``; uses ``endpoint`` of calling instance
-        :rtype: :class:`~.Model`
+        :return: a :class:`~.Model` object, initialized using the ``response`` as the source data
+        :rtype: :class:`~.Model` with the same ``endpoint`` as the calling instance
         """
         return self.query_endpoint().parse(response)
 
@@ -124,7 +122,6 @@ class Model(ABC):
 
         :param attributes: a list of custom attribute dictionaries
         :returns: a single dictionary of all custom attributes formatted as ``{"attr": "val"}``
-
         """
         return {attr['attribute_code']: attr['value'] for attr in attributes}
 
@@ -154,6 +151,11 @@ class Product(Model):
     DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/products'
 
     def __init__(self, data: dict, client: clients.Client):
+        """Initialize a Product object
+
+        :param data: the API response from the ``products`` endpoint
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             data=data,
             client=client,
@@ -171,14 +173,15 @@ class Product(Model):
 
     @property
     def media_gallery_entries(self) -> list[MediaEntry]:
-        """Returns the media gallery entries as a list of MediaEntry objects"""
+        """Returns the media gallery entries as a list of :class:`MediaEntry` objects"""
         if not self._media_gallery_entries:
             if entries := self.__media_gallery_entries:
                 self._media_gallery_entries = [MediaEntry(self, entry) for entry in entries]
         return self._media_gallery_entries
 
     @property
-    def thumbnail(self):
+    def thumbnail(self) -> MediaEntry:
+        """Returns the :"""
         return self._get_media_entry('is_thumbnail', True)
 
     @property
@@ -190,12 +193,15 @@ class Product(Model):
         return self._get_media_entry('id', entry_id)
 
     def _get_media_entry(self, attribute: str, value: Union[str, int, bool], condition: str = '=='):
-        """Filter media gallery entries based on attribute values. Specifying params as keyword arguments allows for
-        method calls to be ordered in a more natural way
+        """Filter media gallery entries based on attribute values.
+
+        NOTE: by specifying params as keyword arguments, method calls can be ordered in a more natural way
 
         :param attribute: The media gallery attribute to filter on
         :param value: The value of the attribute to match
         :param condition: The condition used to evaluate a match on. Default is '=='
+        :returns: :class:`MediaEntry` objects that match the criteria
+        :rtype: MediaEntry or list[MediaEntry]
 
         Sample Usage:
             Get Thumbnail Image:
@@ -229,7 +235,6 @@ class Product(Model):
         if len(result) == 1:
             return result[0]
         return result
-
 
     @property
     def encoded_sku(self):
