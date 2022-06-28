@@ -15,7 +15,7 @@ long_description = get_description()
 setup(
     name='my-magento',
     packages=['magento'],
-    version='1.1.1',
+    version='1.1.2',
     license='MIT',
     description='Python Magento 2 REST API Client and Wrapper',
     long_description=long_description,
