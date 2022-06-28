@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Union
-from .utils import ItemManager
-from .entities import Order, Entity, OrderItem, Invoice
+from .entities import Order, Invoice
 from .models import Product, Category
 from . import clients
 
@@ -88,7 +87,7 @@ class SearchQuery:
         self._result = response.json()
         return self.result
 
-    def by_id(self, item_id: int | str) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> {}:
         self.query = self.query.strip('?') + str(item_id)
         return self.execute()
 
@@ -108,7 +107,7 @@ class SearchQuery:
         if isinstance(result, dict):
             return self.parse(result)
 
-    def validate_result(self) -> {} | list[{}]:
+    def validate_result(self) -> Union[dict, list[dict]]:
         """
         Returns the actual result, regardless of search approach
         Failed: response will always contain a "message" key
@@ -204,7 +203,7 @@ class ProductSearch(SearchQuery):
             entity=Product
         )
 
-    def by_id(self, item_id: int | str) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> {}:
         return self.add_criteria(
             field='entity_id',  # Product has no "entity_id" field in API responses, just "id"
             value=item_id       # But to search by the "id" field, need to use "entity_id"
@@ -256,10 +255,13 @@ class CategorySearch(SearchQuery):
         return self.by_id(category_id).products
 
     def order_items_from_id(self, category_id):
-        skus = self.products_from_id(category_id)
-        return self.client.search('orders/items').add_criteria(field='sku',
-                                                               value=','.join(skus),
-                                                               condition='in').execute()
+        skus = ','.join(self.products_from_id(category_id))
+        query = self.client.search('orders/items')
+        return query.add_criteria(
+            field='sku',
+            value=','.join(skus),
+            condition = 'in'
+        ).execute()
 
     def orders_from_id(self, category_id, start, end=None):
         order_items = self.order_items_from_id(category_id)
