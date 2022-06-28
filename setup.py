@@ -1,4 +1,4 @@
-import os.path
+import os
 from setuptools import setup
 
 
@@ -10,16 +10,15 @@ def get_description():
 
 
 long_description = get_description()
-print(long_description)
 
 
 setup(
     name='my-magento',
     packages=['magento'],
-    version='1.2.0',
+    version='1.1.3',
     license='MIT',
-    description='Python Magento 2 REST API Client',
-    long_description=f"""{long_description}""",
+    description='Python Magento 2 REST API Client and Wrapper',
+    long_description=long_description,
     long_description_content_type='text/markdown',
     author='Adam Korn',
     author_email='hello@dailykitten.net',
