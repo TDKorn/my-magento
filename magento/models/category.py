@@ -49,7 +49,7 @@ class Category(Model):
     def products(self):
         if self._products is None:
             endpoint = self.client.url_for(f'categories/{self.id}/products')
-            response = self.client.request(endpoint)
+            response = self.client.get(endpoint)
             self._products = [product['sku'] for product in response.json()]
         return self._products
 

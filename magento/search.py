@@ -83,7 +83,7 @@ class SearchQuery:
 
     def execute(self):
         """Sends the search request through the active client."""
-        response = self.client.request(self.query + self.fields)
+        response = self.client.get(self.query + self.fields)
         self._result = response.json()
         return self.result
 

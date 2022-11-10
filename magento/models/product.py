@@ -1,6 +1,6 @@
 from __future__ import annotations
 from magento import clients
-from typing import Union
+from typing import Union, Iterable
 from . import Model
 import requests
 
@@ -14,7 +14,7 @@ class Product(Model):
     VISIBILITY_SEARCH = 3
     VISIBILITY_BOTH = 4
 
-    DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/products'
+    DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/products/'
 
     def __init__(self, data: dict, client: clients.Client):
         """Initialize a Product object
@@ -29,6 +29,7 @@ class Product(Model):
             private_keys=True
         )
         self._media_gallery_entries = []
+        self._children = []
 
     def __str__(self):
         return f'Magento Product: {self.sku}'
@@ -47,68 +48,30 @@ class Product(Model):
 
     @property
     def thumbnail(self) -> MediaEntry:
-        """Returns the :"""
-        return self._get_media_entry('is_thumbnail', True)
+        """Returns the :class:`MediaEntry` corresponding to the product's thumbnail"""
+        for entry in self.media_gallery_entries:
+            if entry.is_thumbnail:
+                return entry
 
     @property
-    def thumbnail_link(self):
+    def thumbnail_link(self) -> str:
+        """Returns the link to the product :attr:`~.thumbnail`"""
         if self.thumbnail:
             return self.thumbnail.link
 
-    def get_media(self, entry_id):
-        return self._get_media_entry('id', entry_id)
-
-    def _get_media_entry(self, attribute: str, value: Union[str, int, bool], condition: str = '=='):
-        """Filter media gallery entries based on attribute values.
-
-        NOTE: by specifying params as keyword arguments, method calls can be ordered in a more natural way
-
-        :param attribute: The media gallery attribute to filter on
-        :param value: The value of the attribute to match
-        :param condition: The condition used to evaluate a match on. Default is '=='
-        :returns: :class:`MediaEntry` objects that match the criteria
-        :rtype: MediaEntry or list[MediaEntry]
-
-        Sample Usage:
-            Get Thumbnail Image:
-                product._get_media_entry(value='thumbnail', condition='in', attribute='types')
-                    - Matches the media entry containing the string "thumbnail" within its "types" list
-                product._get_media_entry('is_thumbnail', True)
-                    - Simpler way; Matches the 'is_thumbnail' property of MediaEntry class
-
-            Get Entries in Position 0 or 1:
-                product.__get_media_entry(attribute='position', condition = '<', value=2)
-                    - Matches media entries with position < 2
-        """
-        result = []
-
-        if not isinstance(value, int):
-            value = f'\"{value}\"'
-
+    def get_media_by_id(self, entry_id: int) -> MediaEntry:
+        """Access a :class:`MediaEntry` of the product by id"""
         for entry in self.media_gallery_entries:
-            if hasattr(entry, attribute):
-                attr = getattr(entry, attribute)
-                if condition == 'in':
-                    criteria = f'{value} {condition} {attr}'  # Ex. "thumbnail" in types
-                else:
-                    criteria = f'{attr} {condition} {value}'  # Ex. "position" < 2; "id" == 34531
-                try:
-                    if eval(criteria):
-                        result.append(entry)
-                except Exception as e:  # All criteria within package will work. This is for anyone else (:
-                    raise RuntimeError(f'Invalid Criteria: {criteria}') from e
-
-        if len(result) == 1:
-            return result[0]
-        return result
+            if entry.id == entry_id:
+                return entry
 
     @property
-    def encoded_sku(self):
+    def encoded_sku(self) -> str:
         """URL-encoded SKU, which is required when an endpoint URL contains a SKU"""
         return self.encode(self.sku)
 
     @property
-    def stock_item(self):
+    def stock_item(self) -> dict:
         if hasattr(self, 'extension_attributes'):  # Missing if product was retrieved by id
             if stock_data := self.extension_attributes.get('stock_item', {}):
                 return stock_data
@@ -117,33 +80,39 @@ class Product(Model):
         return self.stock_item
 
     @property
-    def stock(self):
+    def stock(self) -> int:
         if self.stock_item:
             return self.stock_item['qty']
 
     @property
-    def stock_item_id(self):
+    def stock_item_id(self) -> int:
         if self.stock_item:
             return self.stock_item['item_id']
 
-    def get_children(self, refresh=True):
-        """Retrieve the child simple products of a configurable product"""
-        if self.type_id != 'configurable':  # Only configurable products have child skus
-            return None
+    def get_children(self, refresh: bool = False) -> list[Product]:
+        """Retrieve the child simple products of a configurable product
 
-        url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
-        response = self.client.request(url)
-        if response.ok:
-            children = [self.parse(child) for child in response.json()]
-            if refresh:
-                for child in children:
-                    child.refresh()
-            return children
-        else:
-            print(f'Failed to get child products of {self.sku}')
-            return None
+        :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
+        """
+        if self.type_id != 'configurable':
+            self.logger.info('Only configurable products have child SKUs')
+            return []
 
-    def get_option_skus(self):
+        if not self._children:
+            url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
+            response = self.client.get(url)
+            if response.ok:
+                self._children = [self.parse(child) for child in response.json()]
+            else:
+                self.logger.error(f'Failed to get child products of {self.sku}')    # Will return empty list
+
+        if refresh:
+            for child in self._children:
+                child.refresh()
+
+        return self._children
+
+    def get_option_skus(self) -> list:
         """If there are additional options, each one has its own SKU (and API Responses use this SKU)."""
         option_skus = []
         if hasattr(self, 'options'):
@@ -154,9 +123,9 @@ class Product(Model):
                         option_skus.append(base_sku + '-' + val['sku'])
         return option_skus
 
-    def update_stock(self, qty):
+    def update_stock(self, qty: int, scope: str = ''):
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
-        url = self.client.url_for(endpoint)
+        url = self.client.url_for(endpoint, scope)
         payload = {
             "stock_item": {
                 "qty": qty,
@@ -164,45 +133,46 @@ class Product(Model):
             },
             'save_options': True
         }
-        response = requests.put(
-            url=url,
-            json=payload,
-            headers=self.client.headers
-        )
+        response = self.client.put(url, payload)
         if response.ok:
             # Get updated product data
-            self.refresh()
-            print(f'Updated stock to {self.stock}')
+            self.refresh(scope)
+            self.logger.info(f'Updated stock to {self.stock}')
         else:
-            print(
+            self.logger.error(
                 f'Failed with status code {response.status_code}' + '\n' +
-                f'Message: {response.json()}'
-            )
+                f'Message: {response.json()}')
 
-    def refresh(self):
+    def refresh(self, scope: str = '') -> bool:
         """Updates attributes with current product data from the API"""
-        url = self.client.url_for(f'products/{self.encoded_sku}')
-        response = self.client.request(url)
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        response = self.client.get(url)
+
         if response.ok:
             self.set_attrs(response.json())  # Update existing object attributes
-            print('Refreshed ' + self.sku)
-        else:
-            print(
-                f'Failed to refresh SKU {self.sku}',
-                f'Error Code: {response.status_code}',
-                f'Message: {response.json()["message"]}',
-                sep='\n'
-            )
+            self.logger.info(f'Refreshed {self.sku}')
+            return True
 
-    def update_status(self, status):
+        else:
+            self.logger.error(
+                'Failed to refresh SKU {}\nError Code: {}\nMessage: {}'.format(
+                    self.sku, response.status_code, response.json()["message"])
+            )
+            return False
+
+    def update_status(self, status: int, scope: str = '') -> bool:
+        """Updates the product status on the default/specified store scope (and admin)
+
+        .. note:: The request is also sent using the ``all`` scope, since product status doesn't
+           automatically update in the admin
+
+        :param status: either 1 (for :attr:`~.STATUS_ENABLED`) or 2 (for :attr:`~.STATUS_DISABLED`)
+        :param scope: the store scope to send the request to (in addition to ``all``
+        """
         if status not in [Product.STATUS_ENABLED, Product.STATUS_DISABLED]:
             raise ValueError('Invalid status provided')
 
         endpoint = f'products/{self.encoded_sku}'
-        scopes = (
-            self.client.url_for(endpoint),  # No scope also updates default scope
-            self.client.url_for(endpoint, scope='all')  # Needed to update admin
-        )
         payload = {
             "product": {
                 "sku": self.sku,
@@ -210,67 +180,42 @@ class Product(Model):
             },
             'save_options': True
         }
-        for scope in scopes:
-            response = requests.put(
-                url=scope,
-                json=payload,
-                headers=self.client.headers
-            )
-            if not response.ok:
-                print(f'Error {response.status_code}: Failed to update product status',
-                      f'Message: {response.json()}',
-                      sep='\n')
 
-        def get_status(scope_url):
-            return self.client.request(scope_url).json()['status']
+        for store_code in [scope, 'all']:  # 'all' scope is needed to update admin
+            url = self.client.url_for(endpoint, store_code)
+            response = self.client.put(url, payload)
 
-        self.refresh()
-        success = True
+            if response.ok and response.json()['status'] == status:
+                self.logger.info('Updated status to {} for {} on scope {}'.format(
+                    "Enabled" if status == Product.STATUS_ENABLED else "Disabled", self.sku, store_code)
+                )
+            else:
+                self.logger.error(
+                    f'Error {response.status_code}: Failed to update status for {self.sku}' + '\n' +
+                    f'Message: {response.json()}'
+                )
+                return False  # Avoid updating admin if store update fails
 
-        for scope in scopes:  # Verify status was updated accordingly on all scopes
-            if get_status(scope) != status:
-                print(f'Failed to update status on {scope}')
-                success = False
-        print(
-            '{} Status: {}'.format(
-                'Success. Updated' if success else 'Failed. Current',
-                'Enabled' if self.status == Product.STATUS_ENABLED else 'Disabled')
-        )
+        self.refresh(scope)
+        return self.status == status
 
-    def delete(self, scope='all'):
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope=scope)
-        response = requests.delete(
-            url=url,
-            headers=self.client.headers
-        )
-        if response.ok:
-            if response.json() is True:
-                # Request product details again bc I don't trust the response :)
-                if (check := self.client.request(url)).status_code == 404:
-                    print(f'Deleted {self.sku}')
-                    return True
-                else:
-                    raise RuntimeError(
-                        'Product was deleted but still exists...(?)' + '\n' +
-                        'Message:{}'.format(check.json())
-                    )
+    def delete(self, scope: str = '') -> bool:
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        response = self.client.delete(url)
+
+        if response.ok and response.json() is True:
+            self.logger.info(f'Deleted {self.sku}')
+            return True
         else:
-            print(f'Failed to delete {self.sku}. Message: {response.json()["message"]}')
+            self.logger.error(
+                f'Failed to delete {self.sku}. Message: {response.json()["message"]}'
+            )
             return False
 
 
 class MediaEntry(Model):
-    MEDIA_MAPPING = {
-        'id': int,
-        'media_type': str,
-        'label': str,
-        'position': int,
-        'disabled': bool,
-        'types': list,
-        'file': str
-    }
 
-    def __init__(self, product: "Product", entry: dict):
+    def __init__(self, product: Product, entry: dict):
         super().__init__(
             data=entry,
             client=product.client,

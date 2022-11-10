@@ -112,7 +112,7 @@ class MagentoLogger:
                             (Use magento.logger.LOG_MESSAGE for easy access)
     :cvar FORMATTER:        the default logging format
     :type FORMATTER:        logging.Formatter
-    :cvar HANDLER_NAME      the default format for the names of handlers created by this package
+    :cvar HANDLER_NAME:      the default format for the names of handlers created by this package
     """
 
     PREFIX = "MyMagento"
@@ -206,7 +206,7 @@ class MagentoLogger:
         return True
 
     def format_msg(self, msg: str) -> str:
-        """Formats MagentoLogger.LOG_MESSAGE using the specified message"""
+        """Formats :attr:`~.LOG_MESSAGE` using the specified message"""
         return MagentoLogger.LOG_MESSAGE.format(
             name=self.name,
             message=msg

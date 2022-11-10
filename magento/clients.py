@@ -84,30 +84,52 @@ class Client(object):
         self.logger.info('Logged in to {}'.format(payload["username"]))
         return True
 
-    def request(self, url: str) -> requests.Response:
+    def get(self, url: str) -> requests.Response:
+        return self.request('GET', url)
+
+    def post(self, url: str, payload: dict) -> requests.Response:
+        return self.request('POST', url, payload)
+
+    def put(self, url: str, payload: dict) -> requests.Response:
+        return self.request('PUT', url, payload)
+
+    def delete(self, url: str) -> requests.Response:
+        return self.request('DELETE', url)
+
+    def request(self, method: str, url: str, payload: dict = None) -> requests.Response:
         """Sends a request with the access token. Used for all internal requests"""
-        response = requests.get(url, headers=self.headers)
+        if method in ('GET', 'DELETE'):
+            response = requests.request(method, url, headers=self.headers)
+        elif method in ('POST', 'PUT'):
+            if payload:
+                response = requests.request(method, url, json=payload, headers=self.headers)
+            else:
+                raise ValueError('Must provide a non-empty payload')
+        else:
+            raise ValueError('Invalid request method provided')
+
         if response.status_code == 401:
             self.logger.debug("Attempting to re-authenticate...")
             self.authenticate()  # Will raise AuthenticationError if unsuccessful (won't recurse infinitely)
-            return self.request(url)
+            return self.request(method, url, payload)
 
         if response.status_code != 200:  # All other responses are returned; errors are handled by methods
             self.logger.error("Request to {} failed with status code {} and message: \"{}\"".format(
                 url, response.status_code, response.json().get('message', response.json()))
             )
+
         return response
 
-    def url_for(self, endpoint, scope=''):
+    def url_for(self, endpoint: str, scope: str = '') -> str:
         """Returns the appropriate url for the given endpoint and store scope"""
         if not scope:
             return self.BASE_URL + endpoint
-        else:  # Must send POST/PUT requests to a scoped url for some updates
+        else:
             return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
     def validate(self) -> bool:
         """Sends an authorized request to a base API endpoint"""
-        response = self.request(self.url_for('store/websites'))
+        response = self.get(self.url_for('store/websites'))
         if response.status_code == 200:
             self.logger.debug("Token validated for {} on {}".format(
                 self.USER_CREDENTIALS['username'], self.domain)
@@ -119,7 +141,7 @@ class Client(object):
             )
             raise AuthenticationError(self, msg=msg, response=response)
 
-    def get_logger(self, log_file = None, stdout_level='INFO', log_requests = True) -> MagentoLogger:
+    def get_logger(self, log_file: str = None, stdout_level: str = 'INFO', log_requests: bool = True) -> MagentoLogger:
         """Retrieve a MagentoLogger for the current username/domain combination. Log files are DEBUG.
 
         :param log_file: the file to log to

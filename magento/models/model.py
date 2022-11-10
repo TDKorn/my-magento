@@ -45,6 +45,7 @@ class Model(ABC):
         self.data = data
         self.client = client
         self.endpoint = endpoint
+        self.logger = client.logger
         self.set_attrs(data, private_keys=private_keys)
 
     def set_attrs(self, data: dict, private_keys: bool = True) -> None:
