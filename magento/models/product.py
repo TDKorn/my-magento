@@ -1,8 +1,7 @@
 from __future__ import annotations
 from magento import clients
-from typing import Union, Iterable
-from . import Model
-import requests
+from typing import Union
+from . import Model, category
 
 
 class Product(Model):
@@ -29,6 +28,7 @@ class Product(Model):
             private_keys=True
         )
         self._media_gallery_entries = []
+        self._categories = []
         self._children = []
 
     def __str__(self):
@@ -89,6 +89,14 @@ class Product(Model):
         if self.stock_item:
             return self.stock_item['item_id']
 
+    @property
+    def description(self) -> str:
+        return self.custom_attributes.get('description', '')
+
+    @property
+    def special_price(self) -> float:
+        return self.custom_attributes.get('special_price')
+
     def get_children(self, refresh: bool = False) -> list[Product]:
         """Retrieve the child simple products of a configurable product
 
@@ -122,6 +130,12 @@ class Product(Model):
                     if val.get('sku'):
                         option_skus.append(base_sku + '-' + val['sku'])
         return option_skus
+
+    def get_categories(self) -> list[category.Category]:
+        if not self._categories:
+            for category_id in self.custom_attributes.get('category_ids', []):
+                self._categories.append(self.client.categories.by_id(category_id))
+        return self._categories
 
     def update_stock(self, qty: int, scope: str = ''):
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
@@ -172,31 +186,11 @@ class Product(Model):
         if status not in [Product.STATUS_ENABLED, Product.STATUS_DISABLED]:
             raise ValueError('Invalid status provided')
 
-        endpoint = f'products/{self.encoded_sku}'
-        payload = {
-            "product": {
-                "sku": self.sku,
-                "status": status
-            },
-            'save_options': True
-        }
-
-        for store_code in [scope, 'all']:  # 'all' scope is needed to update admin
-            url = self.client.url_for(endpoint, store_code)
-            response = self.client.put(url, payload)
-
-            if response.ok and response.json()['status'] == status:
-                self.logger.info('Updated status to {} for {} on scope {}'.format(
-                    "Enabled" if status == Product.STATUS_ENABLED else "Disabled", self.sku, store_code)
-                )
-            else:
-                self.logger.error(
-                    f'Error {response.status_code}: Failed to update status for {self.sku}' + '\n' +
-                    f'Message: {response.json()}'
-                )
+        for store_code in (scope, 'all'):
+            if not self.update_data({'status': status}, store_code):
                 return False  # Avoid updating admin if store update fails
 
-        self.refresh(scope)
+        self.refresh(scope)  # Set back to original scope
         return self.status == status
 
     def delete(self, scope: str = '') -> bool:
@@ -212,6 +206,60 @@ class Product(Model):
             )
             return False
 
+    def update_data(self, product_data, scope: str = ''):
+        """Sends a PUT request to update **top-level** product attributes
+
+        .. tip:: to update custom attributes, use :meth:`~.update_custom_attributes` instead
+
+        :param product_data: dict containing any number of top-level attributes to update
+        :param scope: the store scope to make the update on
+        """
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        payload = {
+            "product": {
+                "sku": self.sku
+            },
+            'save_options': True
+        }
+        payload['product'].update(product_data)
+
+        response = self.client.put(url, payload)
+        if response.ok:
+            self.refresh(scope)
+            for key in product_data:
+                self.logger.info(
+                    f'Updated {key} for {self.sku} to {getattr(self, key)}'
+                )
+            return True
+        else:
+            self.logger.error(
+                f'Failed with status code {response.status_code}' + '\n' +
+                f'Message: {response.json()}')
+            return False
+
+    def update_custom_attributes(self, attribute_data: dict, scope: str = ''):
+        attributes = [{"attribute_code": attr, "value": val} for attr, val in attribute_data.items()]
+        return self.update_data({'custom_attributes': attributes}, scope)
+
+    def update_name(self, name: str, scope: str = '') -> bool:
+        return self.update_data({'name': name}, scope)
+
+    def update_description(self, description: str) -> bool:
+        return self.update_custom_attributes({'description': description})
+
+    def update_metadata(self, metadata: dict, scope: str = '') -> bool:
+        attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
+        return self.update_custom_attributes(attributes)
+
+    def update_price(self, price: Union[int, float], scope: str = '') -> bool:
+        return self.update_data({'price': price}, scope)
+
+    def update_special_price(self, price: Union[float, int]) -> bool:
+        if price < self.price:
+            return self.update_custom_attributes({'special_price': price})
+
+        self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
+        return False
 
 class MediaEntry(Model):
 
