@@ -215,11 +215,13 @@ class Product(Model):
 
 class MediaEntry(Model):
 
+    MEDIA_TYPES = ['base', 'small', 'thumbnail', 'swatch']
+
     def __init__(self, product: Product, entry: dict):
         super().__init__(
             data=entry,
             client=product.client,
-            endpoint='products/{}/media'.format(product.encoded_sku)
+            endpoint=f'products/{product.encoded_sku}/media/{entry["id"]}'
         )
         self.product = product
 
@@ -228,9 +230,97 @@ class MediaEntry(Model):
         return []
 
     @property
+    def is_enabled(self):
+        return not self.disabled
+
+    @property
     def is_thumbnail(self):
         return 'thumbnail' in self.types
 
     @property
     def link(self):
         return f'https://{self.client.domain}/media/catalog/product{self.file}'
+
+    def disable(self) -> bool:
+        self.data['disabled'] = True
+        return self.update(refresh_product=False)
+
+    def enable(self) -> bool:
+        self.data['disabled'] = False
+        return self.update(refresh_product=False)
+
+    def add_media_type(self, media_type: str) -> bool:
+        if media_type in self.MEDIA_TYPES and media_type not in self.types:
+            self.data['types'].append(media_type)
+            return self.update()
+
+    def remove_media_type(self, media_type: str) -> bool:
+        if media_type in self.types:
+            self.data['types'].remove(media_type)
+            return self.update()
+
+    def set_media_types(self, types: list) -> bool:
+        if not isinstance(types, list):
+            raise TypeError('types must be a list')
+
+        types = [t for t in types if t in self.MEDIA_TYPES]
+        self.data['types'] = types
+        return self.update()
+
+    def set_position(self, position: int):
+        if not isinstance(position, int):
+            raise TypeError('position must be an int')
+
+        self.data['position'] = position
+        return self.update()
+
+    def set_alt_text(self, text: str) -> bool:
+        if not isinstance(text, str):
+            raise TypeError('text must be a string')
+
+        self.data['label'] = text
+        return self.update(refresh_product=False)
+
+    def update(self, refresh_product: bool = True) -> bool:
+        """Uses the :attr:`~.data` dict to update the media entry
+
+        .. note:: Some updates (ex. changing the position or the type) can alter the data of other media gallery
+            entries,; setting ``refresh_product=True`` ensures the :class:`Product` always has accurate data
+
+        :param refresh_product: if True, will also refresh the product after updating
+        """
+        url = self.client.url_for(self.endpoint)
+        success = True
+
+        response = self.client.put(url, payload={'entry': self.data})
+        if response.ok and response.json() is True:
+            self.logger.info(
+                f'Updated media entry {self.id} for {self.product}'
+            )
+        else:
+            success = False
+            self.logger.error(
+                f'Failed to update media entry {self.id} for {self.product}'
+            )
+        self.refresh()
+
+        if refresh_product:
+            self.product._media_gallery_entries.clear()
+            self.product.refresh()
+
+        return success
+
+    def refresh(self) -> bool:
+        url = self.client.url_for(self.endpoint)
+        response = self.client.get(url)
+
+        if response.ok:
+            self.set_attrs(response.json())
+            self.logger.info(f'Refreshed media entry {self.id} for {self.product}')
+            return True
+        else:
+            self.logger.error(
+                'Failed to refresh media entry {}\nError Code: {}\nMessage: {}'.format(
+                    self.id, response.status_code, response.json()["message"])
+            )
+            return False
