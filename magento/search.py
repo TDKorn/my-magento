@@ -14,7 +14,7 @@ class SearchQuery:
         self.client = client
         self.endpoint = endpoint
         self.Entity = entity
-        self.query = self.client.BASE_URL + endpoint + '/?'
+        self.query = self.client.url_for(endpoint) + '/?'
         self.fields = ''
         self._result = {}
 
@@ -150,7 +150,7 @@ class SearchQuery:
     def reset(self) -> None:
         self._result = {}
         self.fields = ''
-        self.query = self.client.BASE_URL + self.endpoint + '/?'
+        self.query = self.client.url_for(self.endpoint) + '/?'
 
     @property
     def result_count(self):

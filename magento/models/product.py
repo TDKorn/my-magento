@@ -137,7 +137,7 @@ class Product(Model):
                 self._categories.append(self.client.categories.by_id(category_id))
         return self._categories
 
-    def update_stock(self, qty: int, scope: str = ''):
+    def update_stock(self, qty: int, scope: str = None):
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
         url = self.client.url_for(endpoint, scope)
         payload = {
@@ -157,7 +157,7 @@ class Product(Model):
                 f'Failed with status code {response.status_code}' + '\n' +
                 f'Message: {response.json()}')
 
-    def refresh(self, scope: str = '') -> bool:
+    def refresh(self, scope: str = None) -> bool:
         """Updates attributes with current product data from the API"""
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
         response = self.client.get(url)
@@ -174,7 +174,7 @@ class Product(Model):
             )
             return False
 
-    def update_status(self, status: int, scope: str = '') -> bool:
+    def update_status(self, status: int, scope: str = None) -> bool:
         """Updates the product status on the default/specified store scope (and admin)
 
         .. note:: The request is also sent using the ``all`` scope, since product status doesn't
@@ -193,7 +193,7 @@ class Product(Model):
         self.refresh(scope)  # Set back to original scope
         return self.status == status
 
-    def delete(self, scope: str = '') -> bool:
+    def delete(self, scope: str = None) -> bool:
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
         response = self.client.delete(url)
 
@@ -206,7 +206,7 @@ class Product(Model):
             )
             return False
 
-    def update_data(self, product_data, scope: str = ''):
+    def update_data(self, product_data, scope: str = None):
         """Sends a PUT request to update **top-level** product attributes
 
         .. tip:: to update custom attributes, use :meth:`~.update_custom_attributes` instead
@@ -228,8 +228,8 @@ class Product(Model):
             self.refresh(scope)
             for key in product_data:
                 self.logger.info(
-                    f'Updated {key} for {self.sku} to {getattr(self, key)}'
-                )
+                    f'Updated {key} for {self.sku} to {getattr(self, key)} ' +
+                    f'on scope {scope if scope else self.client.scope}')
             return True
         else:
             self.logger.error(
@@ -237,24 +237,29 @@ class Product(Model):
                 f'Message: {response.json()}')
             return False
 
-    def update_custom_attributes(self, attribute_data: dict, scope: str = ''):
+    def update_custom_attributes(self, attribute_data: dict, scope: str = None):
         attributes = [{"attribute_code": attr, "value": val} for attr, val in attribute_data.items()]
         return self.update_data({'custom_attributes': attributes}, scope)
 
-    def update_name(self, name: str, scope: str = '') -> bool:
+    def update_name(self, name: str, scope: str = None) -> bool:
         return self.update_data({'name': name}, scope)
 
-    def update_description(self, description: str) -> bool:
-        return self.update_custom_attributes({'description': description})
+    def update_description(self, description: str, scope: str = None) -> bool:
+        return self.update_custom_attributes({'description': description}, scope)
 
-    def update_metadata(self, metadata: dict, scope: str = '') -> bool:
+    def update_metadata(self, metadata: dict, scope: str = None) -> bool:
+        """Updates product metadata
+
+        :param metadata: the new ``meta_title``, ``meta_keyword`` and/or ``meta_description`` to use
+        :param scope: the store scope to update
+        """
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
-        return self.update_custom_attributes(attributes)
+        return self.update_custom_attributes(attributes, scope)
 
-    def update_price(self, price: Union[int, float], scope: str = '') -> bool:
-        return self.update_data({'price': price}, scope)
+    def update_price(self, price: Union[int, float], scope: str = None) -> bool:
+        return self.update_data({'price': price})
 
-    def update_special_price(self, price: Union[float, int]) -> bool:
+    def update_special_price(self, price: Union[float, int], scope: str = None) -> bool:
         if price < self.price:
             return self.update_custom_attributes({'special_price': price})
 

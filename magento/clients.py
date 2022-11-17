@@ -10,7 +10,8 @@ from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, Cate
 
 class Client(object):
 
-    def __init__(self, domain, username, password, user_agent=None, token=None, log_level='INFO', login=True, **kwargs):
+    def __init__(self, domain, username, password, scope='', user_agent=None, token=None, log_level='INFO', login=True,
+                 **kwargs):
         self.BASE_URL = f'https://www.{domain}/rest/V1/'
         self.USER_CREDENTIALS = {
             'username': username,
@@ -18,6 +19,7 @@ class Client(object):
         }
         self.ACCESS_TOKEN = token
         self.domain = domain
+        self.scope = scope
         self.user_agent = user_agent if user_agent else get_agent()
         self.logger = self.get_logger(
             stdout_level=log_level,
@@ -120,12 +122,14 @@ class Client(object):
 
         return response
 
-    def url_for(self, endpoint: str, scope: str = '') -> str:
+    def url_for(self, endpoint: str, scope: str = None) -> str:
         """Returns the appropriate url for the given endpoint and store scope"""
         if not scope:
-            return self.BASE_URL + endpoint
-        else:
-            return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
+            if self.scope and scope is None:
+                scope = self.scope
+            else:
+                return self.BASE_URL + endpoint
+        return self.BASE_URL.replace('/V1', f'/{scope}/V1') + endpoint
 
     def validate(self) -> bool:
         """Sends an authorized request to a base API endpoint"""
