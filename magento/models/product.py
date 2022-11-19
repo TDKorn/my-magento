@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import cached_property
 from magento import clients
 from typing import Union
 from . import Model, category
@@ -266,6 +267,7 @@ class Product(Model):
         self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
         return False
 
+
 class MediaEntry(Model):
 
     MEDIA_TYPES = ['base', 'small', 'thumbnail', 'swatch']
@@ -290,9 +292,9 @@ class MediaEntry(Model):
     def is_thumbnail(self):
         return 'thumbnail' in self.types
 
-    @property
+    @cached_property
     def link(self):
-        return f'https://{self.client.domain}/media/catalog/product{self.file}'
+        return self.client.store.active.base_media_url + 'catalog/product' + self.file
 
     def disable(self) -> bool:
         self.data['disabled'] = True
@@ -377,3 +379,23 @@ class MediaEntry(Model):
                     self.id, response.status_code, response.json()["message"])
             )
             return False
+
+
+class ProductAttribute(Model):
+
+    def __init__(self, data: dict, client: clients.Client):
+        """Initialize a ProductAttribute object
+
+        :param data: the API response from the ``products/attributes`` endpoint
+        :param client: an initialized :class:`~.Client` object
+        """
+        super().__init__(
+            data=data,
+            client=client,
+            endpoint='products/attributes',
+            private_keys=True
+        )
+
+    @property
+    def excluded_keys(self) -> list[str]:
+        return []

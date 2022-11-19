@@ -1,19 +1,19 @@
 from __future__ import annotations
-from typing import Union, Iterable
-from .entities import Order, Invoice
-from .models import Product, Category
+from typing import Union, Type, Iterable
+from .entities import Order, Invoice, Entity
+from .models import Product, Category, ProductAttribute, APIResponse, Model
 from . import clients
 
 
 class SearchQuery:
 
-    def __init__(self, endpoint: str, client: clients.Client, entity=None):
+    def __init__(self, endpoint: str, client: clients.Client, model: Union[Type[Model], Type[Entity]] = APIResponse):
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
         self.client = client
         self.endpoint = endpoint
-        self.Entity = entity
+        self.Model = model
         self.query = self.client.url_for(endpoint) + '/?'
         self.fields = ''
         self._result = {}
@@ -98,7 +98,7 @@ class SearchQuery:
         ).execute()
 
     @property
-    def result(self):
+    def result(self) -> Union[Model, list[Model]]:
         result = self.validate_result()
         if result is None:
             return result
@@ -140,12 +140,11 @@ class SearchQuery:
         else:  # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
-    def parse(self, data):
+    def parse(self, data) -> Union[Model, Entity]:
         """Parses the API response and returns the corresponding entity/model object"""
-        if self.Entity is not None:
-            return self.Entity(data, self.client)   # SearchQuery subclasses return corresponding Entity/Model
-        # General SearchQuery returns the raw data
-        return data
+        if self.Model is not APIResponse:
+            return self.Model(data, self.client)
+        return self.Model(data, self.client, self.endpoint)
 
     def reset(self) -> None:
         self._result = {}
@@ -167,7 +166,7 @@ class OrderSearch(SearchQuery):
         super().__init__(
             endpoint='orders',
             client=client,
-            entity=Order
+            model=Order
         )
 
 
@@ -177,7 +176,7 @@ class InvoiceSearch(SearchQuery):
         super().__init__(
             endpoint='invoices',
             client=client,
-            entity=Invoice
+            model=Invoice
         )
 
     def by_order_number(self, order_number):
@@ -200,8 +199,12 @@ class ProductSearch(SearchQuery):
         super().__init__(
             endpoint='products',
             client=client,
-            entity=Product
+            model=Product
         )
+
+    @property
+    def attributes(self):
+        return ProductAttributeSearch(self.client)
 
     def by_id(self, item_id: Union[int, str]) -> {}:
         return self.add_criteria(
@@ -210,7 +213,7 @@ class ProductSearch(SearchQuery):
         ).execute()
 
     def by_sku(self, sku) -> Product:
-        return super().by_id(self.Entity.encode(sku))
+        return super().by_id(self.Model.encode(sku))
 
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> list[Product]:
         """Search for :class:`~.Product`s using a list or comma separated string of SKUs
@@ -252,13 +255,35 @@ class ProductSearch(SearchQuery):
         return self.execute()
 
 
+class ProductAttributeSearch(SearchQuery):
+
+    def __init__(self, client):
+        super().__init__(
+            endpoint='products/attributes',
+            client=client,
+            model=ProductAttribute
+        )
+
+    def get_all(self):
+        return self.add_criteria('position', 0, 'gteq').execute()
+
+    def by_code(self, attribute_code: str):
+        return self.by_id(attribute_code)
+
+    def get_types(self):
+        endpoint = self.endpoint + '/types'
+        response = self.client.get(self.client.url_for(endpoint))
+        if response.ok:
+            return [APIResponse(attr_type, self.client, endpoint) for attr_type in response.json()]
+
+
 class CategorySearch(SearchQuery):
 
     def __init__(self, client):
         super().__init__(
             endpoint='categories',
             client=client,
-            entity=Category
+            model=Category
         )
 
     def get_root(self) -> Category:

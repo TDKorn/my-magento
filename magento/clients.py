@@ -1,11 +1,11 @@
 from __future__ import annotations
 import json
-import copy
 import pickle
 import requests
-
+from functools import cached_property
 from .utils import MagentoLogger, get_agent
-from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch
+from .models import APIResponse, ProductAttribute
+from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch
 
 
 class Client(object):
@@ -26,24 +26,30 @@ class Client(object):
             log_file=kwargs.get('log_file', None),
             log_requests=kwargs.get('log_requests', True)
         )
+        self.store = Store(self)
+
         if login:
             self.authenticate()
 
     @property
-    def orders(self):
+    def orders(self) -> OrderSearch:
         return OrderSearch(self)
 
     @property
-    def invoices(self):
+    def invoices(self) -> InvoiceSearch:
         return InvoiceSearch(self)
 
     @property
-    def categories(self):
+    def categories(self) -> CategorySearch:
         return CategorySearch(self)
 
     @property
-    def products(self):
+    def products(self) -> ProductSearch:
         return ProductSearch(self)
+
+    @property
+    def product_attributes(self) -> ProductAttributeSearch:
+        return ProductAttributeSearch(self)
 
     def search(self, endpoint: str) -> SearchQuery:
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
@@ -55,6 +61,8 @@ class Client(object):
             return self.categories
         if endpoint.lower() == 'products':
             return self.products
+        if endpoint.lower() == 'products/attributes':
+            return self.product_attributes
         # Any other endpoint is queried with a general SearchQuery object
         return SearchQuery(endpoint=endpoint, client=self)
 
@@ -217,8 +225,94 @@ class Client(object):
         return cls(**kwargs)
 
 
-class AuthenticationError(Exception):
+class Store:
 
+    def __init__(self, client: Client):
+        """Initialize a Store object"""
+        self.client = client
+
+    @property
+    def is_single_store(self) -> bool:
+        """Whether the store has a single store view (``default``) or multiple store views"""
+        return len(self.configs) == 1
+
+    @property
+    def active(self) -> APIResponse:
+        """Returns the store config corresponding to the current :attr:`~.Client.scope` of the :class:`Client`"""
+        store_code = 'default' if self.client.scope in ('', 'all') else self.client.scope
+        for store in self.configs:
+            if store.code == store_code:
+                return store
+
+    @cached_property
+    def configs(self) -> list[APIResponse]:
+        """Returns a list of all store configurations"""
+        endpoint = 'store/storeConfigs'
+        response = self.client.get(self.client.url_for(endpoint))
+        if response.ok:
+            return [APIResponse(config, self.client, endpoint) for config in response.json()]
+
+    @cached_property
+    def views(self) -> list[APIResponse]:
+        """Returns a list of all store views"""
+        endpoint = 'store/storeViews'
+        response = self.client.get(self.client.url_for(endpoint))
+        if response.ok:
+            return [APIResponse(view, self.client, endpoint) for view in response.json()]
+
+    @cached_property
+    def all_product_attributes(self) -> list[ProductAttribute]:
+        """A cached list of all product attributes"""
+        return self.client.product_attributes.get_all()
+
+    @cached_property
+    def store_view_product_attributes(self) -> list[ProductAttribute]:
+        """A cached list of all product attributes with the ``Store View`` scope"""
+        return [attr for attr in self.all_product_attributes if attr.scope == 'store']
+
+    @cached_property
+    def website_product_attributes(self) -> list[ProductAttribute]:
+        """A cached list of all product attributes with the ``Web Site`` scope"""
+        return [attr for attr in self.all_product_attributes if attr.scope == 'website']
+
+    @cached_property
+    def global_product_attributes(self) -> list[ProductAttribute]:
+        """A cached list of all product attributes with the ``Global`` scope"""
+        return [attr for attr in self.all_product_attributes if attr.scope == 'global']
+
+    @cached_property
+    def website_attribute_codes(self) -> list[str]:
+        """The attribute codes of the :attr:`~.website_product_attributes`"""
+        return [attr.attribute_code for attr in self.website_product_attributes]
+
+    def filter_website_attrs(self, attribute_data: dict) -> dict:
+        """Filters a product attribute dict and returns a new one that contains only the website scope attributes
+
+        Website scoped attributes must be updated on the admin by making a second request with the ``all`` scope
+
+        * This method is called by :meth:`~.Product.update_attributes` and :meth:`~.Product.update_custom_attributes`
+          to see if the second request is needed
+
+        **Example**::
+
+               >> attribute_data = {'price': 12, 'meta_title': 'My Product'}
+               >> store.filter_website_attrs(attribute_data)
+               {'price': 12}
+
+        :param attribute_data: a dict of product attributes
+        """
+        return {k: v for k, v in attribute_data.items() if k in self.website_attribute_codes}
+
+    def refresh(self) -> bool:
+        """Clears all cached properties"""
+        cached = ('configs', 'views', 'all_product_attributes', 'store_view_product_attributes',
+                  'website_product_attributes', 'global_product_attributes', 'website_attribute_codes')
+        for key in cached:
+            self.__dict__.pop(key, None)
+        return True
+
+
+class AuthenticationError(Exception):
     DEFAULT_MSG = 'Failed to authenticate credentials. '
 
     def __init__(self, client: Client, msg=None, response: requests.Response = None):

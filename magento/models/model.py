@@ -134,3 +134,26 @@ class Model(ABC):
         """
         import urllib.parse
         return urllib.parse.quote_plus(string)
+
+
+class APIResponse(Model):
+
+    def __init__(self, data: dict, client: clients.Client, endpoint: str):
+        """A generic :class:`Model` class
+
+         Used to wrap API Responses when there isn't a :class:`Model` subclass defined for the endpoint
+
+        :param data: the API response from an API endpoint
+        :param client: an initialized :class:`~.Client` object
+        :param endpoint: the endpoint that the API response came from
+        """
+        super().__init__(
+            data=data,
+            client=client,
+            endpoint=endpoint,
+            private_keys=False
+        )
+
+    @property
+    def excluded_keys(self) -> list[str]:
+        return []
