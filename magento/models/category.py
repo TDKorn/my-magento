@@ -1,64 +1,81 @@
+from __future__ import annotations
+import copy
 from . import Model
+from typing import TYPE_CHECKING
+from functools import cached_property
+
+if TYPE_CHECKING:
+    from magento import Client
+    from . import Product
 
 
 class Category(Model):
-    DOCUMENTATION = 'https://magento.redoc.ly/2.3.7-admin/tag/categories'
 
-    def __init__(self, data, client):
+    DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/categories'
+
+    def __init__(self, data: dict, client: Client):
+        """Initialize a Category object using an API response from the ``categories`` endpoint
+
+        :param data: raw API response
+        """
         super().__init__(
             data=data,
             client=client,
             endpoint='categories'
         )
-        self._products = None  # Attributes that are stored after retrieving the first time
-        self._subcategories = None
 
-    def __str__(self):
-        return f'Magento Category: {self.name}'
+    def __repr__(self):
+        return f'<Magento Category: {self.name}>'
 
     @property
     def excluded_keys(self):
         return []
 
-    @property
-    def subcategories(self):
-        """Retrieve and temporarily store the category's child categories"""
-        if self._subcategories is None:
-            if hasattr(self, 'children_data'):
-                # children_data: a list of mostly complete subcategory API response dicts
-                self._subcategories = [self.parse(child) for child in self.children_data]
-            elif hasattr(self, 'children'):
-                # children: a comma separated string of subcategory ids; self.subcategory_ids returns them as list
-                self._subcategories = [self.query_endpoint().by_id(child_id) for child_id in self.subcategory_ids]
-            else:
-                self._subcategories = []  # Data comes from those two fields... no subcategories
-        return self._subcategories
-
-    @property
-    def subcategory_ids(self):
-        if hasattr(self, 'children'):
-            return self.children.split(',')
+    @cached_property
+    def subcategories(self) -> list[Category]:
+        """Returns a list of the category's child categories"""
+        if hasattr(self, 'children_data'):  # A list of API response dicts (present when Category is from search result)
+            return [self.parse(child) for child in self.children_data]
+        if hasattr(self, 'children'):  # String of subcategory ids (present when Category is retrieved by id)
+            return [self.query_endpoint().by_id(child_id) for child_id in self.subcategory_ids]
         else:
-            return [category.id for category in self.subcategories]
+            return []
 
-    @property
-    def subcategory_names(self):
+    @cached_property
+    def subcategory_ids(self) -> list[int]:
+        """Returns the ids of the category's child categories"""
+        if hasattr(self, 'children'):
+            if self.children:
+                return [int(child) for child in self.children.split(',')]
+            return []
+        return [category.id for category in self.subcategories]
+
+    @cached_property
+    def subcategory_names(self) -> list[str]:
+        """Returns the names of the category's child categories"""
         return [category.name for category in self.subcategories]
 
-    @property
-    def products(self):
-        if self._products is None:
-            endpoint = self.client.url_for(f'categories/{self.id}/products')
-            response = self.client.get(endpoint)
-            self._products = [product['sku'] for product in response.json()]
-        return self._products
+    @cached_property
+    def skus(self) -> list[str]:
+        """Returns the SKUs of products in the category"""
+        endpoint = self.client.url_for(f'categories/{self.id}/products')
+        if (response := self.client.get(endpoint)).ok:
+            return [product['sku'] for product in response.json()]
 
-    @property
-    def all_products(self):
-        """Products of the category AND its subcategories"""
-        products = self.products.copy()
+    @cached_property
+    def all_skus(self) -> set[str]:
+        """Returns the SKUs of products in the category and all of its :attr:`~.subcategories`"""
+        skus = copy.deepcopy(self.skus)
         for child in self.subcategories:
-            if child.name != 'Default Category':
-                products.extend(child.products)
-        # In case there are products in more than one subcategory
-        return set(products)
+            skus.extend(child.all_skus)
+        return set(skus)
+
+    @cached_property
+    def products(self) -> list[Product]:
+        """Returns the :class:`~.Product`s in the category"""
+        return self.client.products.by_skulist(self.skus)
+
+    @cached_property
+    def all_products(self) -> list[Product]:
+        """Returns the :class:`~.Product`s in the category and all of its :attr:`~.subcategories`"""
+        return self.client.products.by_skulist(self.all_skus)

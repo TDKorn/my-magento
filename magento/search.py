@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union
+from typing import Union, Iterable
 from .entities import Order, Invoice
 from .models import Product, Category
 from . import clients
@@ -210,12 +210,32 @@ class ProductSearch(SearchQuery):
         ).execute()
 
     def by_sku(self, sku) -> Product:
-        self.query = self.client.url_for(
-            endpoint='products/{}'.format(
-                sku.replace('/', '%2F')
-            )
-        )
-        return self.execute()
+        return super().by_id(self.Entity.encode(sku))
+
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> list[Product]:
+        """Search for :class:`~.Product`s using a list or comma separated string of SKUs
+
+        .. note:: SKUs must be URL-encoded
+
+        :param skulist: an iterable or comma separated string of SKUs
+        """
+        if not isinstance(skulist, Iterable):
+            raise TypeError
+        if not isinstance(skulist, str):
+            skulist = ','.join(skulist)
+        return self.add_criteria(
+            field='sku',
+            value=skulist,
+            condition='in'
+        ).execute()
+
+    def by_category(self, category: str) -> list[Product]:
+        """Search for :class:`~.Product`s by category name"""
+        return self.client.categories.by_name(category).products
+
+    def by_category_id(self, category_id: int):
+        """Search for :class:`~.Product`s by category id"""
+        return self.client.categories.by_id(category_id).products
 
     def get_stock(self, sku):
         return self.by_sku(sku).stock
@@ -241,48 +261,15 @@ class CategorySearch(SearchQuery):
             entity=Category
         )
 
-    def get_parent(self):
+    def get_root(self) -> Category:
         """The top level/default category. Every other category is a subcategory"""
         return self.execute()
 
-    def get_all(self):
-        """Retrieve all categories"""
-        parent = self.get_parent()
-        if isinstance(parent, Category):
-            return parent.subcategories
+    def get_all(self) -> list[Category]:
+        """Retrieve a list of all categories"""
+        self.query = self.query.replace('categories', 'categories/list') + 'searchCriteria[currentPage]=1'
+        return self.execute()
 
-    def products_from_id(self, category_id):
-        return self.by_id(category_id).products
-
-    def order_items_from_id(self, category_id):
-        skus = ','.join(self.products_from_id(category_id))
-        query = self.client.search('orders/items')
-        return query.add_criteria(
-            field='sku',
-            value=','.join(skus),
-            condition = 'in'
-        ).execute()
-
-    def orders_from_id(self, category_id, start, end=None):
-        order_items = self.order_items_from_id(category_id)
-        order_ids = ','.join(set([str(item['order_id']) for item in order_items]))
-        orders = self.client.orders
-
-        orders.add_criteria(  # Criteria to match all order_ids we found
-            field='entity_id',
-            value=order_ids,
-            condition='in'
-        ).add_criteria(  # Criteria to match order date range
-            field='created_at',
-            value=start,
-            condition='gt',
-            group=1
-        )
-        if end:
-            orders.add_criteria(
-                field='created_at',
-                value=end,
-                condition='lteq',
-                group=2
-            )
-        return orders.execute()
+    def by_name(self, name: str) -> Category:
+        """Search for a category by name"""
+        return self.add_criteria('name', name).execute()
