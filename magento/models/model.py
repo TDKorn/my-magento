@@ -108,19 +108,40 @@ class Model(ABC):
         return self.query_endpoint().parse(response)
 
     @staticmethod
-    def unpack_attributes(attributes: list[dict]) -> dict:
-        """Unpacks a list of custom attribute dictionaries into a single dictionary
+    def unpack_attributes(attributes: list[dict], key: str = 'attribute_code') -> dict:
+        """Unpacks a list of attribute dictionaries into a single dictionary
 
-        **Example**
+        **Example**::
 
-        >>> custom_attrs = [{'attribute_code': 'attr', 'value': 'val'},{'attribute_code': 'will_to_live', 'value': '0'}]
-        >>> print(Model.unpack_attributes(custom_attrs))
-        {'attr': 'val', 'will_to_live': '0'}
+               >>> custom_attrs = [{'attribute_code': 'attr', 'value': 'val'},{'attribute_code': 'will_to_live', 'value': '0'}]
+               >>> print(Model.unpack_attributes(custom_attrs))
+
+               {'attr': 'val', 'will_to_live': '0'}
 
         :param attributes: a list of custom attribute dictionaries
+        :param key: the key used in the attribute dictionary (ex. ``attribute_code`` or ``label``)
         :returns: a single dictionary of all custom attributes formatted as ``{"attr": "val"}``
         """
-        return {attr['attribute_code']: attr['value'] for attr in attributes}
+        return {attr[key]: attr['value'] for attr in attributes}
+
+    @staticmethod
+    def pack_attributes(attribute_data: dict, key: str = 'attribute_code') -> list[dict]:
+        """Packs a dictionary containing attributes into a list of attribute dictionaries
+
+        **Example**::
+
+               >>> attribute_data = {'special_price': 12, 'meta_title': 'My Product'}
+               >>> print(Model.pack_attributes(attribute_data))
+               >>> print(Model.pack_attributes(attribute_data, key='label'))
+
+               [{'attribute_code': 'special_price', 'value': 12}, {'attribute_code': 'meta_title', 'value': 'My Product'}]
+               [{'label': 'special_price', 'value': 12}, {'label': 'meta_title', 'value': 'My Product'}]
+
+        :param attribute_data: a dictionary containing attribute data
+        :param key: the key to use when packing the attributes (ex. ``attribute_code`` or ``label``)
+        :returns: a list of dictionaries formatted as ``{ key : "attr", value: "value"}``
+        """
+        return [{key: attr, "value": val} for attr, val in attribute_data.items()]
 
     @staticmethod
     def encode(string: str) -> str:

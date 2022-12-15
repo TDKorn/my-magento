@@ -32,8 +32,8 @@ class Product(Model):
         self._categories = []
         self._children = []
 
-    def __str__(self):
-        return f'Magento Product: {self.sku}'
+    def __repr__(self):
+        return f'<Magento Product: {self.sku}>'
 
     @property
     def excluded_keys(self):
@@ -138,9 +138,13 @@ class Product(Model):
                 self._categories.append(self.client.categories.by_id(category_id))
         return self._categories
 
-    def update_stock(self, qty: int, scope: str = None):
+    def update_stock(self, qty: int) -> bool:
+        """Updates the stock quantity
+
+        :param qty: the new stock quantity
+        """
         endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
-        url = self.client.url_for(endpoint, scope)
+        url = self.client.url_for(endpoint)
         payload = {
             "stock_item": {
                 "qty": qty,
@@ -150,13 +154,16 @@ class Product(Model):
         }
         response = self.client.put(url, payload)
         if response.ok:
-            # Get updated product data
-            self.refresh(scope)
-            self.logger.info(f'Updated stock to {self.stock}')
+            self.refresh()
+            self.logger.info(f'Updated stock to {self.stock} for {self}')
+            return True
+
         else:
             self.logger.error(
-                f'Failed with status code {response.status_code}' + '\n' +
-                f'Message: {response.json()}')
+                f'Failed to update stock for {self} with status code {response.status_code}' + '\n' +
+                f'Message: {response.json()}'
+            )
+            return False
 
     def refresh(self, scope: str = None) -> bool:
         """Updates attributes with current product data from the API"""
@@ -165,7 +172,7 @@ class Product(Model):
 
         if response.ok:
             self.set_attrs(response.json())  # Update existing object attributes
-            self.logger.info(f'Refreshed {self.sku}')
+            self.logger.info(f"Refreshed {self.sku} on scope {scope if scope else self.client.scope or 'default'}")
             return True
 
         else:
@@ -175,24 +182,15 @@ class Product(Model):
             )
             return False
 
-    def update_status(self, status: int, scope: str = None) -> bool:
-        """Updates the product status on the default/specified store scope (and admin)
-
-        .. note:: The request is also sent using the ``all`` scope, since product status doesn't
-           automatically update in the admin
+    def update_status(self, status: int) -> bool:
+        """Updates the product status
 
         :param status: either 1 (for :attr:`~.STATUS_ENABLED`) or 2 (for :attr:`~.STATUS_DISABLED`)
-        :param scope: the store scope to send the request to (in addition to ``all``
         """
         if status not in [Product.STATUS_ENABLED, Product.STATUS_DISABLED]:
             raise ValueError('Invalid status provided')
 
-        for store_code in (scope, 'all'):
-            if not self.update_data({'status': status}, store_code):
-                return False  # Avoid updating admin if store update fails
-
-        self.refresh(scope)  # Set back to original scope
-        return self.status == status
+        return self.update_attributes({'status': status})
 
     def delete(self, scope: str = None) -> bool:
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
@@ -207,13 +205,14 @@ class Product(Model):
             )
             return False
 
-    def update_data(self, product_data, scope: str = None):
+    def _update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
         """Sends a PUT request to update **top-level** product attributes
 
-        .. tip:: to update custom attributes, use :meth:`~.update_custom_attributes` instead
+        .. tip:: to update attributes or custom attributes with attribute scope taken into account,
+            use :meth:`~.update_attributes` or :meth:`~.update_custom_attributes` instead
 
-        :param product_data: dict containing any number of top-level attributes to update
-        :param scope: the store scope to make the update on
+        :param attribute_data: dict containing any number of top-level attributes to update
+        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
         """
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
         payload = {
@@ -222,15 +221,15 @@ class Product(Model):
             },
             'save_options': True
         }
-        payload['product'].update(product_data)
+        payload['product'].update(attribute_data)
 
         response = self.client.put(url, payload)
         if response.ok:
             self.refresh(scope)
-            for key in product_data:
+            for key in attribute_data:
                 self.logger.info(
-                    f'Updated {key} for {self.sku} to {getattr(self, key)} ' +
-                    f'on scope {scope if scope else self.client.scope}')
+                    f"Updated {key} for {self.sku} to {getattr(self, key)} " +
+                    f"on scope {scope if scope else self.client.scope or 'default'}")
             return True
         else:
             self.logger.error(
@@ -238,12 +237,8 @@ class Product(Model):
                 f'Message: {response.json()}')
             return False
 
-    def update_custom_attributes(self, attribute_data: dict, scope: str = None):
-        attributes = [{"attribute_code": attr, "value": val} for attr, val in attribute_data.items()]
-        return self.update_data({'custom_attributes': attributes}, scope)
-
     def update_name(self, name: str, scope: str = None) -> bool:
-        return self.update_data({'name': name}, scope)
+        return self.update_attributes({'name': name}, scope)
 
     def update_description(self, description: str, scope: str = None) -> bool:
         return self.update_custom_attributes({'description': description}, scope)
@@ -257,15 +252,83 @@ class Product(Model):
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
         return self.update_custom_attributes(attributes, scope)
 
-    def update_price(self, price: Union[int, float], scope: str = None) -> bool:
-        return self.update_data({'price': price})
+    def update_price(self, price: Union[int, float]) -> bool:
+        return self.update_attributes({'price': price})
 
-    def update_special_price(self, price: Union[float, int], scope: str = None) -> bool:
+    def update_special_price(self, price: Union[float, int]) -> bool:
         if price < self.price:
             return self.update_custom_attributes({'special_price': price})
 
         self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
         return False
+
+    def update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+        """Update top level product attributes with scoping taken into account
+
+        .. note:: Product attributes can have a ``Global``, ``Store View`` or ``Website`` scope
+
+            :Global Attributes:
+                Values are updated on all store views and the admin
+            :Website Attributes:
+                Values are updated on all store views
+            :Store View Attributes:
+                Values are updated on the store view specified in the request ``scope``
+
+        A second request will be made to update ``Store View`` and ``Website`` attributes on the admin,
+        depending on how many :class:`~.Store` :attr:`~.views` you have:
+
+        * **1 View:** admin values are updated for all attributes, regardless of scope
+        * **2+ Views:** admin values are updated only for ``Website`` attributes
+
+        :param attribute_data: a dictionary of product attributes to update
+        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
+        """
+        if self.client.store.is_single_store:
+            return self._update_single_store(attribute_data)
+
+        if not self._update_attributes(attribute_data, scope):
+            return False
+
+        if website_attrs := self.client.store.filter_website_attrs(attribute_data):
+            return self._update_attributes(website_attrs, scope='all')
+        return True
+
+    def update_custom_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+        """Update custom attributes with scoping taken into account
+
+        See :meth:`~update_attributes` for details
+
+        .. important:: This method only supports **custom attributes**
+
+        :param attribute_data: a dictionary of custom attributes to update
+        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
+        """
+        attributes = {'custom_attributes': self.pack_attributes(attribute_data)}
+
+        if self.client.store.is_single_store:
+            return self._update_single_store(attributes)
+
+        if not self._update_attributes(attributes, scope):
+            return False
+
+        if website_attributes := self.client.store.filter_website_attrs(attribute_data):
+            return self._update_attributes({'custom_attributes': self.pack_attributes(website_attributes)}, scope='all')
+        return True
+
+    def _update_single_store(self, attribute_data: dict) -> bool:
+        """Internal function for updating a store with a single store view
+
+        All attributes will be updated on the ``default`` and ``all`` scope,
+        ensuring that the frontend and admin always have the same product data
+
+        :param attribute_data: a dictionary of custom product attributes to update
+        """
+        for store_code in (None, 'all'):
+            if not self._update_attributes(attribute_data, store_code):
+                return False  # Avoid updating admin if store update fails
+
+        self.refresh()  # Back to original scope
+        return True
 
 
 class MediaEntry(Model):
@@ -398,4 +461,8 @@ class ProductAttribute(Model):
 
     @property
     def excluded_keys(self) -> list[str]:
-        return []
+        return ['options']
+
+    @property
+    def options(self):
+        return self.unpack_attributes(self.__options, key='label')
