@@ -1,6 +1,13 @@
 from __future__ import annotations
+from functools import cached_property
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 from magento import clients
+import urllib.parse
+import inspect
+
+if TYPE_CHECKING:
+    from magento.search import SearchQuery
 
 
 class Model(ABC):
@@ -90,7 +97,7 @@ class Model(ABC):
         """
         pass
 
-    def query_endpoint(self):
+    def query_endpoint(self) -> SearchQuery:
         """Initializes and returns the :class:`~.SearchQuery` object corresponding to the Model's ``endpoint``
 
         :returns: a :class:`~.SearchQuery` or subclass, depending on the ``endpoint``
@@ -147,14 +154,28 @@ class Model(ABC):
     def encode(string: str) -> str:
         """URL-encode with :mod:`urllib`; used for requests that could contain special characters
 
-        |  **Example:** requests to the ``products`` endpoint contain a ``sku`` path parameter
-        |      **‣** Since a ``sku`` can contain characters like ``/`` and ``*``, it will always be encoded first
-        |      **‣** See :meth:`~.by_sku` or :attr:`~.encoded_sku`
-
         :param string: the string to URL-encode
         """
-        import urllib.parse
         return urllib.parse.quote_plus(string)
+
+    @cached_property
+    def cached(self) -> list[str]:
+        """Names of properties that are wrapped with :class:`~functools.cached_property`"""
+        return [member for member, val in inspect.getmembers(self.__class__) if
+                isinstance(val, cached_property) and member != 'cached']
+
+    def clear(self, *keys: str) -> None:
+        """Deletes the provided keys from the object's :attr:`__dict__`
+
+        To clear all cached properties::
+
+            >> self.clear(*self.cached)
+
+        :param keys: name of the object attribute(s) to delete
+        """
+        for key in keys:
+            self.__dict__.pop(key, None)
+        self.logger.debug(f'Cleared {keys} from {self}')
 
 
 class APIResponse(Model):

@@ -170,7 +170,7 @@ class Product(Model):
         response = self.client.get(url)
 
         if response.ok:
-            self.clear_cached()
+            self.clear(*self.cached)
             self.set_attrs(response.json())
             self.logger.info(f"Refreshed {self.sku} on scope {scope if scope else self.client.scope or 'default'}")
             return True
@@ -181,11 +181,6 @@ class Product(Model):
                     self.sku, response.status_code, response.json()["message"])
             )
             return False
-
-    def clear_cached(self):
-        """Clears all cached properties"""
-        for key in ('media_gallery_entries', 'children', 'categories', 'option_skus'):
-            self.__dict__.pop(key, None)
 
     def update_status(self, status: int) -> bool:
         """Updates the product status
