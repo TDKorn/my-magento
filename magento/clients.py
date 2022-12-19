@@ -6,6 +6,7 @@ from functools import cached_property
 from .utils import MagentoLogger, get_agent
 from .models import APIResponse, ProductAttribute
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch
+from .exceptions import AuthenticationError
 
 
 class Client(object):
@@ -316,36 +317,3 @@ class Store:
         for key in cached:
             self.__dict__.pop(key, None)
         return True
-
-
-class AuthenticationError(Exception):
-    DEFAULT_MSG = 'Failed to authenticate credentials. '
-
-    def __init__(self, client: Client, msg=None, response: requests.Response = None):
-        self.message = msg if msg else AuthenticationError.DEFAULT_MSG
-        self.logger = client.logger
-
-        if response is not None:
-            self.parse(response)
-
-        self.logger.error(self.message)
-        super().__init__(self.message)
-
-    def parse(self, response: requests.Response) -> None:
-        """Parses the error message from the response, including message parameters when available"""
-        msg = response.json().get('message')
-        errors = response.json().get('errors')
-
-        if msg:
-            self.message += ' ' + '\n' + f'Response: {msg}'
-
-        if errors:
-            for error in errors:
-                err_msg = error['message']
-                err_params = error.get('parameters')
-
-                if err_params:
-                    for param in err_params:
-                        err_msg = err_msg.replace(f'%{param}', err_params[param])
-
-                self.message += err_msg + '\n'

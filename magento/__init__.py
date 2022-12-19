@@ -2,6 +2,7 @@ from . import clients
 from . import search
 from . import models
 from . import utils
+from . import exceptions
 
 Client = clients.Client
 logger = utils.MagentoLogger(
