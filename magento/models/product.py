@@ -1,8 +1,11 @@
 from __future__ import annotations
 from functools import cached_property
-from magento import clients
-from typing import Union
-from . import Model, category
+from typing import Union, TYPE_CHECKING
+from . import Model
+
+if TYPE_CHECKING:
+    from . import Category
+    from magento import Client
 
 
 class Product(Model):
@@ -16,7 +19,7 @@ class Product(Model):
 
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/products/'
 
-    def __init__(self, data: dict, client: clients.Client):
+    def __init__(self, data: dict, client: Client):
         """Initialize a Product object
 
         :param data: the API response from the ``products`` endpoint
@@ -28,9 +31,6 @@ class Product(Model):
             endpoint='products',
             private_keys=True
         )
-        self._media_gallery_entries = []
-        self._categories = []
-        self._children = []
 
     def __repr__(self):
         return f'<Magento Product: {self.sku}>'
@@ -39,15 +39,12 @@ class Product(Model):
     def excluded_keys(self):
         return ['media_gallery_entries']
 
-    @property
+    @cached_property
     def media_gallery_entries(self) -> list[MediaEntry]:
         """Returns the media gallery entries as a list of :class:`MediaEntry` objects"""
-        if not self._media_gallery_entries:
-            if entries := self.__media_gallery_entries:
-                self._media_gallery_entries = [MediaEntry(self, entry) for entry in entries]
-        return self._media_gallery_entries
+        return [MediaEntry(self, entry) for entry in self.__media_gallery_entries]
 
-    @property
+    @cached_property
     def thumbnail(self) -> MediaEntry:
         """Returns the :class:`MediaEntry` corresponding to the product's thumbnail"""
         for entry in self.media_gallery_entries:
@@ -98,30 +95,32 @@ class Product(Model):
     def special_price(self) -> float:
         return self.custom_attributes.get('special_price')
 
-    def get_children(self, refresh: bool = False) -> list[Product]:
+    def get_children(self, refresh: bool = False, scope: str = None) -> list[Product]:
         """Retrieve the child simple products of a configurable product
 
         :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
+        :param scope: the scope to refresh the children on (when``refresh=True``)
         """
-        if self.type_id != 'configurable':
-            self.logger.info('Only configurable products have child SKUs')
-            return []
-
-        if not self._children:
-            url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
-            response = self.client.get(url)
-            if response.ok:
-                self._children = [self.parse(child) for child in response.json()]
-            else:
-                self.logger.error(f'Failed to get child products of {self.sku}')    # Will return empty list
-
         if refresh:
-            for child in self._children:
-                child.refresh()
+            for child in self.children:
+                child.refresh(scope)
+        return self.children
 
-        return self._children
+    @cached_property
+    def children(self) -> list[Product]:
+        """If the Product is a configurable product, returns a list of its child products"""
+        if self.type_id == 'configurable':
+            url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
+            if (response := self.client.get(url)).ok:
+                return [self.parse(child) for child in response.json()]
+            else:
+                self.logger.error(f'Failed to get child products of {self.sku}')
+        else:
+            self.logger.info('Only configurable products have child SKUs')
+        return []
 
-    def get_option_skus(self) -> list:
+    @cached_property
+    def option_skus(self) -> list[str]:
         """If there are additional options, each one has its own SKU (and API Responses use this SKU)."""
         option_skus = []
         if hasattr(self, 'options'):
@@ -132,11 +131,11 @@ class Product(Model):
                         option_skus.append(base_sku + '-' + val['sku'])
         return option_skus
 
-    def get_categories(self) -> list[category.Category]:
-        if not self._categories:
-            for category_id in self.custom_attributes.get('category_ids', []):
-                self._categories.append(self.client.categories.by_id(category_id))
-        return self._categories
+    @cached_property
+    def categories(self) -> list[Category]:
+        """Returns a list of categories the product is in"""
+        category_ids = self.custom_attributes.get('category_ids', [])
+        return [self.client.categories.by_id(category_id) for category_id in category_ids]
 
     def update_stock(self, qty: int) -> bool:
         """Updates the stock quantity
@@ -171,7 +170,8 @@ class Product(Model):
         response = self.client.get(url)
 
         if response.ok:
-            self.set_attrs(response.json())  # Update existing object attributes
+            self.clear_cached()
+            self.set_attrs(response.json())
             self.logger.info(f"Refreshed {self.sku} on scope {scope if scope else self.client.scope or 'default'}")
             return True
 
@@ -181,6 +181,11 @@ class Product(Model):
                     self.sku, response.status_code, response.json()["message"])
             )
             return False
+
+    def clear_cached(self):
+        """Clears all cached properties"""
+        for key in ('media_gallery_entries', 'children', 'categories', 'option_skus'):
+            self.__dict__.pop(key, None)
 
     def update_status(self, status: int) -> bool:
         """Updates the product status
@@ -446,7 +451,7 @@ class MediaEntry(Model):
 
 class ProductAttribute(Model):
 
-    def __init__(self, data: dict, client: clients.Client):
+    def __init__(self, data: dict, client: Client):
         """Initialize a ProductAttribute object
 
         :param data: the API response from the ``products/attributes`` endpoint
