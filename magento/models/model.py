@@ -177,6 +177,10 @@ class Model(ABC):
             self.__dict__.pop(key, None)
         self.logger.debug(f'Cleared {keys} from {self}')
 
+    def get_scope_name(self, scope: str) -> str:
+        """Returns the appropriate scope name to use for logging messages"""
+        return scope or 'default' if scope is not None else self.client.scope or 'default'
+
 
 class APIResponse(Model):
 

@@ -41,35 +41,39 @@ class Product(Model):
 
     @cached_property
     def media_gallery_entries(self) -> list[MediaEntry]:
-        """Returns the media gallery entries as a list of :class:`MediaEntry` objects"""
+        """The product's media gallery entries, returned as a list of :class:`MediaEntry` objects"""
         return [MediaEntry(self, entry) for entry in self.__media_gallery_entries]
 
     @cached_property
     def thumbnail(self) -> MediaEntry:
-        """Returns the :class:`MediaEntry` corresponding to the product's thumbnail"""
+        """The :class:`MediaEntry` corresponding to the product's thumbnail"""
         for entry in self.media_gallery_entries:
             if entry.is_thumbnail:
                 return entry
 
     @property
     def thumbnail_link(self) -> str:
-        """Returns the link to the product :attr:`~.thumbnail`"""
+        """Link of the product's :attr:`~.thumbnail` image"""
         if self.thumbnail:
             return self.thumbnail.link
 
     def get_media_by_id(self, entry_id: int) -> MediaEntry:
-        """Access a :class:`MediaEntry` of the product by id"""
+        """Access a :class:`MediaEntry` of the product by id
+
+        :param entry_id: the id of the media gallery entry
+        """
         for entry in self.media_gallery_entries:
             if entry.id == entry_id:
                 return entry
 
     @property
     def encoded_sku(self) -> str:
-        """URL-encoded SKU, which is required when an endpoint URL contains a SKU"""
+        """URL-encoded SKU, which is used in request endpoints"""
         return self.encode(self.sku)
 
     @property
     def stock_item(self) -> dict:
+        """Stock data from the StockItem Interface"""
         if hasattr(self, 'extension_attributes'):  # Missing if product was retrieved by id
             if stock_data := self.extension_attributes.get('stock_item', {}):
                 return stock_data
@@ -79,20 +83,24 @@ class Product(Model):
 
     @property
     def stock(self) -> int:
+        """Current stock quantity"""
         if self.stock_item:
             return self.stock_item['qty']
 
     @property
     def stock_item_id(self) -> int:
+        """Item id of the StockItem, used to :meth:`~.update_stock`"""
         if self.stock_item:
             return self.stock_item['item_id']
 
     @property
     def description(self) -> str:
+        """Product description (as HTML)"""
         return self.custom_attributes.get('description', '')
 
     @property
     def special_price(self) -> float:
+        """The current special (sale) price"""
         return self.custom_attributes.get('special_price')
 
     def get_children(self, refresh: bool = False, scope: str = None) -> list[Product]:
@@ -114,14 +122,18 @@ class Product(Model):
             if (response := self.client.get(url)).ok:
                 return [self.parse(child) for child in response.json()]
             else:
-                self.logger.error(f'Failed to get child products of {self.sku}')
+                self.logger.error(f'Failed to get child products of {self}')
         else:
             self.logger.info('Only configurable products have child SKUs')
         return []
 
     @cached_property
     def option_skus(self) -> list[str]:
-        """If there are additional options, each one has its own SKU (and API Responses use this SKU)."""
+        """The full SKUs for the product's customizable options, if they exist
+
+        .. hint:: When a product with customizable options is ordered, these SKUs are used by the API when
+            retrieving and searching for :class:`~.Order` and :class:`~.OrderItem` data
+        """
         option_skus = []
         if hasattr(self, 'options'):
             for option in self.options:
@@ -133,7 +145,7 @@ class Product(Model):
 
     @cached_property
     def categories(self) -> list[Category]:
-        """Returns a list of categories the product is in"""
+        """Categories the product is in, returned as a list of :class:`~.Category` objects"""
         category_ids = self.custom_attributes.get('category_ids', [])
         return [self.client.categories.by_id(category_id) for category_id in category_ids]
 
@@ -152,6 +164,7 @@ class Product(Model):
             'save_options': True
         }
         response = self.client.put(url, payload)
+
         if response.ok:
             self.refresh()
             self.logger.info(f'Updated stock to {self.stock} for {self}')
@@ -165,25 +178,40 @@ class Product(Model):
             return False
 
     def refresh(self, scope: str = None) -> bool:
-        """Updates attributes with current product data from the API"""
+        """Requests current product data from the API, then uses it to update object attributes in place
+
+        .. tip:: This can be used to switch scopes without creating a new object or changing the :class:`~.Client` scope
+
+           **Example**::
+
+               # Get product data on 'default' scope
+               >> product = client.products.by_sku('sku42')
+               # Get fresh product data
+               >> product.refresh()
+               # Get fresh product data from different scope
+               >> product.refresh('all')
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
         response = self.client.get(url)
 
         if response.ok:
             self.clear(*self.cached)
             self.set_attrs(response.json())
-            self.logger.info(f"Refreshed {self.sku} on scope {scope if scope else self.client.scope or 'default'}")
+            self.logger.info(
+                f"Refreshed {self} on scope {self.get_scope_name(scope)}")
             return True
 
         else:
             self.logger.error(
-                'Failed to refresh SKU {}\nError Code: {}\nMessage: {}'.format(
-                    self.sku, response.status_code, response.json()["message"])
+                'Failed to refresh{}\nError Code: {}\nMessage: {}'.format(
+                    self, response.status_code, response.json()["message"])
             )
             return False
 
     def update_status(self, status: int) -> bool:
-        """Updates the product status
+        """Update the product status
 
         :param status: either 1 (for :attr:`~.STATUS_ENABLED`) or 2 (for :attr:`~.STATUS_DISABLED`)
         """
@@ -192,16 +220,23 @@ class Product(Model):
 
         return self.update_attributes({'status': status})
 
-    def delete(self, scope: str = None) -> bool:
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+    def delete(self) -> bool:
+        """Deletes the product
+
+        .. tip:: If you delete a product by accident, the :class:`Product` object's ``data`` attribute will still
+         contain the raw data, which can be used to recover it.
+
+         Alternatively, don't delete it by accident.
+        """
+        url = self.client.url_for(f'products/{self.encoded_sku}')
         response = self.client.delete(url)
 
         if response.ok and response.json() is True:
-            self.logger.info(f'Deleted {self.sku}')
+            self.logger.info(f'Deleted {self}')
             return True
         else:
             self.logger.error(
-                f'Failed to delete {self.sku}. Message: {response.json()["message"]}'
+                f'Failed to delete {self}. Message: {response.json()["message"]}'
             )
             return False
 
@@ -212,7 +247,7 @@ class Product(Model):
             use :meth:`~.update_attributes` or :meth:`~.update_custom_attributes` instead
 
         :param attribute_data: dict containing any number of top-level attributes to update
-        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
         url = self.client.url_for(f'products/{self.encoded_sku}', scope)
         payload = {
@@ -228,8 +263,7 @@ class Product(Model):
             self.refresh(scope)
             for key in attribute_data:
                 self.logger.info(
-                    f"Updated {key} for {self.sku} to {getattr(self, key)} " +
-                    f"on scope {scope if scope else self.client.scope or 'default'}")
+                    f"Updated {key} for {self} to {getattr(self, key)} on scope {self.get_scope_name(scope)}")
             return True
         else:
             self.logger.error(
@@ -238,24 +272,42 @@ class Product(Model):
             return False
 
     def update_name(self, name: str, scope: str = None) -> bool:
+        """Update the product name
+
+        :param name: the new name to use
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         return self.update_attributes({'name': name}, scope)
 
     def update_description(self, description: str, scope: str = None) -> bool:
+        """Update the product description
+
+        :param description: the new HTML description to use
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         return self.update_custom_attributes({'description': description}, scope)
 
     def update_metadata(self, metadata: dict, scope: str = None) -> bool:
-        """Updates product metadata
+        """Update the product metadata
 
         :param metadata: the new ``meta_title``, ``meta_keyword`` and/or ``meta_description`` to use
-        :param scope: the store scope to update
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
         return self.update_custom_attributes(attributes, scope)
 
     def update_price(self, price: Union[int, float]) -> bool:
+        """Update the product price
+
+        :param price: the new price
+        """
         return self.update_attributes({'price': price})
 
     def update_special_price(self, price: Union[float, int]) -> bool:
+        """Update the product special price
+
+        :param price: the new special price
+        """
         if price < self.price:
             return self.update_custom_attributes({'special_price': price})
 
@@ -281,7 +333,7 @@ class Product(Model):
         * **2+ Views:** admin values are updated only for ``Website`` attributes
 
         :param attribute_data: a dictionary of product attributes to update
-        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
         if self.client.store.is_single_store:
             return self._update_single_store(attribute_data)
@@ -301,7 +353,7 @@ class Product(Model):
         .. important:: This method only supports **custom attributes**
 
         :param attribute_data: a dictionary of custom attributes to update
-        :param scope: the scope to send the request on; will use the :attr:`~.Client.scope` if not provided
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
         attributes = {'custom_attributes': self.pack_attributes(attribute_data)}
 
@@ -327,7 +379,7 @@ class Product(Model):
             if not self._update_attributes(attribute_data, store_code):
                 return False  # Avoid updating admin if store update fails
 
-        self.refresh()  # Back to original scope
+        self.refresh()  # Back to default scope
         return True
 
 
@@ -343,6 +395,9 @@ class MediaEntry(Model):
         )
         self.product = product
 
+    def __repr__(self):
+        return f"<MediaEntry {self.id} for {self.product}: {self.label}>"
+
     @property
     def excluded_keys(self):
         return []
@@ -357,89 +412,148 @@ class MediaEntry(Model):
 
     @cached_property
     def link(self):
+        """Permalink to the image"""
         return self.client.store.active.base_media_url + 'catalog/product' + self.file
 
-    def disable(self) -> bool:
+    def disable(self, scope: str = None) -> bool:
+        """Disables the MediaEntry on the given scope
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         self.data['disabled'] = True
-        return self.update(refresh_product=False)
+        return self.update(scope)
 
-    def enable(self) -> bool:
+    def enable(self, scope: str = None) -> bool:
+        """Enables the MediaEntry on the given scope
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         self.data['disabled'] = False
-        return self.update(refresh_product=False)
+        return self.update(scope)
 
-    def add_media_type(self, media_type: str) -> bool:
+    def add_media_type(self, media_type: str, scope: str = None) -> bool:
+        """Add a media type to the MediaEntry on the given scope
+
+        .. caution:: If the media type is already assigned to a different entry, it will be removed
+
+        :param media_type: one of the :attr:`~.MEDIA_TYPES`
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         if media_type in self.MEDIA_TYPES and media_type not in self.types:
             self.data['types'].append(media_type)
-            return self.update()
+            return self.update(scope)
 
-    def remove_media_type(self, media_type: str) -> bool:
+    def remove_media_type(self, media_type: str, scope: str = None) -> bool:
+        """Remove a media type from the MediaEntry on the given scope
+
+        :param media_type: one of the :attr:`~MEDIA_TYPES`
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         if media_type in self.types:
             self.data['types'].remove(media_type)
-            return self.update()
+            return self.update(scope)
 
-    def set_media_types(self, types: list) -> bool:
+        self.logger.error(f'{media_type} is not currently assigned to {self}')
+        return False
+
+    def set_media_types(self, types: list, scope: str = None) -> bool:
+        """Set media types for the MediaEntry on the given scope
+
+        :param types: a list containing all :attr:`~MEDIA_TYPES` to assign
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         if not isinstance(types, list):
             raise TypeError('types must be a list')
 
-        types = [t for t in types if t in self.MEDIA_TYPES]
-        self.data['types'] = types
-        return self.update()
+        self.data['types'] = [t for t in types if t in self.MEDIA_TYPES]
+        return self.update(scope)
 
-    def set_position(self, position: int):
+    def set_position(self, position: int, scope: str = None) -> bool:
+        """Set the position of the MediaEntry on the given scope
+
+        :param position: the position to change to
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         if not isinstance(position, int):
             raise TypeError('position must be an int')
 
         self.data['position'] = position
-        return self.update()
+        return self.update(scope)
 
-    def set_alt_text(self, text: str) -> bool:
+    def set_alt_text(self, text: str, scope: str = None) -> bool:
+        """Set the alt text (``label``) of the MediaEntry on the given scope
+
+        :param text: the alt text to use
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
         if not isinstance(text, str):
             raise TypeError('text must be a string')
 
         self.data['label'] = text
-        return self.update(refresh_product=False)
+        return self.update(scope)
 
-    def update(self, refresh_product: bool = True) -> bool:
+    def update(self, scope: str = None) -> bool:
         """Uses the :attr:`~.data` dict to update the media entry
 
-        .. note:: Some updates (ex. changing the position or the type) can alter the data of other media gallery
-            entries,; setting ``refresh_product=True`` ensures the :class:`Product` always has accurate data
+        .. note:: Some updates alter the data of other entries; if the update is successful, the
+            associated :class:`Product` will be refreshed on the same scope to keep the data consistent
 
-        :param refresh_product: if True, will also refresh the product after updating
+        .. tip:: If there's only 1 store view, the admin will also be updated
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
-        url = self.client.url_for(self.endpoint)
-        success = True
-
-        response = self.client.put(url, payload={'entry': self.data})
-        if response.ok and response.json() is True:
-            self.logger.info(
-                f'Updated media entry {self.id} for {self.product}'
-            )
+        if self.client.store.is_single_store:
+            success = self._update_single_store()
         else:
-            success = False
-            self.logger.error(
-                f'Failed to update media entry {self.id} for {self.product}'
-            )
-        self.refresh()
+            success = self._update(scope)
 
-        if refresh_product:
-            self.product._media_gallery_entries.clear()
-            self.product.refresh()
+        self.refresh(scope)  # Get updated data if success or reset to accurate data if failed
+
+        if success:
+            self.product.refresh(scope)
 
         return success
 
-    def refresh(self) -> bool:
-        url = self.client.url_for(self.endpoint)
+    def _update_single_store(self):
+        """Updates the MediaEntry data on the default store view and admin"""
+        for scope in (None, 'all'):
+            if not self._update(scope):
+                return False  # Avoid updating admin if store update fails
+        return True
+
+    def _update(self, scope: str = None) -> bool:
+        url = self.client.url_for(self.endpoint, scope)
+        response = self.client.put(url, payload={'entry': self.data})
+
+        if response.ok and response.json() is True:
+            self.logger.info(
+                f"Updated {self} on scope {self.get_scope_name(scope)}"
+            )
+            return True
+        else:
+            self.logger.error(
+                f"Failed to update {self} on scope {self.get_scope_name(scope)}"
+            )
+            return False
+
+    def refresh(self, scope: str = None) -> bool:
+        """Refresh the MediaEntry with current data from the API
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
+        url = self.client.url_for(self.endpoint, scope)
         response = self.client.get(url)
 
         if response.ok:
             self.set_attrs(response.json())
-            self.logger.info(f'Refreshed media entry {self.id} for {self.product}')
+            self.logger.info(
+                f"Refreshed {self} on scope {self.get_scope_name(scope)}"
+            )
             return True
         else:
             self.logger.error(
-                'Failed to refresh media entry {}\nError Code: {}\nMessage: {}'.format(
-                    self.id, response.status_code, response.json()["message"])
+                'Failed to refresh {}\nError Code: {}\nMessage: {}'.format(
+                    self, response.status_code, response.json()["message"])
             )
             return False
 
@@ -458,6 +572,9 @@ class ProductAttribute(Model):
             endpoint='products/attributes',
             private_keys=True
         )
+
+    def __repr__(self):
+        return f"<Product Attribute: {self.attribute_code}>"
 
     @property
     def excluded_keys(self) -> list[str]:
