@@ -39,116 +39,6 @@ class Product(Model):
     def excluded_keys(self):
         return ['media_gallery_entries']
 
-    @cached_property
-    def media_gallery_entries(self) -> list[MediaEntry]:
-        """The product's media gallery entries, returned as a list of :class:`MediaEntry` objects"""
-        return [MediaEntry(self, entry) for entry in self.__media_gallery_entries]
-
-    @cached_property
-    def thumbnail(self) -> MediaEntry:
-        """The :class:`MediaEntry` corresponding to the product's thumbnail"""
-        for entry in self.media_gallery_entries:
-            if entry.is_thumbnail:
-                return entry
-
-    @property
-    def thumbnail_link(self) -> str:
-        """Link of the product's :attr:`~.thumbnail` image"""
-        if self.thumbnail:
-            return self.thumbnail.link
-
-    def get_media_by_id(self, entry_id: int) -> MediaEntry:
-        """Access a :class:`MediaEntry` of the product by id
-
-        :param entry_id: the id of the media gallery entry
-        """
-        for entry in self.media_gallery_entries:
-            if entry.id == entry_id:
-                return entry
-
-    @property
-    def encoded_sku(self) -> str:
-        """URL-encoded SKU, which is used in request endpoints"""
-        return self.encode(self.sku)
-
-    @property
-    def stock_item(self) -> dict:
-        """Stock data from the StockItem Interface"""
-        if hasattr(self, 'extension_attributes'):  # Missing if product was retrieved by id
-            if stock_data := self.extension_attributes.get('stock_item', {}):
-                return stock_data
-        # Use the SKU to refresh attributes with full product data
-        self.refresh()
-        return self.stock_item
-
-    @property
-    def stock(self) -> int:
-        """Current stock quantity"""
-        if self.stock_item:
-            return self.stock_item['qty']
-
-    @property
-    def stock_item_id(self) -> int:
-        """Item id of the StockItem, used to :meth:`~.update_stock`"""
-        if self.stock_item:
-            return self.stock_item['item_id']
-
-    @property
-    def description(self) -> str:
-        """Product description (as HTML)"""
-        return self.custom_attributes.get('description', '')
-
-    @property
-    def special_price(self) -> float:
-        """The current special (sale) price"""
-        return self.custom_attributes.get('special_price')
-
-    def get_children(self, refresh: bool = False, scope: str = None) -> list[Product]:
-        """Retrieve the child simple products of a configurable product
-
-        :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
-        :param scope: the scope to refresh the children on (when``refresh=True``)
-        """
-        if refresh:
-            for child in self.children:
-                child.refresh(scope)
-        return self.children
-
-    @cached_property
-    def children(self) -> list[Product]:
-        """If the Product is a configurable product, returns a list of its child products"""
-        if self.type_id == 'configurable':
-            url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
-            if (response := self.client.get(url)).ok:
-                return [self.parse(child) for child in response.json()]
-            else:
-                self.logger.error(f'Failed to get child products of {self}')
-        else:
-            self.logger.info('Only configurable products have child SKUs')
-        return []
-
-    @cached_property
-    def option_skus(self) -> list[str]:
-        """The full SKUs for the product's customizable options, if they exist
-
-        .. hint:: When a product with customizable options is ordered, these SKUs are used by the API when
-            retrieving and searching for :class:`~.Order` and :class:`~.OrderItem` data
-        """
-        option_skus = []
-        if hasattr(self, 'options'):
-            for option in self.options:
-                base_sku = option['product_sku']
-                for val in option['values']:
-                    if val.get('sku'):
-                        option_skus.append(base_sku + '-' + val['sku'])
-        return option_skus
-
-    @cached_property
-    def categories(self) -> list[Category]:
-        """Categories the product is in, returned as a list of :class:`~.Category` objects"""
-        category_ids = self.custom_attributes.get('category_ids', [])
-        return [self.client.categories.by_id(category_id) for category_id in category_ids]
-
     def update_stock(self, qty: int) -> bool:
         """Updates the stock quantity
 
@@ -177,39 +67,6 @@ class Product(Model):
             )
             return False
 
-    def refresh(self, scope: str = None) -> bool:
-        """Requests current product data from the API, then uses it to update object attributes in place
-
-        .. tip:: This can be used to switch scopes without creating a new object or changing the :class:`~.Client` scope
-
-           **Example**::
-
-               # Get product data on 'default' scope
-               >> product = client.products.by_sku('sku42')
-               # Get fresh product data
-               >> product.refresh()
-               # Get fresh product data from different scope
-               >> product.refresh('all')
-
-        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
-        """
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
-        response = self.client.get(url)
-
-        if response.ok:
-            self.clear(*self.cached)
-            self.set_attrs(response.json())
-            self.logger.info(
-                f"Refreshed {self} on scope {self.get_scope_name(scope)}")
-            return True
-
-        else:
-            self.logger.error(
-                'Failed to refresh{}\nError Code: {}\nMessage: {}'.format(
-                    self, response.status_code, response.json()["message"])
-            )
-            return False
-
     def update_status(self, status: int) -> bool:
         """Update the product status
 
@@ -220,56 +77,23 @@ class Product(Model):
 
         return self.update_attributes({'status': status})
 
-    def delete(self) -> bool:
-        """Deletes the product
+    def update_price(self, price: Union[int, float]) -> bool:
+        """Update the product price
 
-        .. tip:: If you delete a product by accident, the :class:`Product` object's ``data`` attribute will still
-         contain the raw data, which can be used to recover it.
-
-         Alternatively, don't delete it by accident.
+        :param price: the new price
         """
-        url = self.client.url_for(f'products/{self.encoded_sku}')
-        response = self.client.delete(url)
+        return self.update_attributes({'price': price})
 
-        if response.ok and response.json() is True:
-            self.logger.info(f'Deleted {self}')
-            return True
-        else:
-            self.logger.error(
-                f'Failed to delete {self}. Message: {response.json()["message"]}'
-            )
-            return False
+    def update_special_price(self, price: Union[float, int]) -> bool:
+        """Update the product special price
 
-    def _update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
-        """Sends a PUT request to update **top-level** product attributes
-
-        .. tip:: to update attributes or custom attributes with attribute scope taken into account,
-            use :meth:`~.update_attributes` or :meth:`~.update_custom_attributes` instead
-
-        :param attribute_data: dict containing any number of top-level attributes to update
-        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        :param price: the new special price
         """
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
-        payload = {
-            "product": {
-                "sku": self.sku
-            },
-            'save_options': True
-        }
-        payload['product'].update(attribute_data)
+        if price < self.price:
+            return self.update_custom_attributes({'special_price': price})
 
-        response = self.client.put(url, payload)
-        if response.ok:
-            self.refresh(scope)
-            for key in attribute_data:
-                self.logger.info(
-                    f"Updated {key} for {self} to {getattr(self, key)} on scope {self.get_scope_name(scope)}")
-            return True
-        else:
-            self.logger.error(
-                f'Failed with status code {response.status_code}' + '\n' +
-                f'Message: {response.json()}')
-            return False
+        self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
+        return False
 
     def update_name(self, name: str, scope: str = None) -> bool:
         """Update the product name
@@ -295,24 +119,6 @@ class Product(Model):
         """
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
         return self.update_custom_attributes(attributes, scope)
-
-    def update_price(self, price: Union[int, float]) -> bool:
-        """Update the product price
-
-        :param price: the new price
-        """
-        return self.update_attributes({'price': price})
-
-    def update_special_price(self, price: Union[float, int]) -> bool:
-        """Update the product special price
-
-        :param price: the new special price
-        """
-        if price < self.price:
-            return self.update_custom_attributes({'special_price': price})
-
-        self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
-        return False
 
     def update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
         """Update top level product attributes with scoping taken into account
@@ -381,6 +187,200 @@ class Product(Model):
 
         self.refresh()  # Back to default scope
         return True
+
+    def _update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+        """Sends a PUT request to update **top-level** product attributes
+
+        .. tip:: to update attributes or custom attributes with attribute scope taken into account,
+            use :meth:`~.update_attributes` or :meth:`~.update_custom_attributes` instead
+
+        :param attribute_data: dict containing any number of top-level attributes to update
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        payload = {
+            "product": {
+                "sku": self.sku
+            },
+            'save_options': True
+        }
+        payload['product'].update(attribute_data)
+
+        response = self.client.put(url, payload)
+        if response.ok:
+            self.refresh(scope)
+            for key in attribute_data:
+                self.logger.info(
+                    f"Updated {key} for {self} to {getattr(self, key)} on scope {self.get_scope_name(scope)}")
+            return True
+        else:
+            self.logger.error(
+                f'Failed with status code {response.status_code}' + '\n' +
+                f'Message: {response.json()}')
+            return False
+
+    def refresh(self, scope: str = None) -> bool:
+        """Requests current product data from the API, then uses it to update object attributes in place
+
+        .. tip:: This can be used to switch scopes without creating a new object or changing the :class:`~.Client` scope
+
+           **Example**::
+
+               # Get product data on 'default' scope
+               >> product = client.products.by_sku('sku42')
+               # Get fresh product data
+               >> product.refresh()
+               # Get fresh product data from different scope
+               >> product.refresh('all')
+
+        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
+        """
+        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        response = self.client.get(url)
+
+        if response.ok:
+            self.clear(*self.cached)
+            self.set_attrs(response.json())
+            self.logger.info(
+                f"Refreshed {self} on scope {self.get_scope_name(scope)}")
+            return True
+
+        else:
+            self.logger.error(
+                'Failed to refresh{}\nError Code: {}\nMessage: {}'.format(
+                    self, response.status_code, response.json()["message"])
+            )
+            return False
+
+    def delete(self) -> bool:
+        """Deletes the product
+
+        .. tip:: If you delete a product by accident, the :class:`Product` object's ``data`` attribute will still
+         contain the raw data, which can be used to recover it.
+
+         Alternatively, don't delete it by accident.
+        """
+        url = self.client.url_for(f'products/{self.encoded_sku}')
+        response = self.client.delete(url)
+
+        if response.ok and response.json() is True:
+            self.logger.info(f'Deleted {self}')
+            return True
+        else:
+            self.logger.error(
+                f'Failed to delete {self}. Message: {response.json()["message"]}'
+            )
+            return False
+
+    def get_children(self, refresh: bool = False, scope: str = None) -> list[Product]:
+        """Retrieve the child simple products of a configurable product
+
+        :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
+        :param scope: the scope to refresh the children on (when``refresh=True``)
+        """
+        if refresh:
+            for child in self.children:
+                child.refresh(scope)
+        return self.children
+
+    @cached_property
+    def children(self) -> list[Product]:
+        """If the Product is a configurable product, returns a list of its child products"""
+        if self.type_id == 'configurable':
+            url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
+            if (response := self.client.get(url)).ok:
+                return [self.parse(child) for child in response.json()]
+            else:
+                self.logger.error(f'Failed to get child products of {self}')
+        else:
+            self.logger.info('Only configurable products have child SKUs')
+        return []
+
+    @cached_property
+    def categories(self) -> list[Category]:
+        """Categories the product is in, returned as a list of :class:`~.Category` objects"""
+        category_ids = self.custom_attributes.get('category_ids', [])
+        return [self.client.categories.by_id(category_id) for category_id in category_ids]
+
+    @cached_property
+    def media_gallery_entries(self) -> list[MediaEntry]:
+        """The product's media gallery entries, returned as a list of :class:`MediaEntry` objects"""
+        return [MediaEntry(self, entry) for entry in self.__media_gallery_entries]
+
+    @cached_property
+    def thumbnail(self) -> MediaEntry:
+        """The :class:`MediaEntry` corresponding to the product's thumbnail"""
+        for entry in self.media_gallery_entries:
+            if entry.is_thumbnail:
+                return entry
+
+    @property
+    def thumbnail_link(self) -> str:
+        """Link of the product's :attr:`~.thumbnail` image"""
+        if self.thumbnail:
+            return self.thumbnail.link
+
+    def get_media_by_id(self, entry_id: int) -> MediaEntry:
+        """Access a :class:`MediaEntry` of the product by id
+
+        :param entry_id: the id of the media gallery entry
+        """
+        for entry in self.media_gallery_entries:
+            if entry.id == entry_id:
+                return entry
+
+    @property
+    def encoded_sku(self) -> str:
+        """URL-encoded SKU, which is used in request endpoints"""
+        return self.encode(self.sku)
+
+    @cached_property
+    def option_skus(self) -> list[str]:
+        """The full SKUs for the product's customizable options, if they exist
+
+        .. hint:: When a product with customizable options is ordered, these SKUs are used by the API when
+            retrieving and searching for :class:`~.Order` and :class:`~.OrderItem` data
+        """
+        option_skus = []
+        if hasattr(self, 'options'):
+            for option in self.options:
+                base_sku = option['product_sku']
+                for val in option['values']:
+                    if val.get('sku'):
+                        option_skus.append(base_sku + '-' + val['sku'])
+        return option_skus
+
+    @property
+    def stock(self) -> int:
+        """Current stock quantity"""
+        if self.stock_item:
+            return self.stock_item['qty']
+
+    @property
+    def stock_item(self) -> dict:
+        """Stock data from the StockItem Interface"""
+        if hasattr(self, 'extension_attributes'):  # Missing if product was retrieved by id
+            if stock_data := self.extension_attributes.get('stock_item', {}):
+                return stock_data
+        # Use the SKU to refresh attributes with full product data
+        self.refresh()
+        return self.stock_item
+
+    @property
+    def stock_item_id(self) -> int:
+        """Item id of the StockItem, used to :meth:`~.update_stock`"""
+        if self.stock_item:
+            return self.stock_item['item_id']
+
+    @property
+    def description(self) -> str:
+        """Product description (as HTML)"""
+        return self.custom_attributes.get('description', '')
+
+    @property
+    def special_price(self) -> float:
+        """The current special (sale) price"""
+        return self.custom_attributes.get('special_price')
 
 
 class MediaEntry(Model):
