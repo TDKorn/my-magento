@@ -107,3 +107,67 @@ class Order(Model):
             data.update(self.unpack_attributes(additional_info, key='key'))
         return data
 
+    @cached_property
+    def items(self):
+        return [OrderItem(item, self) for item in self.__items if item.get('parent_item') is None]
+
+
+class OrderItem(Model):
+
+    """Wrapper for the ``order/items`` endpoint"""
+
+    DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/ordersitems"
+
+    def __init__(self, item: dict, order: Optional[Order] = None, client: Optional[Client] = None):
+        """Initialize an OrderItem using an API response from the ``orders/items`` endpoint
+
+        .. note:: Initialization requires either a :class:`~.Client` or :class:`Order` object
+
+        :param item: API response from the ``orders/items`` endpoint
+        :param order: the :class:`Order` that this is an item of
+        :param client: the :class:`~.Client` to use (if not initializing with an Order)
+        :raise ValueError: if both the ``order`` and ``client`` aren't provided
+        """
+        if order is None and client is None:
+            raise ValueError('An Order or Client object must be provided')
+
+        super().__init__(
+            data=item,
+            client=client if client else order.client,
+            endpoint='orders/items'
+        )
+        self.order = order
+
+    def __repr__(self):
+        return f"<OrderItem ({self.sku})> from {self.order}"
+
+    @property
+    def excluded_keys(self) -> list[str]:
+        return []
+
+    @property
+    def order(self) -> Order:
+        """The corresponding :class:`Order`"""
+        return self._order
+
+    @order.setter
+    def order(self, order: Order):
+        if order is None:
+            self._order = self.client.orders.by_id(self.order_id)
+        elif isinstance(order, Order):
+            self._order = order
+        else:
+            raise TypeError
+
+    @cached_property
+    def product(self) -> Product:
+        """The corresponding simple :class:`~.Product`
+
+        If the ordered item:
+
+        * Is a configurable product - the child product is returned
+        * Has customizable options - the base product is returned
+        """
+        if self.product_type == 'simple':
+            return self.client.products.by_id(self.product_id)
+        return self.client.products.by_sku(self.sku)
