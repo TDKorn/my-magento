@@ -6,7 +6,7 @@ import copy
 
 if TYPE_CHECKING:
     from magento import Client
-    from . import Product
+    from . import Product, Invoice
 
 
 class Order(Model):
