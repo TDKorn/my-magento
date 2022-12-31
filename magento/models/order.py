@@ -47,8 +47,19 @@ class Order(Model):
 
     @cached_property
     def items(self) -> List[OrderItem]:
-        """The ordered items, returned as a list of :class:`OrderItem` objects"""
-        return [OrderItem(item, self) for item in self.__items if item.get('parent_item') is None]
+        """The ordered items, returned as a list of :class:`OrderItem` objects
+
+        .. note:: When a configurable :class:`~.Product` is ordered, the API returns data
+           for both the configurable and simple product
+
+           * The :class:`OrderItem` is initialized using the configurable product data, since
+             the simple product data is incomplete
+           * The :attr:`~.OrderItem.product` and :attr:`~.OrderItem.product_id` will still
+             match the simple product though
+
+           If both entries are needed, the unparsed response is in the :attr:`~.data` dict
+        """
+        return [OrderItem(item, order=self) for item in self.__items if item.get('parent_item') is None]
 
     @cached_property
     def item_ids(self) -> List[int]:
@@ -176,7 +187,7 @@ class OrderItem(Model):
 
     DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/ordersitems"
 
-    def __init__(self, item: dict, order: Optional[Order] = None, client: Optional[Client] = None):
+    def __init__(self, item: dict, client: Optional[Client] = None, order: Optional[Order] = None):
         """Initialize an OrderItem using an API response from the ``orders/items`` endpoint
 
         .. note:: Initialization requires either a :class:`~.Client` or :class:`Order` object
@@ -206,7 +217,7 @@ class OrderItem(Model):
 
     @property
     def excluded_keys(self) -> list[str]:
-        return []
+        return ['product_id']
 
     @property
     def order(self) -> Order:
@@ -224,16 +235,32 @@ class OrderItem(Model):
 
     @cached_property
     def product(self) -> Product:
-        """The corresponding simple :class:`~.Product`
+        """The item's corresponding :class:`~.Product`
 
-        If the ordered item:
+        .. note:: **If the ordered item:**
 
-        * Is a configurable product - the child product is returned
-        * Has customizable options - the base product is returned
+           * Is a configurable product - the child simple product is returned
+           * Has custom options - the base product is returned
         """
-        if self.product_type == 'simple':
+        if self.product_type != 'configurable':
             return self.client.products.by_id(self.product_id)
-        return self.client.products.by_sku(self.sku)
+
+        if not self.extension_attributes.get('custom_options'):
+            return self.client.products.by_sku(self.sku)
+
+        # Configurable + Custom Options -> configurable product id & unsearchable option sku
+        for item in self.order.data['items']:  # Get simple product id from response data
+            if item.get('parent_item_id') == self.item_id:
+                return self.client.products.by_id(item['product_id'])
+
+    @cached_property
+    def product_id(self) -> int:
+        """Id of the corresponding simple :class:`~.Product`"""
+        return self.__product_id if self.product_type != 'configurable' else self.product.id
+
+    @cached_property
+    def extension_attributes(self) -> dict:
+        return getattr(self, 'product_option', {}).get('extension_attributes', {})
 
     @cached_property
     def qty_outstanding(self) -> int:
