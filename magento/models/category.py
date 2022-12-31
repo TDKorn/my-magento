@@ -11,6 +11,8 @@ if TYPE_CHECKING:
 
 class Category(Model):
 
+    """Wrapper for the ``categories`` endpoint"""
+
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/categories'
 
     def __init__(self, data: dict, client: Client):
@@ -29,7 +31,11 @@ class Category(Model):
 
     @property
     def excluded_keys(self):
-        return []
+        return ['custom_attributes']
+
+    @cached_property
+    def custom_attributes(self):
+        return self.unpack_attributes(self.__custom_attributes)
 
     @cached_property
     def subcategories(self) -> list[Category]:

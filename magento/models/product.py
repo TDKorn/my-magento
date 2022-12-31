@@ -6,9 +6,13 @@ from . import Model
 if TYPE_CHECKING:
     from . import Category
     from magento import Client
+    from magento.search import SearchQuery
 
 
 class Product(Model):
+
+    """Wrapper for the ``products`` endpoint"""
+
     STATUS_ENABLED = 1
     STATUS_DISABLED = 2
 
@@ -20,7 +24,7 @@ class Product(Model):
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/products/'
 
     def __init__(self, data: dict, client: Client):
-        """Initialize a Product object
+        """Initialize a Product object using an API response from the ``products`` endpoint
 
         :param data: the API response from the ``products`` endpoint
         :param client: an initialized :class:`~.Client` object
@@ -385,9 +389,16 @@ class Product(Model):
 
 class MediaEntry(Model):
 
+    """Wraps a media gallery entry of a :class:`Product`"""
+
     MEDIA_TYPES = ['base', 'small', 'thumbnail', 'swatch']
 
     def __init__(self, product: Product, entry: dict):
+        """Initialize a MediaEntry object for a :class:`Product`
+
+        :param product: the :class:`Product` that the gallery entry is associated with
+        :param entry: the json response data to use as the source data
+        """
         super().__init__(
             data=entry,
             client=product.client,
@@ -397,6 +408,9 @@ class MediaEntry(Model):
 
     def __repr__(self):
         return f"<MediaEntry {self.id} for {self.product}: {self.label}>"
+
+    def query_endpoint(self) -> SearchQuery:
+        return self.logger.info("There is no search interface for media gallery entries")
 
     @property
     def excluded_keys(self):
@@ -560,8 +574,12 @@ class MediaEntry(Model):
 
 class ProductAttribute(Model):
 
+    """Wrapper for the ``products/attributes`` endpoint"""
+
+    DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/productsattributes/"
+
     def __init__(self, data: dict, client: Client):
-        """Initialize a ProductAttribute object
+        """Initialize a ProductAttribute object using an API response from the ``products/attributes`` endpoint
 
         :param data: the API response from the ``products/attributes`` endpoint
         :param client: an initialized :class:`~.Client` object
