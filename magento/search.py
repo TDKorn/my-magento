@@ -1,13 +1,12 @@
 from __future__ import annotations
 from typing import Union, Type, Iterable
-from .entities import Order, Invoice, Entity
-from .models import Product, Category, ProductAttribute, APIResponse, Model
+from .models import Product, Category, ProductAttribute, APIResponse, Model, Order, Invoice
 from . import clients
 
 
 class SearchQuery:
 
-    def __init__(self, endpoint: str, client: clients.Client, model: Union[Type[Model], Type[Entity]] = APIResponse):
+    def __init__(self, endpoint: str, client: clients.Client, model: Type[Model] = APIResponse):
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
@@ -140,7 +139,7 @@ class SearchQuery:
         else:  # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
-    def parse(self, data) -> Union[Model, Entity]:
+    def parse(self, data) -> Model:
         """Parses the API response and returns the corresponding entity/model object"""
         if self.Model is not APIResponse:
             return self.Model(data, self.client)
