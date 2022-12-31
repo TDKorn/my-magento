@@ -152,8 +152,12 @@ class SearchQuery:
         self.query = self.client.url_for(self.endpoint) + '/?'
 
     @property
-    def result_count(self):
-        return len(self.result) if self._result else 0
+    def result_count(self) -> int:
+        if not self._result or not self.result:
+            return 0
+        if isinstance(self.result, Model):
+            return 1
+        return len(self.result)
 
     @property
     def result_type(self):
@@ -295,6 +299,14 @@ class CategorySearch(SearchQuery):
         self.query = self.query.replace('categories', 'categories/list') + 'searchCriteria[currentPage]=1'
         return self.execute()
 
-    def by_name(self, name: str) -> Category:
-        """Search for a category by name"""
-        return self.add_criteria('name', name).execute()
+    def by_name(self, name: str, exact: bool = True) -> Union[Category, List[Category]]:
+        """Search categories by name
+
+        :param name: the category name to search for
+        :param exact: whether the name should be an exact match
+        """
+        self.query = self.query.replace('categories', 'categories/list')
+        if exact:
+            return self.add_criteria('name', name).execute()
+        else:
+            return self.add_criteria('name', f'%25{name}%25', 'like').execute()
