@@ -5,7 +5,7 @@ import requests
 from functools import cached_property
 from .utils import MagentoLogger, get_agent
 from .models import APIResponse, ProductAttribute
-from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch
+from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch
 
 
 class Client(object):
@@ -36,6 +36,10 @@ class Client(object):
         return OrderSearch(self)
 
     @property
+    def order_items(self) -> OrderItemSearch:
+        return OrderItemSearch(self)
+
+    @property
     def invoices(self) -> InvoiceSearch:
         return InvoiceSearch(self)
 
@@ -55,6 +59,8 @@ class Client(object):
         """Initializes and returns a SearchQuery object corresponding to the specified endpoint"""
         if endpoint.lower() == 'orders':
             return self.orders
+        if endpoint.lower() == 'orders/items':
+            return self.order_items
         if endpoint.lower() == 'invoices':
             return self.invoices
         if endpoint.lower() == 'categories':

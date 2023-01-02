@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Union, Type, Iterable
-from .models import Product, Category, ProductAttribute, APIResponse, Model, Order, Invoice
+from typing import Union, Type, Iterable, List
+from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
 from . import clients
 
 
@@ -171,6 +171,92 @@ class OrderSearch(SearchQuery):
             client=client,
             model=Order
         )
+
+
+class OrderItemSearch(SearchQuery):
+
+    def __init__(self, client):
+        super().__init__(
+            endpoint='orders/items',
+            client=client,
+            model=OrderItem
+        )
+
+    def by_product(self, product: Product) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`OrderItem` entries by :class:`~.Product`
+
+        .. note:: This will match OrderItems that contain
+
+           * Any of the child products of a configurable product
+           * Any of the :attr:`~.option_skus` of a product with custom options
+
+        :param product: the :class:`~.Product` to search for in order items
+        """
+        return self.by_product_id(product.id)
+
+    def by_sku(self, sku: str) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries by product sku.
+
+        .. admonition:: The SKU must be an exact match to the OrderItem SKU
+
+           OrderItems always use the SKU of a simple product, including any custom options.
+           This means that:
+
+           * Searching the SKU of a configurable product returns nothing
+           * If a product has custom options, the search will only find OrderItems
+             that contain the specific option sku (or base sku) that's provided
+
+           To search for OrderItems containing all :attr:`~.children` and all possible
+           :attr:`~.option_skus` of a product, use :meth:`~.by_product`
+
+        :param sku: the exact product sku to search for in order items
+        """
+        return self.add_criteria('sku', Model.encode(sku)).execute()
+
+    def by_product_id(self, product_id: Union[int, str]) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries by product id.
+
+        :param product_id: the product id to search for in order items
+        """
+        return self.add_criteria('product_id', product_id).execute()
+
+    def by_category_id(self, category_id: Union[int, str]) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`OrderItem` entries by category id
+
+        :param category_id: id of the category to search for in order items
+        :returns: any :class:`~.OrderItem` containing a product linked to the provided category id
+        """
+        return self.by_category(self.client.categories.by_id(category_id))
+
+    def by_category(self, category: Category) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries that contain any of the category's :attr:`~.Category.products`
+
+        :param category: the :class:`~.Category` to use in the search
+        :returns: any :class:`~.OrderItem` that contains a product in the provided category
+        """
+        product_ids = ','.join(f'{product.id}' for product in category.products)
+        return self.add_criteria(
+            field='product_id',
+            value=product_ids,
+            condition='in'
+        ).execute()
+
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Union[OrderItem, List[OrderItem]]:
+        """Search for :class:`~.OrderItem`s using a list or comma separated string of product SKUs
+
+        .. note:: SKUs must be URL-encoded
+
+        :param skulist: an iterable or comma separated string of product SKUs
+        """
+        if not isinstance(skulist, Iterable):
+            raise TypeError
+        if not isinstance(skulist, str):
+            skulist = ','.join(skulist)
+        return self.add_criteria(
+            field='sku',
+            value=skulist,
+            condition='in'
+        ).execute()
 
 
 class InvoiceSearch(SearchQuery):
