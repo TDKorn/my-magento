@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Union, Type, Iterable, List
+from functools import cached_property
+from typing import Union, Type, Iterable, List, Optional
 from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
 from . import clients
 
@@ -83,6 +84,7 @@ class SearchQuery:
     def execute(self):
         """Sends the search request through the active client."""
         response = self.client.get(self.query + self.fields)
+        self.__dict__.pop('result', None)
         self._result = response.json()
         return self.result
 
@@ -96,7 +98,7 @@ class SearchQuery:
             value=increment_id
         ).execute()
 
-    @property
+    @cached_property
     def result(self) -> Union[Model, list[Model]]:
         result = self.validate_result()
         if result is None:
@@ -149,6 +151,7 @@ class SearchQuery:
         self._result = {}
         self.fields = ''
         self.query = self.client.url_for(self.endpoint) + '/?'
+        self.__dict__.pop('result', None)
 
     @property
     def result_count(self) -> int:
@@ -181,6 +184,28 @@ class OrderItemSearch(SearchQuery):
             client=client,
             model=OrderItem
         )
+
+    @cached_property
+    def result(self) -> Union[Model, list[Model]]:
+        if result := super().result:
+            if isinstance(result, list):
+                return [item for item in result if item]
+        return result
+
+    def parse(self, data) -> Optional[Model]:
+        """Parses the API response data into fully hydrated :class:`~.OrderItem` objects
+
+        Extra validation is required for OrderItems, as duplicated and/or incomplete data is returned when
+        the child of a configurable product is searched :meth:`by_sku` or :meth:`by_product`
+
+        :param data: API response data
+        """
+        if data.get('parent_item'):
+            return None
+        if parent_id := data.get('parent_item_id'):
+            return self.client.order_items.by_id(parent_id)
+        else:
+            return super().parse(data)
 
     def by_product(self, product: Product) -> Union[OrderItem, List[OrderItem]]:
         """Search for :class:`OrderItem` entries by :class:`~.Product`
