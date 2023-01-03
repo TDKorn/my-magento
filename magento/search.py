@@ -1,30 +1,46 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Union, Type, Iterable, List, Optional
+from typing import Union, Type, Iterable, List, Optional, Dict, TYPE_CHECKING
 from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
 from . import clients
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+    from . import Client
 
 
 class SearchQuery:
 
-    def __init__(self, endpoint: str, client: clients.Client, model: Type[Model] = APIResponse):
+    """Queries any endpoint that invokes the searchCriteria interface. Parent of all endpoint-specific search classes
+
+        .. tip:: See https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/ for official docs
+    """
+
+    def __init__(self, endpoint: str, client: Client, model: Type[Model] = APIResponse):
+        """Initialize a SearchQuery object
+
+        :param endpoint: the base search API endpoint (for example, ``orders``)
+        :param client: an initialized :class:`~.Client` object
+        :param model: the :class:`~.Model` to parse the response data with; uses :class:`~.APIResponse` if not specified
+        """
         if not isinstance(client, clients.Client):
             raise TypeError(f'client type must be {clients.Client}')
 
-        self.client = client
+        self.client = client    #: the :class:`~.Client` to send the search request with
         self.endpoint = endpoint
         self.Model = model
         self.query = self.client.url_for(endpoint) + '/?'
         self.fields = ''
         self._result = {}
 
-    def add_criteria(self, field, value, condition='eq', **kwargs) -> SearchQuery:
-        """
-        :param field:       the object attribute to search by
-        :param value:       the value of the attribute to compare
-        :param condition:   the comparison condition
-        :param kwargs:      additional search option arguments
-        :return:            the calling SearchQuery object
+    def add_criteria(self, field, value, condition='eq', **kwargs) -> Self:
+        """Add criteria to the search query
+
+        :param field: the API response field to search by
+        :param value: the value of the field to compare
+        :param condition: the comparison condition
+        :param kwargs: additional search option arguments (``group`` and ``filter``)
+        :returns: the calling SearchQuery object
 
         *Options*
                 condition:  condition used to evaluate the attribute value
@@ -68,38 +84,58 @@ class SearchQuery:
         self.query += criteria
         return self
 
-    # Query -> &fields=items['field1,field2']
-    def restrict_fields(self, fields: Union[str, list, tuple]) -> SearchQuery:
+    def restrict_fields(self, fields: Iterable[str]) -> Self:
+        """Constrain the API response data to only contain the specified fields
+
+        :param fields: an iterable or comma separated string of fields to include in the response
+        :returns: the calling SearchQuery object
+        """
         if not isinstance(fields, str):
-            if not isinstance(fields, (list, tuple)):
-                raise TypeError('Invalid type for argument "fields". Must be a comma separated string or list/tuple.')
+            if not isinstance(fields, Iterable):
+                raise TypeError('"fields" must be a comma separated string or an iterable')
             fields = ','.join(fields)
 
-        if 'entity_id' not in fields:
-            fields = ','.join([fields, 'entity_id'])
+        # TODO:
+        #  if self.Model.identifier not in fields:
+        #  fields += f',{self.Model.identifier}'
 
         self.fields = f'&fields=items[{fields}]'
         return self
 
-    def execute(self):
-        """Sends the search request through the active client."""
+    def execute(self) -> Optional[Model | List[Model]]:
+        """Sends the search request using the current :attr:`~.scope` of the :attr:`client`
+
+        .. tip:: Change the :attr:`.Client.scope` to retrieve :attr:`~.result` data
+           from different store :attr:`~.views`
+
+        :returns: the search query :attr:`~.result`
+        """
         response = self.client.get(self.query + self.fields)
         self.__dict__.pop('result', None)
         self._result = response.json()
         return self.result
 
-    def by_id(self, item_id: Union[int, str]) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> Optional[Model]:
+        """Retrieve data for an individual item by its id
+
+        .. note:: The ``id`` used is different depending on the endpoint being queried
+
+           * Most endpoints use an ``entity_id``
+           * The ``orders/items`` endpoint uses ``item_id`` (see :class:`OrderItemSearch`)
+           * The ``products`` endpoint can be queried either with the ``product_id``
+             or :meth:`~.ProductSearch.by_sku`
+
+        :param item_id: id of the item to retrieve
+        """
         self.query = self.query.strip('?') + str(item_id)
         return self.execute()
 
-    def by_number(self, increment_id: str):
-        return self.add_criteria(
-            field='increment_id',
-            value=increment_id
-        ).execute()
-
     @cached_property
-    def result(self) -> Union[Model, list[Model]]:
+    def result(self) -> Optional[Model | List[Model]]:
+        """The result of the search query, wrapped by the :class:`~.Model` corresponding to the endpoint
+
+        :returns: the API response as either an individual or list of :class:`~.Model` objects
+        """
         result = self.validate_result()
         if result is None:
             return result
@@ -108,46 +144,49 @@ class SearchQuery:
         if isinstance(result, dict):
             return self.parse(result)
 
-    def validate_result(self) -> Union[dict, list[dict]]:
-        """
-        Returns the actual result, regardless of search approach
-        Failed: response will always contain a "message" key
-        Success:
-            Search Query:   response contains up to 3 keys from ["items", "total_count", "search_criteria"]
-            Direct Query:   response is the full entity/model response dict; typically has 20+ keys
-        """
+    def validate_result(self) -> Optional[Dict | List[Dict]]:
+        """Parses the response and returns the actual result data, regardless of search approach"""
         if not self._result:
             return None
 
+        if isinstance(self._result, list):
+            return self._result
+
         if self._result.get('message'):
-            print(
-                'Search failed with the following message: ' + '\t'
-                + self._result['message']
+            self.client.logger.error(
+                'Search failed with the following message:\t{}'.format(
+                    self._result['message'])
             )
             return None
 
-        if len(self._result.keys()) > 3:    # Direct request of entity by id/sku with full response dict
+        if len(self._result.keys()) > 3:  # Single item, retrieved by id
             return self._result
 
-        if 'items' in self._result:         # All successful response with search criteria will have items key
-            items = self._result['items']   # Note that some entities (ex. Order) have an items key too. Entity response won't reach this line though
-            if items:                       # Response can still be {'items': None} though
+        if 'items' in self._result:  # All successful responses with search criteria have `items` key
+            items = self._result['items']
+            if items:  # Response can still be {'items': None} though
                 if len(items) > 1:
                     return items
                 return items[0]
             else:
-                print("No matching {} for this search query".format(self.endpoint))
+                self.client.logger.info(
+                    "No matching {} for this search query".format(self.endpoint)
+                )
                 return None
         else:  # I have no idea what could've gone wrong, sorry :/
             raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
 
-    def parse(self, data) -> Model:
-        """Parses the API response and returns the corresponding entity/model object"""
+    def parse(self, data: dict) -> Model:
+        """Parses the API response with the corresponding :class:`~.Model` object
+
+        :param data: API response data of a single item
+        """
         if self.Model is not APIResponse:
             return self.Model(data, self.client)
         return self.Model(data, self.client, self.endpoint)
 
     def reset(self) -> None:
+        """Resets the query and result, allowing the object to be reused"""
         self._result = {}
         self.fields = ''
         self.query = self.client.url_for(self.endpoint) + '/?'
@@ -155,6 +194,7 @@ class SearchQuery:
 
     @property
     def result_count(self) -> int:
+        """Number of items that matched the search criteria"""
         if not self._result or not self.result:
             return 0
         if isinstance(self.result, Model):
@@ -162,23 +202,42 @@ class SearchQuery:
         return len(self.result)
 
     @property
-    def result_type(self):
+    def result_type(self) -> Type:
+        """The type of the result"""
         return type(self.result)
 
 
 class OrderSearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``orders`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='orders',
             client=client,
             model=Order
         )
 
+    def by_number(self, order_number: Union[int, str]) -> Optional[Order]:
+        """Retrieve an :class:`~.Order` by number
+
+        :param order_number: the order number (``increment_id``)
+        """
+        return self.add_criteria(
+            field='increment_id',
+            value=order_number
+        ).execute()
+
 
 class OrderItemSearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``orders/items`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='orders/items',
             client=client,
@@ -186,17 +245,17 @@ class OrderItemSearch(SearchQuery):
         )
 
     @cached_property
-    def result(self) -> Union[Model, list[Model]]:
+    def result(self) -> Optional[OrderItem | List[OrderItem]]:
         if result := super().result:
             if isinstance(result, list):
                 return [item for item in result if item]
         return result
 
-    def parse(self, data) -> Optional[Model]:
-        """Parses the API response data into fully hydrated :class:`~.OrderItem` objects
+    def parse(self, data) -> Optional[OrderItem]:
+        """Overrides :meth:`SearchQuery.parse` to fully hydrate :class:`~.OrderItem` objects
 
-        Extra validation is required for OrderItems, as duplicated and/or incomplete data is returned when
-        the child of a configurable product is searched :meth:`by_sku` or :meth:`by_product`
+        Extra validation is required for OrderItems, as duplicated and/or incomplete data is returned
+        when the child of a configurable product is searched :meth:`by_sku` or :meth:`by_product`
 
         :param data: API response data
         """
@@ -205,10 +264,10 @@ class OrderItemSearch(SearchQuery):
         if parent_id := data.get('parent_item_id'):
             return self.client.order_items.by_id(parent_id)
         else:
-            return super().parse(data)
+            return OrderItem(data, self.client)
 
-    def by_product(self, product: Product) -> Union[OrderItem, List[OrderItem]]:
-        """Search for :class:`OrderItem` entries by :class:`~.Product`
+    def by_product(self, product: Product) -> Optional[OrderItem | List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries by :class:`~.Product`
 
         .. note:: This will match OrderItems that contain
 
@@ -219,7 +278,7 @@ class OrderItemSearch(SearchQuery):
         """
         return self.by_product_id(product.id)
 
-    def by_sku(self, sku: str) -> Union[OrderItem, List[OrderItem]]:
+    def by_sku(self, sku: str) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product sku.
 
         .. admonition:: The SKU must be an exact match to the OrderItem SKU
@@ -238,22 +297,23 @@ class OrderItemSearch(SearchQuery):
         """
         return self.add_criteria('sku', Model.encode(sku)).execute()
 
-    def by_product_id(self, product_id: Union[int, str]) -> Union[OrderItem, List[OrderItem]]:
+    def by_product_id(self, product_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product id.
 
         :param product_id: the product id to search for in order items
         """
         return self.add_criteria('product_id', product_id).execute()
 
-    def by_category_id(self, category_id: Union[int, str]) -> Union[OrderItem, List[OrderItem]]:
-        """Search for :class:`OrderItem` entries by category id
+    def by_category_id(self, category_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries by category id
 
         :param category_id: id of the category to search for in order items
         :returns: any :class:`~.OrderItem` containing a product linked to the provided category id
         """
-        return self.by_category(self.client.categories.by_id(category_id))
+        if category := self.client.categories.by_id(category_id):
+            return self.by_category(category)
 
-    def by_category(self, category: Category) -> Union[OrderItem, List[OrderItem]]:
+    def by_category(self, category: Category) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries that contain any of the category's :attr:`~.Category.products`
 
         :param category: the :class:`~.Category` to use in the search
@@ -266,7 +326,7 @@ class OrderItemSearch(SearchQuery):
             condition='in'
         ).execute()
 
-    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Union[OrderItem, List[OrderItem]]:
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem`s using a list or comma separated string of product SKUs
 
         .. note:: SKUs must be URL-encoded
@@ -286,21 +346,47 @@ class OrderItemSearch(SearchQuery):
 
 class InvoiceSearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``invoices`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='invoices',
             client=client,
             model=Invoice
         )
 
-    def by_order_number(self, order_number):
+    def by_number(self, invoice_number: Union[int, str]) -> Optional[Invoice]:
+        """Retrieve an :class:`~.Invoice` by number
+
+        :param invoice_number: the invoice number (``increment_id``)
+        """
+        return self.add_criteria(
+            field='increment_id',
+            value=invoice_number
+        ).execute()
+
+    def by_order_number(self, order_number: Union[int, str]) -> Optional[Invoice]:
+        """Retrieve an :class:`~.Invoice` by order number
+
+        :param order_number: the order number (``increment_id``)
+        """
         if order := self.client.orders.by_number(order_number):
             return self.by_order(order)
 
-    def by_order(self, order):
+    def by_order(self, order: Order) -> Optional[Invoice]:
+        """Retrieve the :class:`~.Invoice` for an :class:`~.Order`
+
+        :param order: the :class:`~.Order` object to retrieve an invoice for
+        """
         return self.by_order_id(order.id)
 
-    def by_order_id(self, order_id):
+    def by_order_id(self, order_id: Union[int, str]) -> Optional[Invoice]:
+        """Retrieve an :class:`~.Invoice` by order id ``id``
+
+        :param order_id: the ``order_id`` of the order to retrieve an invoice for
+        """
         return self.add_criteria(
             field='order_id',
             value=order_id
@@ -309,7 +395,11 @@ class InvoiceSearch(SearchQuery):
 
 class ProductSearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``products`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='products',
             client=client,
@@ -317,19 +407,31 @@ class ProductSearch(SearchQuery):
         )
 
     @property
-    def attributes(self):
+    def attributes(self) -> ProductAttributeSearch:
+        """Alternate way to access the SearchQuery for :class:`~.ProductAttribute` data"""
         return ProductAttributeSearch(self.client)
 
-    def by_id(self, item_id: Union[int, str]) -> {}:
+    def by_id(self, item_id: Union[int, str]) -> Optional[Product]:
+        """Retrieve a :class:`~.Product` by ``product_id``
+
+        .. note:: Response data from the ``products`` endpoint only has an ``id`` field, but
+           all other endpoints that return data about products will use ``product_id``
+
+        :param item_id: the ``id`` (or ``product_id``) of the product
+        """
         return self.add_criteria(
-            field='entity_id',  # Product has no "entity_id" field in API responses, just "id"
-            value=item_id       # But to search by the "id" field, need to use "entity_id"
+            field='entity_id',  # Product has no "entity_id" field in API responses
+            value=item_id  # But to search by the "id" field, must use "entity_id"
         ).execute()
 
-    def by_sku(self, sku) -> Product:
-        return super().by_id(self.Model.encode(sku))
+    def by_sku(self, sku) -> Optional[Product]:
+        """Retrieve a :class:`~.Product` by ``sku``
 
-    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> list[Product]:
+        :param sku: the product sku
+        """
+        return super().by_id(Model.encode(sku))
+
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Product | List[Product]]:
         """Search for :class:`~.Product`s using a list or comma separated string of SKUs
 
         .. note:: SKUs must be URL-encoded
@@ -354,37 +456,41 @@ class ProductSearch(SearchQuery):
         """Search for :class:`~.Product`s by category id"""
         return self.client.categories.by_id(category_id).products
 
-    def get_stock(self, sku):
-        return self.by_sku(sku).stock
+    def get_stock(self, sku) -> Optional[int]:
+        """Retrieve the :attr:`~.stock` of a product by sku
 
-    def get_enabled_simple_skus(self):
-        self.add_criteria(
-            field='type_id',
-            value='simple'
-        ).add_criteria(
-            field='status',
-            value=Product.STATUS_ENABLED,
-            group=1
-        )
-        return self.execute()
+        :param sku: the product sku
+        """
+        if product := self.by_sku(sku):
+            return product.stock
 
 
 class ProductAttributeSearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``products/attributes`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='products/attributes',
             client=client,
             model=ProductAttribute
         )
 
-    def get_all(self):
+    def get_all(self) -> Optional[List[ProductAttribute]]:
+        """Retrieve a list of all :class:`~.ProductAttribute`s"""
         return self.add_criteria('position', 0, 'gteq').execute()
 
-    def by_code(self, attribute_code: str):
+    def by_code(self, attribute_code: str) -> Optional[ProductAttribute]:
+        """Retrieve a :class:`~.ProductAttribute` by its attribute code
+
+        :param attribute_code: the code of the :class:`~.ProductAttribute`
+        """
         return self.by_id(attribute_code)
 
-    def get_types(self):
+    def get_types(self) -> Optional[List[APIResponse]]:
+        """Retrieve a list of all available :class:`~.ProductAttribute` types"""
         endpoint = self.endpoint + '/types'
         response = self.client.get(self.client.url_for(endpoint))
         if response.ok:
@@ -393,7 +499,11 @@ class ProductAttributeSearch(SearchQuery):
 
 class CategorySearch(SearchQuery):
 
-    def __init__(self, client):
+    def __init__(self, client: Client):
+        """SearchQuery for the ``categories`` endpoint
+
+        :param client: an initialized :class:`~.Client` object
+        """
         super().__init__(
             endpoint='categories',
             client=client,
@@ -401,16 +511,16 @@ class CategorySearch(SearchQuery):
         )
 
     def get_root(self) -> Category:
-        """The top level/default category. Every other category is a subcategory"""
+        """Retrieve the top level/default :class:`~.Category` (every other category is a subcategory)"""
         return self.execute()
 
-    def get_all(self) -> list[Category]:
+    def get_all(self) -> List[Category]:
         """Retrieve a list of all categories"""
         self.query = self.query.replace('categories', 'categories/list') + 'searchCriteria[currentPage]=1'
         return self.execute()
 
-    def by_name(self, name: str, exact: bool = True) -> Union[Category, List[Category]]:
-        """Search categories by name
+    def by_name(self, name: str, exact: bool = True) -> Optional[Category | List[Category]]:
+        """Search for a :class:`~.Category` by name
 
         :param name: the category name to search for
         :param exact: whether the name should be an exact match
