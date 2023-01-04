@@ -2,6 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from typing import Union, Type, Iterable, List, Optional, Dict, TYPE_CHECKING
 from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
+from .exceptions import MagentoError
 from . import clients
 
 if TYPE_CHECKING:
@@ -152,11 +153,7 @@ class SearchQuery:
         if isinstance(self._result, list):
             return self._result
 
-        if self._result.get('message'):
-            self.client.logger.error(
-                'Search failed with the following message:\t{}'.format(
-                    self._result['message'])
-            )
+        if self._result.get('message'):  # Error; logged by Client
             return None
 
         if len(self._result.keys()) > 3:  # Single item, retrieved by id
@@ -173,8 +170,9 @@ class SearchQuery:
                     "No matching {} for this search query".format(self.endpoint)
                 )
                 return None
-        else:  # I have no idea what could've gone wrong, sorry :/
-            raise RuntimeError("Unknown Error. Raw Response: {}".format(self._result))
+        # I have no idea what could've gone wrong, sorry :/
+        msg = "Search failed with an unknown error.\nAPI Response: {}".format(self._result)
+        raise MagentoError(self.client, msg)
 
     def parse(self, data: dict) -> Model:
         """Parses the API response with the corresponding :class:`~.Model` object

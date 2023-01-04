@@ -6,7 +6,7 @@ from functools import cached_property
 from .utils import MagentoLogger, get_agent
 from .models import APIResponse, ProductAttribute
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch
-from .exceptions import AuthenticationError
+from .exceptions import AuthenticationError, MagentoError
 
 
 class Client(object):
@@ -131,8 +131,8 @@ class Client(object):
             return self.request(method, url, payload)
 
         if response.status_code != 200:  # All other responses are returned; errors are handled by methods
-            self.logger.error("Request to {} failed with status code {} and message: \"{}\"".format(
-                url, response.status_code, response.json().get('message', response.json()))
+            self.logger.error("Request to {} failed with status code {}.\n{message}".format(
+                url, response.status_code, message=MagentoError.parse(response))
             )
 
         return response
