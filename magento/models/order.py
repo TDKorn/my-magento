@@ -197,41 +197,36 @@ class OrderItem(Model):
         :param client: the :class:`~.Client` to use (if not initializing with an Order)
         :raise ValueError: if both the ``order`` and ``client`` aren't provided
         """
-        if order is None and client is None:
-            raise ValueError('An Order or Client object must be provided')
+        if client is None:
+            if order is None:
+                raise ValueError('An Order or Client object must be provided')
+            if not isinstance(order, Order):
+                raise TypeError(f'`order` must be of type {Order}')
 
         super().__init__(
             data=item,
             client=client if client else order.client,
             endpoint='orders/items'
         )
-        self.order = order
-
         self.tax = item.get('base_tax_amount', item.get('tax_amount', 0))
         self.refund = item.get('base_amount_refunded', item.get('amount_refunded', 0))
         self.tax_refunded = item.get('base_tax_refunded', item.get('tax_refunded', 0))
         self.line_total = item.get('base_row_total_incl_tax', item.get('row_total_incl_tax', 0))
+        self._order = order
 
     def __repr__(self):
-        return f"<OrderItem ({self.sku})> from {self.order}"
+        return f"<OrderItem ({self.sku})> from Order ID: {self.order_id}>"
 
     @property
     def excluded_keys(self) -> list[str]:
         return ['product_id']
 
-    @property
+    @cached_property
     def order(self) -> Order:
         """The corresponding :class:`Order`"""
+        if self._order is None:
+            return self.client.orders.by_id(self.order_id)
         return self._order
-
-    @order.setter
-    def order(self, order: Optional[Order]):
-        if order is None:
-            self._order = self.client.orders.by_id(self.order_id)
-        elif isinstance(order, Order):
-            self._order = order
-        else:
-            raise TypeError
 
     @cached_property
     def product(self) -> Product:
