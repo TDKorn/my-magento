@@ -131,6 +131,32 @@ class SearchQuery:
         self.query = self.query.strip('?') + str(item_id)
         return self.execute()
 
+    def by_list(self, field: str, values: Iterable) -> Optional[Model, List[Model]]:
+        """Search for multiple items using an iterable or comma-separated string of field values
+
+        .. admonition:: Example
+
+           Search for orders that are processing, pending, or completed::
+
+              #  Values can be a list/tuple/iterable
+              >> api.orders.by_list('status', ['processing', 'pending', 'completed'])
+
+              #  Values can be a comma-separated string
+              >> api.orders.by_list('status', 'processing,pending,completed')
+
+        :param field: the API response field to search for matches in
+        :param values: an iterable or comma separated string of values
+        """
+        if not isinstance(values, Iterable):
+            raise TypeError('`values` must be an iterable')
+        if not isinstance(values, str):
+            values = ','.join(f'{value}' for value in values)
+        return self.add_criteria(
+            field=field,
+            value=values,
+            condition='in'
+        ).execute()
+
     @cached_property
     def result(self) -> Optional[Model | List[Model]]:
         """The result of the search query, wrapped by the :class:`~.Model` corresponding to the endpoint
@@ -228,6 +254,79 @@ class OrderSearch(SearchQuery):
             value=order_number
         ).execute()
 
+    def by_product(self, product: Product) -> Optional[Order | List[Order]]:
+        """Search for all :class:`~.Order` s of a :class:`~.Product`
+
+        :param product: the :class:`~.Product` to search for in orders
+        """
+        items = self.client.order_items.by_product(product)
+        return self.from_items(items)
+
+    def by_sku(self, sku: str) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` by product sku
+
+        .. note:: Like :meth:`.OrderItemSearch.by_sku`, the sku will need to be an exact
+           match to the sku of a simple product, including a custom option if applicable
+
+           * Use :meth:`~.OrderSearch.by_product` or :meth:`~.OrderSearch.by_product_id`
+             to find orders containing any of the :attr:`~.option_skus` and/or all
+             :attr:`~.children` of a configurable product
+
+        :param sku: the exact product sku to search for in orders
+        """
+        items = self.client.order_items.by_sku(sku)
+        return self.from_items(items)
+
+    def by_product_id(self, product_id: Union[int, str]) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s by ``product_id``
+
+        :param product_id: the ``id`` (``product_id``) of the product to search for in orders
+        """
+        items = self.client.order_items.by_product_id(product_id)
+        return self.from_items(items)
+
+    def by_category_id(self, category_id: Union[int, str], search_subcategories: bool = False) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s by ``category_id``
+
+        :param category_id: id of the category to search for in orders
+        :returns: any :class:`~.Order` containing a product linked to the provided category id
+        """
+        items = self.client.order_items.by_category_id(category_id)
+        return self.from_items(items)
+
+    def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s that contain any of the category's :attr:`~.Category.products`
+
+        :param category: the :class:`~.Category` to use in the search
+        :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
+        :returns: any :class:`~.Order` that contains a product in the provided category
+        """
+        items = self.client.order_items.by_category(category)
+        return self.from_items(items)
+
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s using a list or comma separated string of product SKUs
+
+        .. note:: SKUs must be URL-encoded
+
+        :param skulist: an iterable or comma separated string of product SKUs
+        """
+        items = self.client.order_items.by_skulist(skulist)
+        return self.from_items(items)
+
+    def from_items(self, items: Optional[OrderItem | List[OrderItem]]) -> Optional[Order, List[Order]]:
+        """Retrieve unique :class:`~.Order` objects from :class:`~.OrderItem` entries using a single request
+
+        :param items: an individual/list of order items
+        """
+        if items is None:
+            return
+        if isinstance(items, list):
+            order_ids = set(item.order_id for item in items)
+            return self.by_list('entity_id', order_ids)
+        else:
+            return items.order  # Single OrderItem
+
 
 class OrderItemSearch(SearchQuery):
 
@@ -274,6 +373,9 @@ class OrderItemSearch(SearchQuery):
 
         :param product: the :class:`~.Product` to search for in order items
         """
+        if not isinstance(product, Product):
+            raise TypeError(f'`product` must be of type {Product}')
+
         return self.by_product_id(product.id)
 
     def by_sku(self, sku: str) -> Optional[OrderItem | List[OrderItem]]:
@@ -298,7 +400,7 @@ class OrderItemSearch(SearchQuery):
     def by_product_id(self, product_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product id.
 
-        :param product_id: the product id to search for in order items
+        :param product_id: the ``id`` (or ``product_id``) of the product to search for in order items
         """
         return self.add_criteria('product_id', product_id).execute()
 
@@ -317,12 +419,11 @@ class OrderItemSearch(SearchQuery):
         :param category: the :class:`~.Category` to use in the search
         :returns: any :class:`~.OrderItem` that contains a product in the provided category
         """
+        if not isinstance(category, Category):
+            raise TypeError(f'`category` must be of type {Category}')
+
         product_ids = ','.join(f'{product.id}' for product in category.products)
-        return self.add_criteria(
-            field='product_id',
-            value=product_ids,
-            condition='in'
-        ).execute()
+        return self.by_list('product_id', product_ids)
 
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem`s using a list or comma separated string of product SKUs
@@ -331,15 +432,7 @@ class OrderItemSearch(SearchQuery):
 
         :param skulist: an iterable or comma separated string of product SKUs
         """
-        if not isinstance(skulist, Iterable):
-            raise TypeError
-        if not isinstance(skulist, str):
-            skulist = ','.join(skulist)
-        return self.add_criteria(
-            field='sku',
-            value=skulist,
-            condition='in'
-        ).execute()
+        return self.by_list('sku', skulist)
 
 
 class InvoiceSearch(SearchQuery):
@@ -436,15 +529,7 @@ class ProductSearch(SearchQuery):
 
         :param skulist: an iterable or comma separated string of SKUs
         """
-        if not isinstance(skulist, Iterable):
-            raise TypeError
-        if not isinstance(skulist, str):
-            skulist = ','.join(skulist)
-        return self.add_criteria(
-            field='sku',
-            value=skulist,
-            condition='in'
-        ).execute()
+        return self.by_list('sku', skulist)
 
     def by_category(self, category: str) -> list[Product]:
         """Search for :class:`~.Product`s by category name"""
@@ -489,10 +574,7 @@ class ProductAttributeSearch(SearchQuery):
 
     def get_types(self) -> Optional[List[APIResponse]]:
         """Retrieve a list of all available :class:`~.ProductAttribute` types"""
-        endpoint = self.endpoint + '/types'
-        response = self.client.get(self.client.url_for(endpoint))
-        if response.ok:
-            return [APIResponse(attr_type, self.client, endpoint) for attr_type in response.json()]
+        return self.client.search(f'{self.endpoint}/types').execute()
 
 
 class CategorySearch(SearchQuery):

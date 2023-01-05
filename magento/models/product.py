@@ -301,10 +301,10 @@ class Product(Model):
         return []
 
     @cached_property
-    def categories(self) -> list[Category]:
+    def categories(self) -> Optional[Category | List[Category]]:
         """Categories the product is in, returned as a list of :class:`~.Category` objects"""
         category_ids = self.custom_attributes.get('category_ids', [])
-        return [self.client.categories.by_id(category_id) for category_id in category_ids]
+        return self.client.categories.by_list('entity_id', category_ids)
 
     @cached_property
     def media_gallery_entries(self) -> list[MediaEntry]:
