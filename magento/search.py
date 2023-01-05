@@ -289,9 +289,10 @@ class OrderSearch(SearchQuery):
         """Search for :class:`~.Order` s by ``category_id``
 
         :param category_id: id of the category to search for in orders
-        :returns: any :class:`~.Order` containing a product linked to the provided category id
+        :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
+        :returns: any :class:`~.Order` containing a :class:`~.Product` in the corresponding :class:`~.Category`
         """
-        items = self.client.order_items.by_category_id(category_id)
+        items = self.client.order_items.by_category_id(category_id, search_subcategories)
         return self.from_items(items)
 
     def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[Order | List[Order]]:
@@ -301,7 +302,7 @@ class OrderSearch(SearchQuery):
         :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
         :returns: any :class:`~.Order` that contains a product in the provided category
         """
-        items = self.client.order_items.by_category(category)
+        items = self.client.order_items.by_category(category, search_subcategories)
         return self.from_items(items)
 
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Order | List[Order]]:
@@ -390,8 +391,9 @@ class OrderItemSearch(SearchQuery):
            * If a product has custom options, the search will only find OrderItems
              that contain the specific option sku (or base sku) that's provided
 
-           To search for OrderItems containing all :attr:`~.children` and all possible
-           :attr:`~.option_skus` of a product, use :meth:`~.by_product`
+           To search for OrderItems containing all :attr:`~.children` of a
+           configurable product and/or all possible :attr:`~.option_skus`,
+           use :meth:`~.by_product` or :meth:`~.by_product_id`
 
         :param sku: the exact product sku to search for in order items
         """
@@ -400,29 +402,30 @@ class OrderItemSearch(SearchQuery):
     def by_product_id(self, product_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product id.
 
-        :param product_id: the ``id`` (or ``product_id``) of the product to search for in order items
+        :param product_id: the ``id`` (or ``product_id``) of the :class:`~.Product` to search for in order items
         """
         return self.add_criteria('product_id', product_id).execute()
 
-    def by_category_id(self, category_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
-        """Search for :class:`~.OrderItem` entries by category id
+    def by_category_id(self, category_id: Union[int, str], search_subcategories: bool = False) -> Optional[OrderItem | List[OrderItem]]:
+        """Search for :class:`~.OrderItem` entries by ``category_id``
 
-        :param category_id: id of the category to search for in order items
-        :returns: any :class:`~.OrderItem` containing a product linked to the provided category id
+        :param category_id: id of the :class:`~.Category` to search for in order items
+        :param search_subcategories: if ``True``, also searches for order items from :attr:`~.all_subcategories`
+        :returns: any :class:`~.OrderItem` containing a :class:`~.Product` in the corresponding :class:`~.Category`
         """
         if category := self.client.categories.by_id(category_id):
-            return self.by_category(category)
+            return self.by_category(category, search_subcategories)
 
-    def by_category(self, category: Category) -> Optional[OrderItem | List[OrderItem]]:
+    def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries that contain any of the category's :attr:`~.Category.products`
 
         :param category: the :class:`~.Category` to use in the search
-        :returns: any :class:`~.OrderItem` that contains a product in the provided category
+        :param search_subcategories: if ``True``, also searches for order items from :attr:`~.all_subcategories`
         """
         if not isinstance(category, Category):
             raise TypeError(f'`category` must be of type {Category}')
 
-        product_ids = ','.join(f'{product.id}' for product in category.products)
+        product_ids = category.all_product_ids if search_subcategories else category.product_ids
         return self.by_list('product_id', product_ids)
 
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[OrderItem | List[OrderItem]]:
@@ -531,13 +534,33 @@ class ProductSearch(SearchQuery):
         """
         return self.by_list('sku', skulist)
 
-    def by_category(self, category: str) -> list[Product]:
-        """Search for :class:`~.Product`s by category name"""
-        return self.client.categories.by_name(category).products
+    def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[Product | List[Product]]:
+        """Search for :class:`~.Product` s in a :class:`~.Category`
 
-    def by_category_id(self, category_id: int):
-        """Search for :class:`~.Product`s by category id"""
-        return self.client.categories.by_id(category_id).products
+        :param category: the :class:`~.Category` to retrieve products from
+        :param search_subcategories: if ``True``, also retrieves products from :attr:`~.all_subcategories`
+        """
+        if not isinstance(category, Category):
+            raise TypeError(f'`category` must be of type {Category}')
+
+        if search_subcategories:
+            category_ids = [category.id] + category.all_subcategory_ids
+            return self.by_list('category_id', category_ids)
+        else:
+            return self.add_criteria('category_id', category.id).execute()
+
+    def by_category_id(self, category_id: Union[int, str], search_subcategories: bool = False) -> Optional[Product | List[Product]]:
+        """Search for :class:`~.Product` s by ``category_id``
+
+        :param category_id: the id of the :class:`~.Category` to retrieve products from
+        :param search_subcategories: if ``True``, also retrieves products from :attr:`~.all_subcategories`
+        """
+        if search_subcategories:
+            if category := self.client.categories.by_id(category_id):
+                return self.by_category(category, search_subcategories)
+            return None
+        else:
+            return self.add_criteria('category_id', category_id).execute()
 
     def get_stock(self, sku) -> Optional[int]:
         """Retrieve the :attr:`~.stock` of a product by sku
@@ -589,6 +612,14 @@ class CategorySearch(SearchQuery):
             client=client,
             model=Category
         )
+
+    def by_id(self, item_id: Union[int, str]) -> Optional[Category]:
+        self.query += f'rootCategoryId={item_id}'
+        return self.execute()
+
+    def by_list(self, field: str, values: Iterable) -> Optional[Category, List[Category]]:
+        self.query = self.query.replace('categories', 'categories/list')
+        return super().by_list(field, values)
 
     def get_root(self) -> Category:
         """Retrieve the top level/default :class:`~.Category` (every other category is a subcategory)"""

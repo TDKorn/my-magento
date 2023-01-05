@@ -1,7 +1,7 @@
 from __future__ import annotations
 import copy
 from . import Model
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional, Set, Dict
 from functools import cached_property
 
 if TYPE_CHECKING:
@@ -34,22 +34,26 @@ class Category(Model):
         return ['custom_attributes']
 
     @cached_property
-    def custom_attributes(self):
-        return self.unpack_attributes(self.__custom_attributes)
+    def custom_attributes(self) -> Dict[str, str]:
+        return self.unpack_attributes(self.data.get('custom_attributes'))
 
     @cached_property
-    def subcategories(self) -> list[Category]:
-        """Returns a list of the category's child categories"""
-        if hasattr(self, 'children_data'):  # A list of API response dicts (present when Category is from search result)
+    def subcategories(self) -> List[Category]:
+        """The child categories, returned as a list of :class:`~.Category` objects
+
+        .. note:: Only the direct child categories are returned.
+           For a list of all descendants, use :attr:`~.all_subcategories`
+        """
+        if hasattr(self, 'children_data'):  # A list of API response dicts (when Category is from search)
             return [self.parse(child) for child in self.children_data]
-        if hasattr(self, 'children'):  # String of subcategory ids (present when Category is retrieved by id)
-            return [self.query_endpoint().by_id(child_id) for child_id in self.subcategory_ids]
+        if hasattr(self, 'children') and self.children:  # String of subcategory ids (from categories/{id} endpoint)
+            return self.query_endpoint().by_list('entity_id', self.children)
         else:
             return []
 
     @cached_property
-    def subcategory_ids(self) -> list[int]:
-        """Returns the ids of the category's child categories"""
+    def subcategory_ids(self) -> List[int]:
+        """The ``category_ids`` of the :attr:`~.subcategories`"""
         if hasattr(self, 'children'):
             if self.children:
                 return [int(child) for child in self.children.split(',')]
@@ -57,31 +61,51 @@ class Category(Model):
         return [category.id for category in self.subcategories]
 
     @cached_property
-    def subcategory_names(self) -> list[str]:
-        """Returns the names of the category's child categories"""
+    def subcategory_names(self) -> List[str]:
+        """The names of the category's :attr:`~.subcategories`"""
         return [category.name for category in self.subcategories]
 
     @cached_property
-    def skus(self) -> list[str]:
-        """Returns the SKUs of products in the category"""
-        endpoint = self.client.url_for(f'categories/{self.id}/products')
-        if (response := self.client.get(endpoint)).ok:
-            return [product['sku'] for product in response.json()]
+    def products(self) -> List[Product]:
+        """The :class:`~.Product` s in the category"""
+        return self.client.products.by_category(self) or []
 
     @cached_property
-    def all_skus(self) -> set[str]:
-        """Returns the SKUs of products in the category and all of its :attr:`~.subcategories`"""
-        skus = copy.deepcopy(self.skus)
+    def product_ids(self) -> List[int]:
+        """The ``product_ids`` of the category's :attr:`~.products`"""
+        return [product.id for product in self.products]
+
+    @cached_property
+    def skus(self) -> List[str]:
+        """The skus of the category's :attr:`~.products`"""
+        return [product.sku for product in self.products]
+
+    @cached_property
+    def all_subcategories(self) -> Optional[List[Category]]:
+        """Recursively retrieves all descendants of the category"""
+        if not self.subcategories:
+            return []
+        children = copy.deepcopy(self.subcategories)
         for child in self.subcategories:
-            skus.extend(child.all_skus)
-        return set(skus)
+            children.extend(child.all_subcategories)
+        return children
 
     @cached_property
-    def products(self) -> list[Product]:
-        """Returns the :class:`~.Product`s in the category"""
-        return self.client.products.by_skulist(self.skus)
+    def all_subcategory_ids(self) -> List[int]:
+        """The ``category_ids`` of :attr:`~.all_subcategories`"""
+        return [category.id for category in self.all_subcategories]
 
     @cached_property
-    def all_products(self) -> list[Product]:
-        """Returns the :class:`~.Product`s in the category and all of its :attr:`~.subcategories`"""
-        return self.client.products.by_skulist(self.all_skus)
+    def all_products(self) -> List[Product]:
+        """"The :class:`~.Product` s in the category and in :attr:`~.all_subcategories`"""
+        return self.client.products.by_category(self, search_subcategories=True) or []
+
+    @cached_property
+    def all_product_ids(self) -> Set[int]:
+        """The ``product_ids`` of the products in the category and in :attr:`~.all_subcategories`"""
+        return set(product.id for product in self.all_products)
+
+    @cached_property
+    def all_skus(self) -> Set[str]:
+        """The skus of the products in the category and in :attr:`~.all_subcategories`"""
+        return set(product.sku for product in self.all_products)
