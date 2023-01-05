@@ -96,9 +96,8 @@ class SearchQuery:
                 raise TypeError('"fields" must be a comma separated string or an iterable')
             fields = ','.join(fields)
 
-        # TODO:
-        #  if self.Model.identifier not in fields:
-        #  fields += f',{self.Model.identifier}'
+        if (id_field := self.Model.IDENTIFIER) not in fields:
+            fields += f',{id_field}'
 
         self.fields = f'&fields=items[{fields}]'
         return self
@@ -308,8 +307,6 @@ class OrderSearch(SearchQuery):
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Order | List[Order]]:
         """Search for :class:`~.Order` s using a list or comma separated string of product SKUs
 
-        .. note:: SKUs must be URL-encoded
-
         :param skulist: an iterable or comma separated string of product SKUs
         """
         items = self.client.order_items.by_skulist(skulist)
@@ -429,13 +426,17 @@ class OrderItemSearch(SearchQuery):
         return self.by_list('product_id', product_ids)
 
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[OrderItem | List[OrderItem]]:
-        """Search for :class:`~.OrderItem`s using a list or comma separated string of product SKUs
-
-        .. note:: SKUs must be URL-encoded
+        """Search for :class:`~.OrderItem`s using a list or comma-separated string of product SKUs
 
         :param skulist: an iterable or comma separated string of product SKUs
         """
-        return self.by_list('sku', skulist)
+        if not isinstance(skulist, Iterable):
+            raise TypeError(f'`skulist` must be an iterable or comma-separated string of SKUs')
+        if isinstance(skulist, str):
+            skulist = skulist.split(',')
+
+        skus = map(Model.encode, skulist)
+        return self.by_list('sku', skus)
 
 
 class InvoiceSearch(SearchQuery):
@@ -540,8 +541,6 @@ class InvoiceSearch(SearchQuery):
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Invoice | List[Invoice]]:
         """Search for :class:`~.Invoice` s using a list or comma separated string of product SKUs
 
-        .. note:: SKUs must be URL-encoded
-
         :param skulist: an iterable or comma separated string of product SKUs
         """
         items = self.client.order_items.by_skulist(skulist)
@@ -607,11 +606,15 @@ class ProductSearch(SearchQuery):
     def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Product | List[Product]]:
         """Search for :class:`~.Product`s using a list or comma separated string of SKUs
 
-        .. note:: SKUs must be URL-encoded
-
         :param skulist: an iterable or comma separated string of SKUs
         """
-        return self.by_list('sku', skulist)
+        if not isinstance(skulist, Iterable):
+            raise TypeError(f'`skulist` must be an iterable or comma-separated string of SKUs')
+        if isinstance(skulist, str):
+            skulist = skulist.split(',')
+
+        skus = map(Model.encode, skulist)
+        return self.by_list('sku', skus)
 
     def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[Product | List[Product]]:
         """Search for :class:`~.Product` s in a :class:`~.Category`

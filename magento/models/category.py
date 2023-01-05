@@ -1,7 +1,7 @@
 from __future__ import annotations
 import copy
 from . import Model
-from typing import TYPE_CHECKING, List, Optional, Set, Dict
+from typing import TYPE_CHECKING, List, Optional, Set, Dict, Union
 from functools import cached_property
 
 if TYPE_CHECKING:
@@ -14,6 +14,7 @@ class Category(Model):
     """Wrapper for the ``categories`` endpoint"""
 
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/categories'
+    IDENTIFIER = 'id'
 
     def __init__(self, data: dict, client: Client):
         """Initialize a Category object using an API response from the ``categories`` endpoint

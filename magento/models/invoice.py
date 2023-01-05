@@ -1,8 +1,7 @@
 from __future__ import annotations
-from . import Model, APIResponse, Order, OrderItem, Product
-from typing import TYPE_CHECKING, Optional, List
+from . import Model, Order, OrderItem, Product
+from typing import TYPE_CHECKING, Optional, List, Union
 from functools import cached_property
-import copy
 
 if TYPE_CHECKING:
     from magento import Client
@@ -13,7 +12,8 @@ class Invoice(Model):
 
     """Wrapper for the ``invoices`` endpoint"""
 
-    DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/orders'
+    DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/invoices'
+    IDENTIFIER = 'entity_id'
 
     def __init__(self, data: dict, client: Client):
         """Initialize an Invoice object using an API response from the ``invoices`` endpoint
@@ -32,7 +32,7 @@ class Invoice(Model):
         return f'<Magento Invoice: #{self.number}> for {self.order}'
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return ['items']
 
     @property
@@ -46,12 +46,12 @@ class Invoice(Model):
         return getattr(self, 'increment_id', None)
 
     @cached_property
-    def order(self):
+    def order(self) -> Order:
         """The corresponding :class:`~.Order`"""
         return self.client.orders.by_id(self.order_id)
 
     @cached_property
-    def items(self):
+    def items(self) -> List[InvoiceItem]:
         """The invoiced items, returned as a list of :class:`InvoiceItem` objects"""
         return [InvoiceItem(item, self) for item in self.__items
                 if item['order_item_id'] in self.order.item_ids]
@@ -61,8 +61,8 @@ class InvoiceItem(Model):
 
     """Wraps an item entry of an :class:`Invoice`"""
 
-    DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/invoicesid#operation" \
-                    "/salesInvoiceRepositoryV1GetGet!c=200&ct=application/json&path=items&t=response "
+    DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/invoicesid"
+    IDENTIFIER = 'entity_id'
 
     def __init__(self, item: dict, invoice: Invoice):
         """Initialize an InvoiceItem of an :class:`Invoice`
@@ -80,11 +80,16 @@ class InvoiceItem(Model):
     def __repr__(self):
         return f"<InvoiceItem ({self.sku})> from {self.invoice}"
 
+    def data_endpoint(self, scope: Optional[str] = None) -> str:
+        """No data endpoint exists for invoice items"""
+        return self.logger.info("There is no data endpoint for invoice items")
+
     def query_endpoint(self) -> SearchQuery:
+        """No search endpoint exists for invoice items"""
         return self.logger.info("There is no search interface for invoice items")
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return ['product_id']
 
     @property

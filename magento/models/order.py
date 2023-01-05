@@ -1,7 +1,7 @@
 from __future__ import annotations
-from . import Model, APIResponse
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, Union
 from functools import cached_property
+from . import Model
 import copy
 
 if TYPE_CHECKING:
@@ -14,6 +14,7 @@ class Order(Model):
     """Wrapper for the ``orders`` endpoint"""
 
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/orders'
+    IDENTIFIER = 'entity_id'
 
     def __init__(self, data: dict, client: Client):
         """Initialize an Order object using an API response from the ``orders`` endpoint
@@ -32,7 +33,7 @@ class Order(Model):
         return f'<Magento Order: #{self.number} placed on {self.created_at}>'
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return ['items', 'payment']
 
     @property
@@ -186,6 +187,7 @@ class OrderItem(Model):
     """Wrapper for the ``order/items`` endpoint"""
 
     DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/ordersitems"
+    IDENTIFIER = 'item_id'
 
     def __init__(self, item: dict, client: Optional[Client] = None, order: Optional[Order] = None):
         """Initialize an OrderItem using an API response from the ``orders/items`` endpoint
@@ -218,7 +220,7 @@ class OrderItem(Model):
         return f"<OrderItem ({self.sku})> from Order ID: {self.order_id}>"
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return ['product_id']
 
     @cached_property

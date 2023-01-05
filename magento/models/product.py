@@ -22,6 +22,7 @@ class Product(Model):
     VISIBILITY_BOTH = 4
 
     DOCUMENTATION = 'https://adobe-commerce.redoc.ly/2.3.7-admin/tag/products/'
+    IDENTIFIER = 'sku'
 
     def __init__(self, data: dict, client: Client):
         """Initialize a Product object using an API response from the ``products`` endpoint
@@ -43,13 +44,16 @@ class Product(Model):
     def excluded_keys(self):
         return ['media_gallery_entries']
 
+    @property
+    def uid(self) -> Union[str, int]:
+        return self.encoded_sku
+
     def update_stock(self, qty: int) -> bool:
         """Updates the stock quantity
 
         :param qty: the new stock quantity
         """
-        endpoint = f'products/{self.encoded_sku}/stockItems/{self.stock_item_id}'
-        url = self.client.url_for(endpoint)
+        url = f'{self.data_endpoint()}/stockItems/{self.stock_item_id}'
         payload = {
             "stock_item": {
                 "qty": qty,
@@ -201,7 +205,7 @@ class Product(Model):
         :param attribute_data: dict containing any number of top-level attributes to update
         :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
         """
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
+        url = self.data_endpoint(scope)
         payload = {
             "product": {
                 "sku": self.sku
@@ -250,39 +254,6 @@ class Product(Model):
         """
         return self.client.invoices.by_product(self)
 
-    def refresh(self, scope: str = None) -> bool:
-        """Requests current product data from the API, then uses it to update object attributes in place
-
-        .. tip:: This can be used to switch scopes without creating a new object or changing the :class:`~.Client` scope
-
-           **Example**::
-
-               # Get product data on 'default' scope
-               >> product = client.products.by_sku('sku42')
-               # Get fresh product data
-               >> product.refresh()
-               # Get fresh product data from different scope
-               >> product.refresh('all')
-
-        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
-        """
-        url = self.client.url_for(f'products/{self.encoded_sku}', scope)
-        response = self.client.get(url)
-
-        if response.ok:
-            self.clear(*self.cached)
-            self.set_attrs(response.json())
-            self.logger.info(
-                f"Refreshed {self} on scope {self.get_scope_name(scope)}")
-            return True
-
-        else:
-            self.logger.error(
-                'Failed to refresh{}\nError Code: {}\nMessage: {}'.format(
-                    self, response.status_code, response.json()["message"])
-            )
-            return False
-
     def delete(self) -> bool:
         """Deletes the product
 
@@ -291,7 +262,7 @@ class Product(Model):
 
          Alternatively, don't delete it by accident.
         """
-        url = self.client.url_for(f'products/{self.encoded_sku}')
+        url = self.data_endpoint()
         response = self.client.delete(url)
 
         if response.ok and response.json() is True:
@@ -303,7 +274,7 @@ class Product(Model):
             )
             return False
 
-    def get_children(self, refresh: bool = False, scope: str = None) -> list[Product]:
+    def get_children(self, refresh: bool = False, scope: str = None) -> List[Product]:
         """Retrieve the child simple products of a configurable product
 
         :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
@@ -315,7 +286,7 @@ class Product(Model):
         return self.children
 
     @cached_property
-    def children(self) -> list[Product]:
+    def children(self) -> List[Product]:
         """If the Product is a configurable product, returns a list of its child products"""
         if self.type_id == 'configurable':
             url = self.client.url_for(f'configurable-products/{self.encoded_sku}/children')
@@ -334,7 +305,7 @@ class Product(Model):
         return self.client.categories.by_list('entity_id', category_ids)
 
     @cached_property
-    def media_gallery_entries(self) -> list[MediaEntry]:
+    def media_gallery_entries(self) -> List[MediaEntry]:
         """The product's media gallery entries, returned as a list of :class:`MediaEntry` objects"""
         return [MediaEntry(self, entry) for entry in self.__media_gallery_entries]
 
@@ -366,7 +337,7 @@ class Product(Model):
         return self.encode(self.sku)
 
     @cached_property
-    def option_skus(self) -> list[str]:
+    def option_skus(self) -> List[str]:
         """The full SKUs for the product's customizable options, if they exist
 
         .. hint:: When a product with customizable options is ordered, these SKUs are used by the API when
@@ -420,6 +391,9 @@ class MediaEntry(Model):
 
     MEDIA_TYPES = ['base', 'small', 'thumbnail', 'swatch']
 
+    DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/productsskumediaentryId"
+    IDENTIFIER = "id"
+
     def __init__(self, product: Product, entry: dict):
         """Initialize a MediaEntry object for a :class:`Product`
 
@@ -429,7 +403,7 @@ class MediaEntry(Model):
         super().__init__(
             data=entry,
             client=product.client,
-            endpoint=f'products/{product.encoded_sku}/media/{entry["id"]}'
+            endpoint=f'products/{product.encoded_sku}/media'
         )
         self.product = product
 
@@ -437,10 +411,11 @@ class MediaEntry(Model):
         return f"<MediaEntry {self.id} for {self.product}: {self.label}>"
 
     def query_endpoint(self) -> SearchQuery:
+        """No search endpoint exists for media gallery entries"""
         return self.logger.info("There is no search interface for media gallery entries")
 
     @property
-    def excluded_keys(self):
+    def excluded_keys(self) -> List[str]:
         return []
 
     @property
@@ -563,7 +538,7 @@ class MediaEntry(Model):
         return True
 
     def _update(self, scope: str = None) -> bool:
-        url = self.client.url_for(self.endpoint, scope)
+        url = self.data_endpoint(scope)
         response = self.client.put(url, payload={'entry': self.data})
 
         if response.ok and response.json() is True:
@@ -577,33 +552,13 @@ class MediaEntry(Model):
             )
             return False
 
-    def refresh(self, scope: str = None) -> bool:
-        """Refresh the MediaEntry with current data from the API
-
-        :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
-        """
-        url = self.client.url_for(self.endpoint, scope)
-        response = self.client.get(url)
-
-        if response.ok:
-            self.set_attrs(response.json())
-            self.logger.info(
-                f"Refreshed {self} on scope {self.get_scope_name(scope)}"
-            )
-            return True
-        else:
-            self.logger.error(
-                'Failed to refresh {}\nError Code: {}\nMessage: {}'.format(
-                    self, response.status_code, response.json()["message"])
-            )
-            return False
-
 
 class ProductAttribute(Model):
 
     """Wrapper for the ``products/attributes`` endpoint"""
 
     DOCUMENTATION = "https://adobe-commerce.redoc.ly/2.3.7-admin/tag/productsattributes/"
+    IDENTIFIER = "attribute_code"
 
     def __init__(self, data: dict, client: Client):
         """Initialize a ProductAttribute object using an API response from the ``products/attributes`` endpoint
@@ -622,7 +577,7 @@ class ProductAttribute(Model):
         return f"<Product Attribute: {self.attribute_code}>"
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return ['options']
 
     @property

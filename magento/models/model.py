@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import cached_property
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union, Optional, List
 from magento import clients
 import urllib.parse
 import inspect
@@ -19,6 +19,18 @@ class Model(ABC):
     * Initialized using the JSON response ``data`` from any API ``endpoint``
     * Most predefined subclasses use an ``endpoint`` that can be searched with criteria
     * Access the corresponding :class:`~magento.search.SearchQuery` object via :meth:`~.query_endpoint`
+    """
+
+    DOCUMENTATION = None
+    """Link to the Official Magento 2 API documentation for the endpoint wrapped by the Model
+
+    :type: str
+    """
+
+    IDENTIFIER = None
+    """The :attr:`~.Model.uid` field for the endpoint
+
+    :type: str
     """
 
     def __init__(self, data: dict, client: clients.Client, endpoint: str, private_keys: bool = True):
@@ -90,12 +102,24 @@ class Model(ABC):
 
     @property
     @abstractmethod
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         """API response keys that shouldn't be set as object attributes by :meth:`~.set_attrs`
 
         :returns: list of API response keys that shouldn't be set as attributes
         """
         pass
+
+    @property
+    def uid(self) -> Union[str, int]:
+        """Unique item identifier; used in the url of the :meth:`~.Model.data_endpoint`"""
+        return self.data.get(self.IDENTIFIER)
+
+    def data_endpoint(self, scope: Optional[str] = None) -> str:
+        """Endpoint to use when requesting/updating the item's data
+
+        :param scope: the scope to generate the :meth:`~.url_for`
+        """
+        return self.client.url_for(f'{self.endpoint}/{self.uid}', scope)
 
     def query_endpoint(self) -> SearchQuery:
         """Initializes and returns the :class:`~.SearchQuery` object corresponding to the Model's ``endpoint``
@@ -114,8 +138,42 @@ class Model(ABC):
         """
         return self.query_endpoint().parse(response)
 
+    def refresh(self, scope: str = None) -> bool:
+        """Updates object attributes in place using current data from the :meth:`~.data_endpoint`
+
+        .. hint:: :meth:`~.refresh` can be used to switch the scope of the source data
+           without creating a new object or changing the :attr:`.Client.scope`
+
+           .. admonition:: **Example**:
+              :class: example
+
+              ::
+
+                # Get product data on 'default' scope
+                >> product = client.products.by_sku('sku42')
+                # Get fresh product data from different scope
+                >> product.refresh('all')
+
+        :param scope: the scope to send the request on; uses the :attr:`.Client.scope` if not provided
+        """
+        url = self.data_endpoint(scope)
+        response = self.client.get(url)
+
+        if response.ok:
+            self.clear(*self.cached)
+            self.set_attrs(response.json())
+            self.logger.info(
+                f"Refreshed {self} on scope {self.get_scope_name(scope)}"
+            )
+            return True
+        else:
+            self.logger.error(  # Actual error message is logged by client
+                f"Failed to refresh {self} on scope {self.get_scope_name(scope)}"
+            )
+            return False
+
     @staticmethod
-    def unpack_attributes(attributes: list[dict], key: str = 'attribute_code') -> dict:
+    def unpack_attributes(attributes: List[dict], key: str = 'attribute_code') -> dict:
         """Unpacks a list of attribute dictionaries into a single dictionary
 
         **Example**::
@@ -132,7 +190,7 @@ class Model(ABC):
         return {attr[key]: attr['value'] for attr in attributes}
 
     @staticmethod
-    def pack_attributes(attribute_data: dict, key: str = 'attribute_code') -> list[dict]:
+    def pack_attributes(attribute_data: dict, key: str = 'attribute_code') -> List[dict]:
         """Packs a dictionary containing attributes into a list of attribute dictionaries
 
         **Example**::
@@ -156,10 +214,12 @@ class Model(ABC):
 
         :param string: the string to URL-encode
         """
+        if urllib.parse.unquote_plus(string) != string:
+            return string  # Already encoded
         return urllib.parse.quote_plus(string)
 
     @cached_property
-    def cached(self) -> list[str]:
+    def cached(self) -> List[str]:
         """Names of properties that are wrapped with :class:`~functools.cached_property`"""
         return [member for member, val in inspect.getmembers(self.__class__) if
                 isinstance(val, cached_property) and member != 'cached']
@@ -201,5 +261,10 @@ class APIResponse(Model):
         )
 
     @property
-    def excluded_keys(self) -> list[str]:
+    def excluded_keys(self) -> List[str]:
         return []
+
+    @property
+    def uid(self) -> Union[str, int]:
+        # Attempt to retrieve an id
+        return self.data.get('entity_id', self.data.get('id', -1))
