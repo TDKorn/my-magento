@@ -402,7 +402,7 @@ class OrderItemSearch(SearchQuery):
     def by_product_id(self, product_id: Union[int, str]) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product id.
 
-        :param product_id: the ``id`` (or ``product_id``) of the :class:`~.Product` to search for in order items
+        :param product_id: the ``id`` (``product_id``) of the :class:`~.Product` to search for in order items
         """
         return self.add_criteria('product_id', product_id).execute()
 
@@ -477,7 +477,7 @@ class InvoiceSearch(SearchQuery):
         return self.by_order_id(order.id)
 
     def by_order_id(self, order_id: Union[int, str]) -> Optional[Invoice]:
-        """Retrieve an :class:`~.Invoice` by order id ``id``
+        """Retrieve an :class:`~.Invoice` by ``order_id``
 
         :param order_id: the ``order_id`` of the order to retrieve an invoice for
         """
@@ -485,6 +485,85 @@ class InvoiceSearch(SearchQuery):
             field='order_id',
             value=order_id
         ).execute()
+
+    def by_product(self, product: Product) -> Optional[Order | List[Order]]:
+        """Search for all :class:`~.Invoice` s of a :class:`~.Product`
+
+        :param product: the :class:`~.Product` to search for in invoices
+        """
+        items = self.client.order_items.by_product(product)
+        return self.from_order_items(items)
+
+    def by_sku(self, sku: str) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s by product sku
+
+        .. note:: Like :meth:`.OrderItemSearch.by_sku`, the sku will need to be an exact
+           match to the sku of a simple product, including a custom option if applicable
+
+           * Use :meth:`~.InvoiceSearch.by_product` or :meth:`~.InvoiceSearch.by_product_id`
+             to find orders containing any of the :attr:`~.option_skus` and/or all
+             :attr:`~.children` of a configurable product
+
+        :param sku: the exact product sku to search for in invoices
+        """
+        items = self.client.order_items.by_sku(sku)
+        return self.from_order_items(items)
+
+    def by_product_id(self, product_id: Union[int, str]) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s by ``product_id``
+
+        :param product_id: the ``id`` (``product_id``) of the product to search for in invoices
+        """
+        items = self.client.order_items.by_product_id(product_id)
+        return self.from_order_items(items)
+
+    def by_category_id(self, category_id: Union[int, str], search_subcategories: bool = False) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s by ``category_id``
+
+        :param category_id: id of the category to search for in orders
+        :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
+        :returns: any :class:`~.Invoice` containing a :class:`~.Product` in the corresponding :class:`~.Category`
+        """
+        items = self.client.order_items.by_category_id(category_id, search_subcategories)
+        return self.from_order_items(items)
+
+    def by_category(self, category: Category, search_subcategories: bool = False) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s that contain any of the category's :attr:`~.Category.products`
+
+        :param category: the :class:`~.Category` to use in the search
+        :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
+        :returns: any :class:`~.Invoice` that contains a product in the provided category
+        """
+        items = self.client.order_items.by_category(category, search_subcategories)
+        return self.from_order_items(items)
+
+    def by_skulist(self, skulist: Union[str, Iterable[str]]) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s using a list or comma separated string of product SKUs
+
+        .. note:: SKUs must be URL-encoded
+
+        :param skulist: an iterable or comma separated string of product SKUs
+        """
+        items = self.client.order_items.by_skulist(skulist)
+        return self.from_order_items(items)
+
+    def from_order_items(self, items: Optional[OrderItem | List[OrderItem]]) -> Optional[Invoice, List[Invoice]]:
+        """Retrieve unique :class:`~.Invoice` objects from :class:`~.OrderItem` entries using a single request
+
+        .. tip:: Since there is no ``invoices/items`` endpoint, to search for invoices we must first do an
+           :class:`OrderItemSearch`, then retrieve the ``order_ids`` and search :meth:`~.by_order_id`
+
+        :param items: an individual/list of order items
+        """
+        if items is None:
+            return self.client.logger.info(
+                'No matching invoices for this search query'
+            )
+        if isinstance(items, list):
+            order_ids = set(item.order_id for item in items)
+            return self.by_list('order_id', order_ids)
+        else:
+            return self.by_order_id(items.order_id)  # Single OrderItem
 
 
 class ProductSearch(SearchQuery):
@@ -511,7 +590,7 @@ class ProductSearch(SearchQuery):
         .. note:: Response data from the ``products`` endpoint only has an ``id`` field, but
            all other endpoints that return data about products will use ``product_id``
 
-        :param item_id: the ``id`` (or ``product_id``) of the product
+        :param item_id: the ``id`` (``product_id``) of the product
         """
         return self.add_criteria(
             field='entity_id',  # Product has no "entity_id" field in API responses
