@@ -6,7 +6,7 @@ from functools import cached_property
 
 if TYPE_CHECKING:
     from magento import Client
-    from . import Product
+    from . import Product, Order, OrderItem, Invoice
 
 
 class Category(Model):
@@ -66,21 +66,6 @@ class Category(Model):
         return [category.name for category in self.subcategories]
 
     @cached_property
-    def products(self) -> List[Product]:
-        """The :class:`~.Product` s in the category"""
-        return self.client.products.by_category(self) or []
-
-    @cached_property
-    def product_ids(self) -> List[int]:
-        """The ``product_ids`` of the category's :attr:`~.products`"""
-        return [product.id for product in self.products]
-
-    @cached_property
-    def skus(self) -> List[str]:
-        """The skus of the category's :attr:`~.products`"""
-        return [product.sku for product in self.products]
-
-    @cached_property
     def all_subcategories(self) -> Optional[List[Category]]:
         """Recursively retrieves all descendants of the category"""
         if not self.subcategories:
@@ -96,9 +81,30 @@ class Category(Model):
         return [category.id for category in self.all_subcategories]
 
     @cached_property
+    def products(self) -> List[Product]:
+        """The :class:`~.Product` s in the category
+
+        Alias for :meth:`get_products`
+        """
+        return self.get_products()
+
+    @cached_property
+    def product_ids(self) -> List[int]:
+        """The ``product_ids`` of the category's :attr:`~.products`"""
+        return [product.id for product in self.products]
+
+    @cached_property
+    def skus(self) -> List[str]:
+        """The skus of the category's :attr:`~.products`"""
+        return [product.sku for product in self.products]
+
+    @cached_property
     def all_products(self) -> List[Product]:
-        """"The :class:`~.Product` s in the category and in :attr:`~.all_subcategories`"""
-        return self.client.products.by_category(self, search_subcategories=True) or []
+        """The :class:`~.Product` s in the category and in :attr:`~.all_subcategories`
+
+        Alias for :meth:`get_products` with ``search_subcategories=True``
+        """
+        return self.get_products(search_subcategories=True)
 
     @cached_property
     def all_product_ids(self) -> Set[int]:
@@ -109,3 +115,31 @@ class Category(Model):
     def all_skus(self) -> Set[str]:
         """The skus of the products in the category and in :attr:`~.all_subcategories`"""
         return set(product.sku for product in self.all_products)
+
+    def get_products(self, search_subcategories: bool = False) -> Optional[Product | List[Product]]:
+        """Retrieves the category's products
+
+        :param search_subcategories: if ``True``, also retrieves products from :attr:`~.all_subcategories`
+        """
+        return self.client.products.by_category(self, search_subcategories) or []
+
+    def get_orders(self, search_subcategories: bool = False) -> Optional[Order | List[Order]]:
+        """Retrieve any :class:`~.Order` that contains one of the category's :attr:`~products`
+
+        :param search_subcategories: if ``True``, also searches for orders from :attr:`~.all_subcategories`
+        """
+        return self.client.orders.by_category(self, search_subcategories)
+
+    def get_order_items(self, search_subcategories: bool = False) -> Optional[OrderItem | List[OrderItem]]:
+        """Retrieve any :class:`~.OrderItem` that contains one of the category's :attr:`~products`
+
+        :param search_subcategories: if ``True``, also searches for order items from :attr:`~.all_subcategories`
+        """
+        return self.client.order_items.by_category(self, search_subcategories)
+
+    def get_invoices(self, search_subcategories: bool = False) -> Optional[Invoice | List[Invoice]]:
+        """Retrieve any :class:`~.Invoice` that contains one of the category's :attr:`~products`
+
+        :param search_subcategories: if ``True``, also searches for invoices from :attr:`~.all_subcategories`
+        """
+        return self.client.invoices.by_category(self, search_subcategories)

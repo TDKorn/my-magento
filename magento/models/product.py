@@ -1,12 +1,12 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Union, TYPE_CHECKING
+from typing import Union, TYPE_CHECKING, Optional, List
 from . import Model
 
 if TYPE_CHECKING:
-    from . import Category
     from magento import Client
     from magento.search import SearchQuery
+    from . import Category, Order, OrderItem, Invoice
 
 
 class Product(Model):
@@ -222,6 +222,33 @@ class Product(Model):
                 f'Failed with status code {response.status_code}' + '\n' +
                 f'Message: {response.json()}')
             return False
+
+    def get_orders(self) -> Optional[Order | List[Order]]:
+        """Searches for orders that contain the product
+
+        If the product is configurable, returns orders containing any of its child products
+
+        :returns: orders that contain the product, as an individual or list of :class:`~.Order` objects
+        """
+        return self.client.orders.by_product(self)
+
+    def get_order_items(self) -> Optional[OrderItem | List[OrderItem]]:
+        """Searches for order items that contain the product
+
+        If the product is configurable, returns order items containing any of its child products
+
+        :returns: order items that contain the product, as an individual or list of :class:`~.OrderItem` objects
+        """
+        return self.client.order_items.by_product(self)
+
+    def get_invoices(self) -> Optional[Invoice | List[Invoice]]:
+        """Searches for invoices that contain the product
+
+        If the product is configurable, returns invoices containing any of its child products
+
+        :returns: invoices that contain the product, as an individual or list of :class:`~.Invoice` objects
+        """
+        return self.client.invoices.by_product(self)
 
     def refresh(self, scope: str = None) -> bool:
         """Requests current product data from the API, then uses it to update object attributes in place
