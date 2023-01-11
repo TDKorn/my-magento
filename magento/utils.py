@@ -206,38 +206,38 @@ class MagentoLogger:
         return True
 
     def format_msg(self, msg: str) -> str:
-        """Formats :attr:`~.LOG_MESSAGE` using the specified message"""
+        """Formats the :attr:`~.LOG_MESSAGE` using the specified message"""
         return MagentoLogger.LOG_MESSAGE.format(
             name=self.name,
             message=msg
         )
 
     def debug(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.debug()"""
+        """Formats the :attr:`~.LOG_MESSAGE` with the specified message, then logs it with Logger.debug()"""
         return self.logger.debug(
             self.format_msg(msg)
         )
 
     def info(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.info()"""
+        """Formats the :attr:`~.LOG_MESSAGE` with the specified message, then logs it with Logger.info()"""
         return self.logger.info(
             self.format_msg(msg)
         )
 
     def error(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.error()"""
+        """Formats the :attr:`~.LOG_MESSAGE` with the specified message, then logs it with Logger.error()"""
         return self.logger.error(
             self.format_msg(msg)
         )
 
     def warning(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.warning()"""
+        """Formats the :attr:`~.LOG_MESSAGE` with the specified message, then logs it with Logger.warning()"""
         return self.logger.warning(
             self.format_msg(msg)
         )
 
     def critical(self, msg):
-        """Formats MagentoLogger.LOG_MESSAGE with the specified message, then logs it with Logger.critical()"""
+        """Formats the :attr:`~.LOG_MESSAGE` with the specified message, then logs it with Logger.critical()"""
         return self.logger.critical(
             self.format_msg(msg)
         )

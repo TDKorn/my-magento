@@ -11,46 +11,37 @@ if TYPE_CHECKING:
 
 
 class Model(ABC):
-    """The base class for all API response wrapper classes
+
+    """The abstract base class of all API response wrapper classes
 
     **Overview**
 
-    * A :class:`Model` is the object representation of any Magento API response
-    * Initialized using the JSON response ``data`` from any API ``endpoint``
-    * Most predefined subclasses use an ``endpoint`` that can be searched with criteria
-    * Access the corresponding :class:`~magento.search.SearchQuery` object via :meth:`~.query_endpoint`
+    * A :class:`Model` wraps the response ``data`` from an API ``endpoint``
+    * Several endpoints have subclasses with additional methods to retrieve/update data
+    * All other endpoints are wrapped using a general :class:`~.APIResponse`
+    * The endpoint's corresponding :class:`~.SearchQuery` can be accessed via :meth:`~.query_endpoint`
     """
 
-    DOCUMENTATION = None
-    """Link to the Official Magento 2 API documentation for the endpoint wrapped by the Model
-
-    :type: str
-    """
-
-    IDENTIFIER = None
-    """The :attr:`~.Model.uid` field for the endpoint
-
-    :type: str
-    """
+    DOCUMENTATION: str = None  #: Link to the Official Magento 2 API documentation for the endpoint wrapped by the Model
+    IDENTIFIER: str = None  #: The API response field that the endpoint's :attr:`~.Model.uid` comes from
 
     def __init__(self, data: dict, client: clients.Client, endpoint: str, private_keys: bool = True):
         """Initialize a :class:`Model` object from an API response and the ``endpoint`` that it came from
 
         ...
 
-        **NOTE** that the ``endpoint`` is used to:
+        .. tip:: The ``endpoint`` is used to:
 
-        * Generate the :meth:`~.url_for` any requests made by subclass-specific methods
-        * Match the :class:`Model` to its corresponding :class:`~magento.search.SearchQuery` object,
-          which is returned by :meth:`~.query_endpoint`
-        * Determine how to :meth:`~Model.parse` new :class:`Model` objects from API responses
+           * Generate the :meth:`~.url_for` any requests made by subclass-specific methods
+           * Match the :class:`~.Model` to its corresponding :class:`~.SearchQuery` object
+           * Determine how to :meth:`~.Model.parse` new :class:`~.Model` objects from API responses
 
         ...
 
         :param data: the JSON from an API response to use as source data
         :param client: an initialized :class:`~.Client`
-        :param endpoint: the base API endpoint that the :class:`Model` represents
-        :param private_keys: if set to True, will set the keys in the :attr:`~.excluded_keys` as private attributes
+        :param endpoint: the API endpoint that the :class:`Model` wraps
+        :param private_keys: if ``True``, sets the keys in the :attr:`~.excluded_keys` as private attributes
             (prefixed with ``__``) instead of fully excluding them
 
         """
@@ -77,13 +68,14 @@ class Model(ABC):
         :param private_keys: if set to True, will set the :attr:`~.excluded_keys` as private attributes
             (prefixed with ``__``) instead of fully excluding them
 
-        **Private Keys Clarification**
+        .. admonition:: **Private Keys Clarification**
+           :class: info
 
-        Let's say that ``"status"`` is in the :attr:`~.excluded_keys`
+           Let's say that ``"status"`` is in the :attr:`~.excluded_keys`
 
-        * No matter what, the :class:`Model` object will not have a ``status`` attribute set
-        * If ``private_keys=True``, it **will** have a ``__status`` attribute set though
-        * If ``private_keys=False``, then the attribute/key is completely excluded
+           * No matter what, the ``status`` attribute will not be set on the :class:`Model`
+           * If ``private_keys==True``, the ``__status`` attribute will be set (using the ``status`` data)
+           * If ``private_keys==False``, the data from ``status`` is completely excluded
         """
         keys = set(data) - set(self.excluded_keys)
         for key in keys:
@@ -125,34 +117,34 @@ class Model(ABC):
         """Initializes and returns the :class:`~.SearchQuery` object corresponding to the Model's ``endpoint``
 
         :returns: a :class:`~.SearchQuery` or subclass, depending on the ``endpoint``
-        :rtype: :class:`~.SearchQuery`
         """
         return self.client.search(self.endpoint)
 
     def parse(self, response: dict) -> Model:
         """Uses the instance's corresponding :class:`~.SearchQuery` to parse an API response
 
-        :param response: JSON dictionary from the API to use as source data
-        :return: a :class:`~.Model` object, initialized using the ``response`` as the source data
-        :rtype: :class:`~.Model` with the same ``endpoint`` as the calling instance
+        :param response: API response dict to use as source data
+        :returns: a :class:`~.Model` with the same ``endpoint`` as the calling instance
         """
         return self.query_endpoint().parse(response)
 
-    def refresh(self, scope: str = None) -> bool:
+    def refresh(self, scope: Optional[str] = None) -> bool:
         """Updates object attributes in place using current data from the :meth:`~.data_endpoint`
 
         .. hint:: :meth:`~.refresh` can be used to switch the scope of the source data
            without creating a new object or changing the :attr:`.Client.scope`
 
-           .. admonition:: **Example**:
+           .. admonition:: Example
               :class: example
 
               ::
 
                 # Get product data on 'default' scope
-                >> product = client.products.by_sku('sku42')
+                >>> product = client.products.by_sku('sku42')
                 # Get fresh product data from different scope
-                >> product.refresh('all')
+                >>> product.refresh('all')
+
+                Refreshed <Magento Product: sku42> on scope all
 
         :param scope: the scope to send the request on; uses the :attr:`.Client.scope` if not provided
         """
@@ -176,12 +168,15 @@ class Model(ABC):
     def unpack_attributes(attributes: List[dict], key: str = 'attribute_code') -> dict:
         """Unpacks a list of attribute dictionaries into a single dictionary
 
-        **Example**::
+        .. admonition:: Example
+           :class: example
 
-               >>> custom_attrs = [{'attribute_code': 'attr', 'value': 'val'},{'attribute_code': 'will_to_live', 'value': '0'}]
-               >>> print(Model.unpack_attributes(custom_attrs))
+           ::
 
-               {'attr': 'val', 'will_to_live': '0'}
+            >> custom_attrs = [{'attribute_code': 'attr', 'value': 'val'},{'attribute_code': 'will_to_live', 'value': '0'}]
+            >> print(Model.unpack_attributes(custom_attrs))
+
+            {'attr': 'val', 'will_to_live': '0'}
 
         :param attributes: a list of custom attribute dictionaries
         :param key: the key used in the attribute dictionary (ex. ``attribute_code`` or ``label``)
@@ -193,24 +188,28 @@ class Model(ABC):
     def pack_attributes(attribute_data: dict, key: str = 'attribute_code') -> List[dict]:
         """Packs a dictionary containing attributes into a list of attribute dictionaries
 
-        **Example**::
+        .. admonition:: **Example**
+           :class: example
 
-               >>> attribute_data = {'special_price': 12, 'meta_title': 'My Product'}
-               >>> print(Model.pack_attributes(attribute_data))
-               >>> print(Model.pack_attributes(attribute_data, key='label'))
+           ::
 
-               [{'attribute_code': 'special_price', 'value': 12}, {'attribute_code': 'meta_title', 'value': 'My Product'}]
-               [{'label': 'special_price', 'value': 12}, {'label': 'meta_title', 'value': 'My Product'}]
+            >> attribute_data = {'special_price': 12, 'meta_title': 'My Product'}
+            >> print(Model.pack_attributes(attribute_data))
+            >> print(Model.pack_attributes(attribute_data, key='label'))
+
+            [{'attribute_code': 'special_price', 'value': 12}, {'attribute_code': 'meta_title', 'value': 'My Product'}]
+            [{'label': 'special_price', 'value': 12}, {'label': 'meta_title', 'value': 'My Product'}]
+
 
         :param attribute_data: a dictionary containing attribute data
         :param key: the key to use when packing the attributes (ex. ``attribute_code`` or ``label``)
-        :returns: a list of dictionaries formatted as ``{ key : "attr", value: "value"}``
+        :returns: a list of dictionaries formatted as ``{key : "attr", "value": "value"}``
         """
         return [{key: attr, "value": val} for attr, val in attribute_data.items()]
 
     @staticmethod
     def encode(string: str) -> str:
-        """URL-encode with :mod:`urllib`; used for requests that could contain special characters
+        """URL-encode with :mod:`urllib.parse`; used for requests that could contain special characters
 
         :param string: the string to URL-encode
         """
@@ -220,7 +219,7 @@ class Model(ABC):
 
     @cached_property
     def cached(self) -> List[str]:
-        """Names of properties that are wrapped with :class:`~functools.cached_property`"""
+        """Names of properties that are wrapped with :func:`functools.cached_property`"""
         return [member for member, val in inspect.getmembers(self.__class__) if
                 isinstance(val, cached_property) and member != 'cached']
 
@@ -245,9 +244,9 @@ class Model(ABC):
 class APIResponse(Model):
 
     def __init__(self, data: dict, client: clients.Client, endpoint: str):
-        """A generic :class:`Model` class
+        """A generic :class:`Model` subclass
 
-         Used to wrap API Responses when there isn't a :class:`Model` subclass defined for the endpoint
+        Wraps API responses when there isn't a :class:`Model` subclass defined for the ``endpoint``
 
         :param data: the API response from an API endpoint
         :param client: an initialized :class:`~.Client` object

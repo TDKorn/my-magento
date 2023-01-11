@@ -120,10 +120,11 @@ class SearchQuery:
 
         .. note:: The ``id`` used is different depending on the endpoint being queried
 
-           * Most endpoints use an ``entity_id``
-           * The ``orders/items`` endpoint uses ``item_id`` (see :class:`OrderItemSearch`)
-           * The ``products`` endpoint can be queried either with the ``product_id``
-             or :meth:`~.ProductSearch.by_sku`
+           * Most endpoints use an ``entity_id`` or ``id``
+           * The ``orders/items`` endpoint uses ``item_id``
+           * The ``products`` endpoint can be queried using a ``sku`` or ``product_id``
+
+           The :attr:`~.Model.IDENTIFIER` attribute of each :class:`~.Model` contains the appropriate ``id`` field
 
         :param item_id: id of the item to retrieve
         """
@@ -134,14 +135,15 @@ class SearchQuery:
         """Search for multiple items using an iterable or comma-separated string of field values
 
         .. admonition:: Example
+           :class: example
 
            Search for orders that are processing, pending, or completed::
 
-              #  Values can be a list/tuple/iterable
-              >> api.orders.by_list('status', ['processing', 'pending', 'completed'])
+            #  Values can be a list/tuple/iterable
+            >> api.orders.by_list('status', ['processing', 'pending', 'completed'])
 
-              #  Values can be a comma-separated string
-              >> api.orders.by_list('status', 'processing,pending,completed')
+            #  Values can be a comma-separated string
+            >> api.orders.by_list('status', 'processing,pending,completed')
 
         :param field: the API response field to search for matches in
         :param values: an iterable or comma separated string of values

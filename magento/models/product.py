@@ -103,7 +103,7 @@ class Product(Model):
         self.logger.error(f'Sale price for {self} must be less than current price ({self.price})')
         return False
 
-    def update_name(self, name: str, scope: str = None) -> bool:
+    def update_name(self, name: str, scope: Optional[str] = None) -> bool:
         """Update the product name
 
         :param name: the new name to use
@@ -111,7 +111,7 @@ class Product(Model):
         """
         return self.update_attributes({'name': name}, scope)
 
-    def update_description(self, description: str, scope: str = None) -> bool:
+    def update_description(self, description: str, scope: Optional[str] = None) -> bool:
         """Update the product description
 
         :param description: the new HTML description to use
@@ -119,7 +119,7 @@ class Product(Model):
         """
         return self.update_custom_attributes({'description': description}, scope)
 
-    def update_metadata(self, metadata: dict, scope: str = None) -> bool:
+    def update_metadata(self, metadata: dict, scope: Optional[str] = None) -> bool:
         """Update the product metadata
 
         :param metadata: the new ``meta_title``, ``meta_keyword`` and/or ``meta_description`` to use
@@ -128,7 +128,7 @@ class Product(Model):
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
         return self.update_custom_attributes(attributes, scope)
 
-    def update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+    def update_attributes(self, attribute_data: dict, scope: Optional[str] = None) -> bool:
         """Update top level product attributes with scoping taken into account
 
         .. note:: Product attributes can have a ``Global``, ``Store View`` or ``Website`` scope
@@ -144,7 +144,7 @@ class Product(Model):
         depending on how many :class:`~.Store` :attr:`~.views` you have:
 
         * **1 View:** admin values are updated for all attributes, regardless of scope
-        * **2+ Views:** admin values are updated only for ``Website`` attributes
+        * **2+ Views:** admin values are updated only for :attr:`~.website_product_attributes`
 
         :param attribute_data: a dictionary of product attributes to update
         :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
@@ -159,12 +159,15 @@ class Product(Model):
             return self._update_attributes(website_attrs, scope='all')
         return True
 
-    def update_custom_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+    def update_custom_attributes(self, attribute_data: dict, scope: Optional[str] = None) -> bool:
         """Update custom attributes with scoping taken into account
 
         See :meth:`~update_attributes` for details
 
-        .. important:: This method only supports **custom attributes**
+        .. admonition:: Important
+           :class: important-af
+
+           This method only supports updating **custom attributes**
 
         :param attribute_data: a dictionary of custom attributes to update
         :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
@@ -196,7 +199,7 @@ class Product(Model):
         self.refresh()  # Back to default scope
         return True
 
-    def _update_attributes(self, attribute_data: dict, scope: str = None) -> bool:
+    def _update_attributes(self, attribute_data: dict, scope: Optional[str] = None) -> bool:
         """Sends a PUT request to update **top-level** product attributes
 
         .. tip:: to update attributes or custom attributes with attribute scope taken into account,
@@ -257,8 +260,8 @@ class Product(Model):
     def delete(self) -> bool:
         """Deletes the product
 
-        .. tip:: If you delete a product by accident, the :class:`Product` object's ``data`` attribute will still
-         contain the raw data, which can be used to recover it.
+        .. hint:: If you delete a product by accident, the :class:`Product` object's ``data``
+         attribute will still contain the raw data, which can be used to recover it.
 
          Alternatively, don't delete it by accident.
         """
@@ -274,11 +277,11 @@ class Product(Model):
             )
             return False
 
-    def get_children(self, refresh: bool = False, scope: str = None) -> List[Product]:
+    def get_children(self, refresh: bool = False, scope: Optional[str] = None) -> List[Product]:
         """Retrieve the child simple products of a configurable product
 
-        :param refresh: if True, calls :meth:`~.refresh` on the child products to retrieve full data
-        :param scope: the scope to refresh the children on (when``refresh=True``)
+        :param refresh: if True, calls :meth:`~.Model.refresh` on the child products to retrieve full data
+        :param scope: the scope to refresh the children on (when ``refresh=True``)
         """
         if refresh:
             for child in self.children:
@@ -410,7 +413,7 @@ class MediaEntry(Model):
     def __repr__(self):
         return f"<MediaEntry {self.id} for {self.product}: {self.label}>"
 
-    def query_endpoint(self) -> SearchQuery:
+    def query_endpoint(self) -> None:
         """No search endpoint exists for media gallery entries"""
         return self.logger.info("There is no search interface for media gallery entries")
 
@@ -431,7 +434,7 @@ class MediaEntry(Model):
         """Permalink to the image"""
         return self.client.store.active.base_media_url + 'catalog/product' + self.file
 
-    def disable(self, scope: str = None) -> bool:
+    def disable(self, scope: Optional[str] = None) -> bool:
         """Disables the MediaEntry on the given scope
 
         :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
@@ -439,7 +442,7 @@ class MediaEntry(Model):
         self.data['disabled'] = True
         return self.update(scope)
 
-    def enable(self, scope: str = None) -> bool:
+    def enable(self, scope: Optional[str] = None) -> bool:
         """Enables the MediaEntry on the given scope
 
         :param scope: the scope to send the request on; will use the :attr:`.Client.scope` if not provided
@@ -447,7 +450,7 @@ class MediaEntry(Model):
         self.data['disabled'] = False
         return self.update(scope)
 
-    def add_media_type(self, media_type: str, scope: str = None) -> bool:
+    def add_media_type(self, media_type: str, scope: Optional[str] = None) -> bool:
         """Add a media type to the MediaEntry on the given scope
 
         .. caution:: If the media type is already assigned to a different entry, it will be removed
@@ -459,7 +462,7 @@ class MediaEntry(Model):
             self.data['types'].append(media_type)
             return self.update(scope)
 
-    def remove_media_type(self, media_type: str, scope: str = None) -> bool:
+    def remove_media_type(self, media_type: str, scope: Optional[str] = None) -> bool:
         """Remove a media type from the MediaEntry on the given scope
 
         :param media_type: one of the :attr:`~MEDIA_TYPES`
@@ -472,7 +475,7 @@ class MediaEntry(Model):
         self.logger.error(f'{media_type} is not currently assigned to {self}')
         return False
 
-    def set_media_types(self, types: list, scope: str = None) -> bool:
+    def set_media_types(self, types: list, scope: Optional[str] = None) -> bool:
         """Set media types for the MediaEntry on the given scope
 
         :param types: a list containing all :attr:`~MEDIA_TYPES` to assign
@@ -484,7 +487,7 @@ class MediaEntry(Model):
         self.data['types'] = [t for t in types if t in self.MEDIA_TYPES]
         return self.update(scope)
 
-    def set_position(self, position: int, scope: str = None) -> bool:
+    def set_position(self, position: int, scope: Optional[str] = None) -> bool:
         """Set the position of the MediaEntry on the given scope
 
         :param position: the position to change to
@@ -496,7 +499,7 @@ class MediaEntry(Model):
         self.data['position'] = position
         return self.update(scope)
 
-    def set_alt_text(self, text: str, scope: str = None) -> bool:
+    def set_alt_text(self, text: str, scope: Optional[str] = None) -> bool:
         """Set the alt text (``label``) of the MediaEntry on the given scope
 
         :param text: the alt text to use
@@ -508,7 +511,7 @@ class MediaEntry(Model):
         self.data['label'] = text
         return self.update(scope)
 
-    def update(self, scope: str = None) -> bool:
+    def update(self, scope: Optional[str] = None) -> bool:
         """Uses the :attr:`~.data` dict to update the media entry
 
         .. note:: Some updates alter the data of other entries; if the update is successful, the
@@ -537,7 +540,7 @@ class MediaEntry(Model):
                 return False  # Avoid updating admin if store update fails
         return True
 
-    def _update(self, scope: str = None) -> bool:
+    def _update(self, scope: Optional[str] = None) -> bool:
         url = self.data_endpoint(scope)
         response = self.client.put(url, payload={'entry': self.data})
 

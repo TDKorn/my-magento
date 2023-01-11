@@ -80,11 +80,11 @@ class InvoiceItem(Model):
     def __repr__(self):
         return f"<InvoiceItem ({self.sku})> from {self.invoice}"
 
-    def data_endpoint(self, scope: Optional[str] = None) -> str:
+    def data_endpoint(self, scope: Optional[str] = None) -> None:
         """No data endpoint exists for invoice items"""
         return self.logger.info("There is no data endpoint for invoice items")
 
-    def query_endpoint(self) -> SearchQuery:
+    def query_endpoint(self) -> None:
         """No search endpoint exists for invoice items"""
         return self.logger.info("There is no search interface for invoice items")
 
