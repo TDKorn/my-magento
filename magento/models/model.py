@@ -243,6 +243,8 @@ class Model(ABC):
 
 class APIResponse(Model):
 
+    IDENTIFIER = 'entity_id'  # Most endpoints use this field
+
     def __init__(self, data: dict, client: clients.Client, endpoint: str):
         """A generic :class:`Model` subclass
 
@@ -263,7 +265,21 @@ class APIResponse(Model):
     def excluded_keys(self) -> List[str]:
         return []
 
+    def data_endpoint(self, scope: Optional[str] = None) -> Optional[str]:
+        if self.uid:
+            return super().data_endpoint(scope)
+        else:
+            self.logger.info('No uid found - unable to determine the data endpoint url')
+
     @property
-    def uid(self) -> Union[str, int]:
-        # Attempt to retrieve an id
-        return self.data.get('entity_id', self.data.get('id', -1))
+    def uid(self) -> Optional[int]:
+        """Unique item identifier
+
+        .. note:: Since the :class:`~.APIResponse` can wrap any endpoint, the response
+           is checked for commonly used id fields (``entity_id`` and ``id``)
+
+           If the endpoint doesn't use those fields, ``None`` will be returned
+        """
+        if not (uid := super().uid):
+            uid = self.data.get('id', None)
+        return uid
