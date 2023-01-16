@@ -25,13 +25,19 @@ class SearchQuery:
         :param model: the :class:`~.Model` to parse the response data with; uses :class:`~.APIResponse` if not specified
         """
         if not isinstance(client, clients.Client):
-            raise TypeError(f'client type must be {clients.Client}')
+            raise TypeError(f'`client` must be of type {clients.Client}')
 
-        self.client = client    #: the :class:`~.Client` to send the search request with
+        #: The :class:`~.Client` to send the search request with
+        self.client = client
+        #: The endpoint being queried
         self.endpoint = endpoint
+        #: The :doc:`Model <models>`_ class to wrap the response with
         self.Model = model
+        #: The current url for the search request
         self.query = self.client.url_for(endpoint) + '/?'
+        #: Restricted fields, from :meth:`~restricted_fields`
         self.fields = ''
+        #: The raw response data, if any
         self._result = {}
 
     def add_criteria(self, field, value, condition='eq', **kwargs) -> Self:
@@ -118,13 +124,14 @@ class SearchQuery:
     def by_id(self, item_id: Union[int, str]) -> Optional[Model]:
         """Retrieve data for an individual item by its id
 
-        .. note:: The ``id`` used is different depending on the endpoint being queried
+        .. note:: The ``id`` field used is different depending on the endpoint being queried
 
            * Most endpoints use an ``entity_id`` or ``id``
            * The ``orders/items`` endpoint uses ``item_id``
-           * The ``products`` endpoint can be queried using a ``sku`` or ``product_id``
+           * The ``products`` endpoint uses ``product_id``,
+             but can also be queried :meth:`~ProductSearch.by_sku`
 
-           The :attr:`~.Model.IDENTIFIER` attribute of each :class:`~.Model` contains the appropriate ``id`` field
+           The :attr:`~.Model.IDENTIFIER` attribute of each :class:`~.Model` contains the appropriate field
 
         :param item_id: id of the item to retrieve
         """
@@ -144,6 +151,7 @@ class SearchQuery:
 
             #  Values can be a comma-separated string
             >> api.orders.by_list('status', 'processing,pending,completed')
+
 
         :param field: the API response field to search for matches in
         :param values: an iterable or comma separated string of values
@@ -234,8 +242,10 @@ class SearchQuery:
 
 class OrderSearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``orders`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``orders`` endpoint
+        """Initialize an :class:`OrderSearch`
 
         :param client: an initialized :class:`~.Client` object
         """
@@ -330,8 +340,10 @@ class OrderSearch(SearchQuery):
 
 class OrderItemSearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``orders/items`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``orders/items`` endpoint
+        """Initialize an :class:`OrderItemSearch`
 
         :param client: an initialized :class:`~.Client` object
         """
@@ -443,8 +455,10 @@ class OrderItemSearch(SearchQuery):
 
 class InvoiceSearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``invoices`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``invoices`` endpoint
+        """Initialize an :class:`InvoiceSearch`
 
         :param client: an initialized :class:`~.Client` object
         """
@@ -569,8 +583,10 @@ class InvoiceSearch(SearchQuery):
 
 class ProductSearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``products`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``products`` endpoint
+        """Initialize a :class:`ProductSearch`
 
         :param client: an initialized :class:`~.Client` object
         """
@@ -657,8 +673,10 @@ class ProductSearch(SearchQuery):
 
 class ProductAttributeSearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``products/attributes`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``products/attributes`` endpoint
+        """Initialize a :class:`ProductAttributeSearch`
 
         :param client: an initialized :class:`~.Client` object
         """
@@ -686,8 +704,10 @@ class ProductAttributeSearch(SearchQuery):
 
 class CategorySearch(SearchQuery):
 
+    """:class:`SearchQuery` subclass for the ``categories`` endpoint"""
+
     def __init__(self, client: Client):
-        """SearchQuery for the ``categories`` endpoint
+        """Initialize a :class:`CategorySearch`
 
         :param client: an initialized :class:`~.Client` object
         """
