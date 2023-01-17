@@ -1,26 +1,16 @@
-.. raw:: html
+.. |RTD| replace:: **Explore the docs »**
+.. _RTD: https://my-magento.readthedocs.io/en/latest/
 
-   <h1 id="my-magento" align="center">MyMagento</h1>
+MyMagento
+-----------
 
-     <p align="center">
-       A Python package that wraps and extends the Magento 2 REST API
-       <br/>
-       <br/>
 
-.. only:: draft
 
-   .. raw:: html
+A Python package that wraps and extends the Magento 2 REST API
 
-      <a href="https://my-magento.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a>
-      <br/>
+|RTD|_
 
-.. raw:: html
-
-   </p>
-   </div>
-
-   <div align = "center">
-
+|
 
 .. image:: https://img.shields.io/pypi/v/my-magento
    :target: https://pypi.org/project/my-magento/
@@ -32,13 +22,8 @@
 .. image:: https://readthedocs.org/projects/my-magento/badge/?version=latest
     :target: https://my-magento.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-    
-.. raw:: html
-   
-   </div>
-   <br/>
-   <br/>
 
+|
 
 About MyMagento
 ~~~~~~~~~~~~~~~~~~~~
@@ -104,10 +89,10 @@ Installation
    Please note that ``MyMagento`` requires ``Python >= 3.10``
 
 
-.. Documentation
-.. ~~~~~~~~~~~~~~
+Documentation
+~~~~~~~~~~~~~~
 
-.. Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/latest/>`_
+Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/latest/>`_
 
 
 ...
@@ -128,7 +113,7 @@ Use the credentials of your Magento 2 admin account to initialize and :meth:`~.a
  |[ MyMagento | website_username ]|:  Logged in to username
 
 
-Once you initialize a ``Client``, you have a few ways to start :ref:`interact_with_api`
+Once you initialize a ``Client``, you have a few ways to start `interacting with the api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
 
 ...
 

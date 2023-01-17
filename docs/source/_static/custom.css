@@ -14,9 +14,8 @@ code.literal {
     background:#006db4
 }
 div#mymagento h1:first-child {
-    color: transparent;
-    font-size: 0.1px;
-    margin: 0px;
+    visibility: hidden;
+    display: none !important;
 }
 /* Change viewcode "[source]" link position and colour (blue) */
 .rst-content .viewcode-back, .rst-content .viewcode-link {

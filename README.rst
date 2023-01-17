@@ -1,9 +1,3 @@
-
-
-.. |em| replace:: —
-.. |en| replace:: –
-
-
 .. raw:: html
 
    <h1 id="my-magento" align="center">MyMagento</h1>
@@ -101,11 +95,12 @@ Installation
 
    Please note that ``MyMagento`` requires ``Python >= 3.10``
 
+...
 
-.. Documentation
-.. ~~~~~~~~~~~~~~
+Documentation
+~~~~~~~~~~~~~~
 
-.. Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/latest/>`_
+Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/latest/>`_
 
 
 ...
@@ -126,6 +121,12 @@ Use the credentials of your Magento 2 admin account to initialize and `authentic
  |[ MyMagento | website_username ]|:  Logged in to username
 
 
-Once you initialize a ``Client``, you have a few ways to start `interact_with_api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
+Once you initialize a ``Client``, you have a few ways to start `interacting with the api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
 
+...
+
+Interacting with the API
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the rest of this README, please refer to the `docs <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
 
