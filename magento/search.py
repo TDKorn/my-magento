@@ -14,7 +14,7 @@ class SearchQuery:
 
     """Queries any endpoint that invokes the searchCriteria interface. Parent of all endpoint-specific search classes
 
-        .. tip:: See https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/ for official docs
+    .. tip:: See https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/ for official docs
     """
 
     def __init__(self, endpoint: str, client: Client, model: Type[Model] = APIResponse):
@@ -31,11 +31,11 @@ class SearchQuery:
         self.client = client
         #: The endpoint being queried
         self.endpoint = endpoint
-        #: The :doc:`Model <models>`_ class to wrap the response with
+        #: :doc:`models` class to wrap the response with
         self.Model = model
         #: The current url for the search request
         self.query = self.client.url_for(endpoint) + '/?'
-        #: Restricted fields, from :meth:`~restricted_fields`
+        #: Restricted fields, from :meth:`~.restrict_fields`
         self.fields = ''
         #: The raw response data, if any
         self._result = {}

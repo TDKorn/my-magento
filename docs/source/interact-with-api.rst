@@ -72,8 +72,8 @@ The following :class:`~.Client` attributes correspond to endpoint-specific :clas
 Search Results as Models
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :attr:`~.result` data of any query is parsed and wrapped by the endpoint's corresponding :class:`~.Model`,
-making it easier to interact with
+The :attr:`~.SearchQuery.result` data of any query is parsed and wrapped by the endpoint's
+corresponding :class:`~.Model`, making it easier to interact with
 
 .. code-block:: python
 
@@ -150,7 +150,7 @@ The :class:`~.Model` subclasses also have various methods to update data on the 
 Building Custom Search Queries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In addition to the predefined methods, you can build your own queries too |en| simply
+In addition to the predefined methods, you can build your own queries too – simply
 :meth:`~.add_criteria`, :meth:`~.restrict_fields`, and :meth:`~.execute` the search
 
 

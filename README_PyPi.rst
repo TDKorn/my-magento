@@ -2,9 +2,13 @@
 .. _RTD: https://my-magento.readthedocs.io/en/latest/
 
 MyMagento
------------
+---------------
 
-
+.. image:: _static/magento_orange.png
+   :alt: Magento Logo
+   :align: center
+   :width: 100
+   :height: 100
 
 A Python package that wraps and extends the Magento 2 REST API
 
@@ -12,7 +16,7 @@ A Python package that wraps and extends the Magento 2 REST API
 
 |
 
-.. image:: https://img.shields.io/pypi/v/my-magento
+.. image:: https://img.shields.io/pypi/v/my-magento?color=orange
    :target: https://pypi.org/project/my-magento/
    :alt: PyPI Version
 

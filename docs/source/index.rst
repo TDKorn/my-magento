@@ -1,5 +1,5 @@
-MyMagento
------------
+MyMagento 🛒
+-------------
 
 .. include:: README.rst
    :end-line: 134

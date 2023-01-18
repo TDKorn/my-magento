@@ -1,18 +1,43 @@
+@import url('https://fonts.googleapis.com/css?family=Work+Sans:400,700.less');
+
+body {
+    color: #41362f;
+    font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-weight: 400;
+    line-height: 1.36;
+}
 /* Make properties not stack */
 dl.py.property {
     display: block !important;
 }
 /* Set color of inline ``variables`` */
 code.literal {
-    color: #d90429 !important;
+    color: #e22626 !important;
 }
-/* Change nav header thing to a less nauseating blue */
+/* Change nav header thing to Magento orange */
 .wy-side-nav-search {
-    background-color:#006db4
+    background-color: #eb5202;
 }
 .wy-nav-top {
-    background:#006db4
+    background: #eb5202;
 }
+/* TOCTree Caption color */
+.wy-menu-vertical header, .wy-menu-vertical p.caption {
+    color: #eb5202;
+}
+/* Home Icon */
+a.icon-home::before {
+    content: "🛒";
+}
+/* Magento Logo in README */
+#magento-logo {
+    width: 100%;
+    max-width: 20%;
+}
+div#mymagento{
+    text-align: center;
+}
+/* Hide rst heading (uses html <h1>) */
 div#mymagento h1:first-child {
     visibility: hidden;
     display: none !important;
@@ -51,16 +76,16 @@ div#mymagento h1:first-child {
 
 
 /* Admonition Titles */
-/* Dark msg title background as like, the default custom admonition for InstaTweet */
+/* Admonitions just for README */
 .rst-content .search .admonition-title {
    background: #2b2d42;
 }
-/* Same blue as nav for docs */
-.rst-content .docs .admonition-title {
-    background: #006db4;
-}
 .rst-content .client .admonition-title {
     background: #4f1abc ;
+}
+/* Title background for autodoc insertions */
+.rst-content .docs .admonition-title {
+    background: #006db4;
 }
 /* Title background for tips  */
 .rst-content .tip .admonition-title {
@@ -77,7 +102,7 @@ div#mymagento h1:first-child {
 }
 /* Title background for caution */
 .rst-content .caution .admonition-title {
-    background: #ff9800 ;
+    background: #fffbbb ;
 }
 /* Light Blue title for "Note" admonition, colour taken from `.. note::` */
 .rst-content .note .admonition-title {
@@ -89,7 +114,7 @@ div#mymagento h1:first-child {
 }
 /* Red msg title background for the important af stuff */
 .rst-content .important-af .admonition-title {
-    background: #c71427 ;
+    background: #e22626 ;
 }
 
 /*

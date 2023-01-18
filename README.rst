@@ -1,5 +1,6 @@
 .. raw:: html
 
+   <img id="magento-logo" src="_static/magento_orange.png">
    <h1 id="my-magento" align="center">MyMagento</h1>
 
      <p align="center">
@@ -14,7 +15,8 @@
    
    <div align = "center">
 
-.. image:: https://img.shields.io/pypi/v/my-magento
+
+.. image:: https://img.shields.io/pypi/v/my-magento?color=orange
    :target: https://pypi.org/project/my-magento/
    :alt: PyPI Version
 

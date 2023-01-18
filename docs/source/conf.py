@@ -172,6 +172,8 @@ html_context = {
     'github_version': None
 }
 
+html_logo = "_static/magento_black.png"
+
 # ============================ Linkcode Extension Settings ============================
 #
 #                     Adapted from https://github.com/nlgranger/SeqTools
@@ -179,7 +181,7 @@ html_context = {
 #
 
 # Get the blob to link to on GitHub
-linkcode_revision = "master"
+linkcode_revision = "main"
 
 try:
     # lock to commit number
@@ -188,10 +190,10 @@ try:
     linkcode_revision = head
 
     # if we are on master's HEAD, use master as reference
-    cmd = "git log --first-parent master -n1 --pretty=%H"
+    cmd = "git log --first-parent main -n1 --pretty=%H"
     master = subprocess.check_output(cmd.split()).strip().decode('utf-8')
     if head == master:
-        linkcode_revision = "master"
+        linkcode_revision = "main"
 
     # if we have a tag, use tag as reference
     cmd = "git describe --exact-match --tags " + head

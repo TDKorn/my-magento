@@ -50,6 +50,7 @@ class Client:
         :param log_level: the logging level for logging to stdout
         :param login: if ``True``, calls :meth:`~.authenticate` upon initialization
         :param kwargs: see below
+
         ...
 
         :Optional Keyword Arguments:
@@ -142,7 +143,7 @@ class Client:
         .. note:: Several endpoints have predefined :class:`~.SearchQuery` and :class:`~.Model` subclasses
 
            If a subclass hasn't been defined for the ``endpoint`` yet, a general :class:`~.SearchQuery`
-           will be returned, which wraps the :attr:`~.result` in :class:`~.APIResponse` objects
+           will be returned, which wraps the :attr:`~.SearchQuery.result` with :class:`~.APIResponse`
 
         :param endpoint: a valid Magento API search endpoint
         """
