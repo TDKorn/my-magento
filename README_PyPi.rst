@@ -4,7 +4,7 @@
 MyMagento
 ---------------
 
-.. image:: _static/magento_orange.png
+.. image:: https://my-magento.readthedocs.io/en/latest/_static/magento_orange.png
    :alt: Magento Logo
    :align: center
    :width: 100
@@ -59,20 +59,20 @@ Main Components
    :alt: The Client
    :target: https://github.com/TDKorn/my-magento/blob/sphinx-docs/magento/clients.py
 
-.. admonition:: The `Client <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/clients.py#L13-L374>`_
+.. admonition:: The `Client <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/clients.py#L13-L375>`_
    :class: client
 
    * Handles all interactions with the API, with support for multiple store views
    * Accessible from all objects created by the package
 
-.. admonition:: The `SearchQuery <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/search.py#L13-L240>`_ and Subclasses
+.. admonition:: The `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/search.py#L13-L240>`_ and Subclasses
    :class: search
 
-   * `execute() <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/search.py#L111-L122>`_  predefined or custom search queries on any endpoint
+   * `execute() <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/search.py#L111-L122>`_  predefined or custom search queries on any endpoint
    * Supports simple and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_
 
 
-.. admonition::  The `Model <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/models/model.py#L13-L241>`_ Subclasses
+.. admonition::  The `Model <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/models/model.py#L13-L241>`_ Subclasses
    :class: hint
 
    * Wrap all API responses in the package
@@ -104,7 +104,7 @@ Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/la
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use the credentials of your Magento 2 admin account to initialize and `authenticate() <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/clients.py#L224-L251>`_ a `Client <https://github.com/tdkorn/my-magento/blob/e5c4b35c52d253451ef45b432d0ee0560459341f/magento/clients.py#L13-L374>`_
+Use the credentials of your Magento 2 admin account to initialize and `authenticate() <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/clients.py#L225-L252>`_ a `Client <https://github.com/tdkorn/my-magento/blob/v2.0.0/magento/clients.py#L13-L375>`_
 
 .. code-block:: python
 

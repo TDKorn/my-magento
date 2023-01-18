@@ -1,8 +1,8 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
-LONG_DESCRIPTION_SRC = 'README.rst'
+LONG_DESCRIPTION_SRC = 'README_PyPi.rst'
 
 
 def read(file):
@@ -12,10 +12,10 @@ def read(file):
 
 setup(
     name='my-magento',
-    packages=['magento'],
-    version='2.0.0b1',
+    packages=find_packages(),
+    version='2.0.0',
     license='MIT',
-    description='Python Magento 2 REST API Client and Wrapper',
+    description='Python Magento 2 REST API Wrapper',
     long_description=read(LONG_DESCRIPTION_SRC),
     long_description_content_type="text/x-rst; charset=UTF-8",
     author='Adam Korn',
