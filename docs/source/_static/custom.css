@@ -29,14 +29,6 @@ code.literal {
 a.icon-home::before {
     content: "🛒";
 }
-/* Magento Logo in README */
-#magento-logo {
-    width: 100%;
-    max-width: 20%;
-}
-div#mymagento{
-    text-align: center;
-}
 /* Hide rst heading (uses html <h1>) */
 div#mymagento h1:first-child {
     visibility: hidden;

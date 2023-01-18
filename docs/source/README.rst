@@ -1,12 +1,12 @@
 .. raw:: html
 
-   <img id="magento-logo" src="_static/magento_orange.png">
-   <h1 id="my-magento" align="center">MyMagento</h1>
-
-     <p align="center">
-       A Python package that wraps and extends the Magento 2 REST API
-       <br/>
-       <br/>
+   <div align="center">
+      <img id="magento-logo" src="_static/magento_orange.png" style="width: 15%">
+      <h1 id="my-magento" align="center">MyMagento</h1>
+      <p>
+         A Python package that wraps and extends the Magento 2 REST API
+         <br/>
+         <br/>
 
 .. only:: draft
 
@@ -20,7 +20,7 @@
    </p>
    </div>
 
-   <div align = "center">
+   <div align="center">
 
 
 .. image:: https://img.shields.io/pypi/v/my-magento?color=orange
@@ -108,7 +108,7 @@ Installation
 .. Documentation
 .. ~~~~~~~~~~~~~~
 
-.. Full documentation can be found on `ReadTheDocs <my-magento.readthedocs.io/en/latest/>`_
+.. Full documentation can be found on `ReadTheDocs <https://my-magento.readthedocs.io/en/latest/>`_
 
 
 ...
