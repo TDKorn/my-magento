@@ -2,24 +2,22 @@ import os
 from setuptools import setup
 
 
-def get_description():
-    file = os.path.abspath('README.md')
-    with open(file, 'r', encoding='utf-8') as f:
-        long_description = u'{}'.format(f.read())
-        return long_description
+LONG_DESCRIPTION_SRC = 'README.rst'
 
 
-long_description = get_description()
+def read(file):
+    with open(os.path.abspath(file), 'r', encoding='utf-8') as f:
+        return f.read()
 
 
 setup(
     name='my-magento',
     packages=['magento'],
-    version='1.1.2',
+    version='2.0.0b1',
     license='MIT',
     description='Python Magento 2 REST API Client and Wrapper',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description=read(LONG_DESCRIPTION_SRC),
+    long_description_content_type="text/x-rst; charset=UTF-8",
     author='Adam Korn',
     author_email='hello@dailykitten.net',
     url='https://www.github.com/TDKorn/my-magento',
