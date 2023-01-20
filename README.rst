@@ -16,7 +16,7 @@
    <div align="center">
 
 
-.. image:: https://img.shields.io/pypi/v/my-magento?color=orange
+.. image:: https://img.shields.io/pypi/v/my-magento?color=eb5202
    :target: https://pypi.org/project/my-magento/
    :alt: PyPI Version
 

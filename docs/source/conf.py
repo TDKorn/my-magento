@@ -189,12 +189,6 @@ try:
     head = subprocess.check_output(cmd.split()).strip().decode('utf-8')
     linkcode_revision = head
 
-    # if we are on master's HEAD, use master as reference
-    cmd = "git log --first-parent main -n1 --pretty=%H"
-    master = subprocess.check_output(cmd.split()).strip().decode('utf-8')
-    if head == master:
-        linkcode_revision = "main"
-
     # if we have a tag, use tag as reference
     cmd = "git describe --exact-match --tags " + head
     tag = subprocess.check_output(cmd.split(" ")).strip().decode('utf-8')
@@ -212,6 +206,9 @@ linkcode_url = "https://github.com/tdkorn/my-magento/blob/" \
 
 # Hardcoded Top Level Module Path since MyMagento isn't PyPi release name
 modpath = pkg_resources.require('my-magento')[0].location
+
+# Top Level Package Name
+top_level = pkg_resources.require('my-magento')[0].get_metadata('top_level.txt').strip()
 
 
 def linkcode_resolve(domain, info):
@@ -260,7 +257,7 @@ def linkcode_resolve(domain, info):
 
     # Format link using the filepath of the source file plus the line numbers
     # Fix links with "../../../" or "..\\..\\..\\"
-    filepath = '/'.join(filepath.lstrip('..\\/checkouts/latest').split('\\'))
+    filepath = '/'.join(filepath[filepath.find(top_level):].split('\\'))
 
     # Example of final link: # https://github.com/tdkorn/my-magento/blob/sphinx-docs/magento/utils.py#L355-L357
     final_link = linkcode_url.format(

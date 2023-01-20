@@ -23,9 +23,13 @@
    <div align="center">
 
 
-.. image:: https://img.shields.io/pypi/v/my-magento?color=orange
+.. image:: https://img.shields.io/pypi/v/my-magento?color=eb5202
    :target: https://pypi.org/project/my-magento/
    :alt: PyPI Version
+
+.. image:: https://img.shields.io/badge/GitHub-my--magento-4f1abc
+   :target: https://github.com/tdkorn/my-magento
+   :alt: GitHub Repository
 
 .. image:: https://static.pepy.tech/personalized-badge/my-magento?period=total&units=none&left_color=grey&right_color=blue&left_text=Downloads
     :target: https://pepy.tech/project/my-magento
@@ -137,6 +141,4 @@ Interacting with the API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For the rest of this README, please refer to the `docs <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
-
-
 
