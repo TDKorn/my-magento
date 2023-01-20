@@ -13,7 +13,7 @@ def read(file):
 setup(
     name='my-magento',
     packages=find_packages(),
-    version='2.0.0',
+    version='2.0.1',
     license='MIT',
     description='Python Magento 2 REST API Wrapper',
     long_description=read(LONG_DESCRIPTION_SRC),
