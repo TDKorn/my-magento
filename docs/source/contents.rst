@@ -8,7 +8,7 @@ Table Of Contents
 ##########################
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: README
 
    index
@@ -33,6 +33,15 @@ Table Of Contents
 
 
 .. toctree::
-   :caption: Changelog
+   :caption: Extras
 
    changelog
+   self
+
+
+Indices and tables
+~~~~~~~~~~~~~~~~~~
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :doc:`Full Table of Contents <contents>`

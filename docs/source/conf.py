@@ -149,8 +149,11 @@ rst_out_dir = root
 # [Optional] dict of {'ref': 'external_link'} to replace relative links
 # like :ref:`ref` with an `ref <external_link>`_ (ex. for PyPi)
 #
+docs = "https://my-magento.readthedocs.io/en/latest/"
 rst_replace_refs = {
-    "interact_with_api": "https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api"
+    # "interact_with_api": "interact-with-api.html#interact-with-api"
+    "Custom Queries":  docs + "interact-with-api.html#custom-queries",
+    "logging-in":  docs + "examples/logging-in.html",
 }
 
 # The text to use for linkcode source code links
@@ -186,22 +189,15 @@ html_logo = "_static/magento_black.png"
 #
 #
 
-# Get the blob to link to on GitHub
-linkcode_revision = "main"
-
+# Get the most recent tag to link to on GitHub
 try:
-    # lock to commit number
-    cmd = "git log -n1 --pretty=%H"
-    head = subprocess.check_output(cmd.split()).strip().decode('utf-8')
-    linkcode_revision = head
-
-    # if we have a tag, use tag as reference
-    cmd = "git describe --exact-match --tags " + head
+    cmd = "git describe --tags --abbrev=0"
     tag = subprocess.check_output(cmd.split(" ")).strip().decode('utf-8')
     linkcode_revision = tag
 
 except subprocess.CalledProcessError:
-    pass
+    linkcode_revision = "main"
+
 
 # Set GitHub version to be same as linkcode
 html_context['github_version'] = linkcode_revision
@@ -214,7 +210,7 @@ linkcode_url = "https://github.com/tdkorn/my-magento/blob/" \
 modpath = pkg_resources.require('my-magento')[0].location
 
 # Top Level Package Name
-top_level = pkg_resources.require('my-magento')[0].get_metadata('top_level.txt').strip()
+top_level = 'magento'  # pkg_resources.require('my-magento')[0].get_metadata('top_level.txt').strip()
 
 
 def linkcode_resolve(domain, info):
@@ -320,7 +316,7 @@ def replace_autodoc_refs_with_linkcode(info: dict, link: str, rst_src: str):
 
     # The rst could have :meth:`~.method` or :meth:`~.Class.method` or :class:`~.Class` or...
     # Regardless, there's :directive:`[~][module|class][.]target` where [] is optional
-    pattern = rf":\w+:`~?\.?\w?\.{ref_name}`"
+    pattern = rf":\w+:`~?\.?\w*\.{ref_name}`"
 
     # See if there's any reference in the rst, and figure out what it is
     if match := re.findall(pattern, rst):
@@ -372,8 +368,16 @@ def replace_rst_images(rst: str) -> str:
     """
     return re.sub(
         # .. image:: {..}/_static/(filename.ext)
-        pattern=r".. image:: \S+_static/(\w+\.\w{3,4})",
-        repl=r".. image:: https://instatweet.readthedocs.io/en/latest/_images/\1",
+        pattern=r".. image:: \S*_static/(\w+\.\w{3,4})",
+        repl=r".. image:: https://my-magento.readthedocs.io/en/latest/_static/\1",
+        string=rst
+    )
+
+
+def replace_rst_rubrics(rst: str, heading: str = "^"):
+    return re.sub(
+        pattern = r'.. rubric:: (.*)\n',
+        repl=r"\1\n" + heading * 100 + r"\n",
         string=rst
     )
 
@@ -387,6 +391,7 @@ def save_generated_rst_files(app, exception):
         rst = replace_rst_images(
             rst=rst_sources[rst_src]
         )
+        rst = replace_rst_rubrics(rst)
         if rst_replace_refs:
             rst = replace_rst_refs(
                 rst, refs=rst_replace_refs

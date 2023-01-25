@@ -1,26 +1,26 @@
-.. raw:: html
-
-   <div align="center">
-      <img id="magento-logo" src="_static/magento_orange.png" style="width: 15%">
-      <h1 id="my-magento" align="center">MyMagento</h1>
-      <p>
-         A Python package that wraps and extends the Magento 2 REST API
-         <br/>
-         <br/>
-
-.. only:: draft
-
-   .. raw:: html
-
-      <a href="https://my-magento.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a>
-      <br/>
+..  Title: MyMagento
+..  Description: A Python package that wraps and extends the Magento 2 REST API
+..  Author: TDKorn
 
 .. raw:: html
 
-   </p>
-   </div>
-
    <div align="center">
+
+.. image:: _static/magento_orange.png
+   :alt: MyMagento: Magento 2 REST API wrapper
+   :width: 15%
+
+.. raw:: html
+
+   <h1>MyMagento🛒</h1>
+
+
+A Python package that wraps and extends the Magento 2 REST API
+
+.. |RTD| replace:: **Explore the docs »**
+.. _RTD: https://my-magento.readthedocs.io/en/latest/
+
+|RTD|_
 
 
 .. image:: https://img.shields.io/pypi/v/my-magento?color=eb5202
@@ -37,13 +37,12 @@
 .. image:: https://readthedocs.org/projects/my-magento/badge/?version=latest
     :target: https://my-magento.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-    
+
 .. raw:: html
-   
+
    </div>
    <br/>
    <br/>
-
 
 About MyMagento
 ~~~~~~~~~~~~~~~~~~~~
@@ -54,18 +53,13 @@ About MyMagento
    ``MyMagento`` is a highly interconnected package that wraps and extends the Magento 2 REST API,
    providing a more intuitive and user-friendly interface to access and update your store.
 
-...
 
-MyMagento simplifies interaction with the Magento 2 REST API
-================================================================
+.. rubric:: MyMagento simplifies interaction with the Magento 2 REST API
 
 If you've worked with the Magento 2 API, you'll know that not all endpoints are created equally.
 
-``MyMagento`` aims to streamline your workflow, offering efficient API wrapper methods for a large number
-of API operations across multiple endpoints. It takes care of the small details so that you can
-stay focused on the more important aspects of managing your store.
-
-...
+``MyMagento`` aims to streamline your workflow by simplifying a
+variety of commonly needed API operations.
 
 
 Main Components
@@ -78,21 +72,44 @@ Main Components
 .. admonition:: The :class:`~.Client`
    :class: client
 
-   * Handles all interactions with the API, with support for multiple store views
-   * Accessible from all objects created by the package
+   * Handles all API interactions
+   * Supports multiple store views
+   * Provides access to all other package components
 
 .. admonition:: The :class:`~.SearchQuery` and Subclasses
    :class: search
 
-   * :meth:`~.execute`  predefined or custom search queries on any endpoint
-   * Supports simple and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_
+   * :meth:`~.execute`  a predefined or custom search query on any endpoint
+   * Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_
 
 
 .. admonition::  The :class:`~.Model` Subclasses
    :class: hint
 
    * Wrap all API responses in the package
-   * Provide additional endpoint-specific functionality for data updates and retrieval
+   * Provide additional endpoint-specific methods to retrieve and update data
+
+
+Available Endpoints
+======================
+
+The following endpoints are currently wrapped with a :class:`~.Model` and :class:`~.SearchQuery` subclass
+
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| **Endpoint**             | **Client Attribute**                |:class:`~.SearchQuery` **Subclass**|:class:`~.Model` **Subclass**|
++==========================++====================================++==================================++============================+
+| ``orders``               | :attr:`.Client.orders`              | :class:`~.OrderSearch`            | :class:`~.Order`            |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``orders/items``         | :attr:`.Client.order_items`         | :class:`~.OrderItemSearch`        | :class:`~.OrderItem`        |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``invoices``             | :attr:`.Client.invoices`            | :class:`~.InvoiceSearch`          | :class:`~.Invoice`          |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``products``             | :attr:`.Client.products`            | :class:`~.ProductSearch`          | :class:`~.Product`          |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``products/attributes``  | :attr:`.Client.product_attributes`  | :class:`~.ProductAttributeSearch` | :class:`~.ProductAttribute` |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``categories``           | :attr:`.Client.categories`          | :class:`~.CategorySearch`         | :class:`~.Category`         |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
 
 ...
 
@@ -120,25 +137,103 @@ Installation
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use the credentials of your Magento 2 admin account to initialize and :meth:`~.authenticate` a :class:`~.Client`
+
+.. only:: draft
+
+
+   +----------------------------------------------------------------------+
+   | |Tip|                                                                |
+   +======================================================================+
+   | See :ref:`logging-in` for full details on generating an access token |
+   +----------------------------------------------------------------------+
+
+
+.. tip:: See :ref:`logging-in` for full details on generating an access token
+
+
+Setting the Login Credentials
+===================================
+
+Use your Magento 2 login credentials to generate an :attr:`~.ACCESS_TOKEN`
 
 .. code-block:: python
 
- from magento import Client
-
- >>> api = Client('website.com','username', 'password', login=False)
- >>> api.authenticate()
-
- |[ MyMagento | website_username ]|:  Authenticating username on website.com...
- |[ MyMagento | website_username ]|:  Logged in to username
+   >> domain = 'website.com'
+   >> username ='username'
+   >> password = 'password'
 
 
-Once you initialize a ``Client``, you have a few ways to start :ref:`interact_with_api`
+If you're using a local installation of Magento, your domain should look like this:
 
-...
+.. code-block:: python
 
-Interacting with the API
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+   >> domain = '127.0.0.1/path/to/magento'
 
-For the rest of this README, please refer to the `docs <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
 
+Getting a :class:`~.Client`
+=================================
+
+``MyMagento`` uses the :class:`~.Client` class to handle all interactions with the API
+
+You'll need to create a :class:`~.Client` to :meth:`~.authenticate` your :attr:`~.USER_CREDENTIALS`
+
+
+
+Option 1: Initialize a :class:`~.Client`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+At minimum, you'll need a ``domain``, ``username``, and ``password``
+
+* ``domain`` **Format**
+
+   - **Hosted**: ``domain.com``
+   - **Local**: ``127.0.0.1/path/to/magento`` (must also set ``local=True``)
+
+
+.. code-block:: python
+
+      from magento import Client
+
+      >>> api = Client(domain, username, password)
+
+
+
+Option 2: Call :func:`~.get_api`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :func:`.get_api()` method uses the same keyword arguments as the ``Client``, but will try
+using environment variable values if the ``domain``, ``username``, or ``password`` are missing
+
+.. code-block:: python
+
+
+      import magento
+
+      >>> api = magento.get_api()
+
+
+Setting Environment Variables
+````````````````````````````````````
+
+To log in faster with :func:`~.get_api`, set the following environment variables:
+
+.. code-block:: python
+
+   import os
+
+   os.environ['MAGENTO_DOMAIN'] = domain
+   os.environ['MAGENTO_USERNAME']= username
+   os.environ['MAGENTO_PASSWORD']= password
+
+
+Output Either Way
+====================
+
+.. code-block:: python
+
+      |[ MyMagento | website_username ]|:  Authenticating username on website.com...
+      |[ MyMagento | website_username ]|:  Logged in to username
+
+
+
+Once you've initialized a ``Client`` it's time to start `interacting with the api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_

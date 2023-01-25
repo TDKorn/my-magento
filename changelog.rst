@@ -4,7 +4,7 @@ Changelog
 v2.1.0
 ~~~~~~~
 
-* Added :meth:`~.get_api` to login using credentials stored in environment variables
+* Added `get_api() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/__init__.py#L16-L39>`_ to login using credentials stored in environment variables
 
   - The environment variables ``MAGENTO_USERNAME``, ``MAGENTO_PASSWORD``, ``MAGENTO_DOMAIN`` will be used if the ``domain``, ``username`` or ``password`` kwargs are missing
 
@@ -36,9 +36,9 @@ v2.1.0
 
 ...
 
-* Add `since() <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/search.py#L190-L214>`_ and `until() <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/search.py#L216-L227>`_ method to `SearchQuery <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/search.py#L14-L313>`_ classes, which search the ``created_at`` field
+* Add `since() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L190-L214>`_ and `until() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L216-L227>`_ method to `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ classes, which search the ``created_at`` field
 
-  - They can be chained together and also with `add_criteria() <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/search.py#L44-L111>`_
+  - They can be chained together and also with `add_criteria() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L44-L111>`_
 
 .. admonition:: Example
    :class: example
@@ -68,7 +68,7 @@ v2.1.0
 
 ...
 
-* Changed `add_criteria() <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/search.py#L44-L111>`_ to auto-increment the filter group by default if no group is specified (ie. ``AND`` condition)
+* Changed `add_criteria() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L44-L111>`_ to auto-increment the filter group by default if no group is specified (ie. ``AND`` condition)
 
 .. code-block:: python
 
@@ -84,5 +84,5 @@ v2.1.0
 ...
 
 * Changed the :attr:`.Client.BASE_URL` to not include ``"www."`` at the start (see `#8 <https://github.com/tdkorn/my-magento/issues/8>`_)
-* Added unit tests for `url_for() <https://github.com/tdkorn/my-magento/blob/10aa209cdbd54b9cb6631599a2e9c7cd6475e900/magento/clients.py#L115-L140>`_
+* Added unit tests for `url_for() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L115-L140>`_
 * Added Jupyter notebook examples
