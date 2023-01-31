@@ -1,4 +1,5 @@
 from __future__ import annotations
+import re
 from functools import cached_property
 from typing import Union, Type, Iterable, List, Optional, Dict, TYPE_CHECKING
 from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
@@ -166,6 +167,43 @@ class SearchQuery:
             condition='in'
         ).execute()
 
+    def since(self, sinceDate: str = None) -> Self:
+        """Retrieve items for which ``created_at>=sinceDate``
+
+        **Example**::
+
+        # Retrieve products created in 2023
+        >>> api.products.since('2023-01-01').execute()
+
+
+        .. tip:: Calling with no arguments retrieves all items::
+
+           # Retrieve all products
+           >>> api.products.since().execute()
+
+        :param sinceDate: the date for response data to start from
+        :return: the calling :class:`~SearchQuery`
+        """
+        return self.add_criteria(
+            field='created_at',
+            value=sinceDate,
+            condition='gteq',
+            group=self.last_group + 1,
+        )
+
+    def until(self, toDate: str) -> Self:
+        """Retrieve items for which ``created_at<=toDate``
+
+        :param toDate: the date for response data to end at (inclusive)
+        :return: the calling :class:`~SearchQuery`
+        """
+        return self.add_criteria(
+            field='created_at',
+            value=toDate,
+            condition='lteq',
+            group=self.last_group + 1,
+        )
+
     @cached_property
     def result(self) -> Optional[Model | List[Model]]:
         """The result of the search query, wrapped by the :class:`~.Model` corresponding to the endpoint
@@ -238,6 +276,19 @@ class SearchQuery:
     def result_type(self) -> Type:
         """The type of the result"""
         return type(self.result)
+
+    @property
+    def last_group(self) -> int:
+        """The most recent filter group on the query
+        
+        :returns: the most recent filter group, or ``-1`` if no criteria has been added
+        """
+        if self.query.endswith('?'):
+            return -1
+        return int(re.match(
+            r'.*searchCriteria\[filter_groups]\[(\d)]',
+            self.query
+        ).groups()[-1])
 
 
 class OrderSearch(SearchQuery):
