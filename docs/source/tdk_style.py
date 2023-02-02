@@ -1,5 +1,11 @@
-from pygments.style import Style
+import types
+import magento
 from pygments.token import *
+from pygments.style import Style
+from pygments.lexers.python import NumPyLexer
+from inspect import getmembers, getmodule, isfunction, ismethod, ismodule, isclass
+from sphinx.application import Sphinx
+
 
 # An attempt at creating my own Pygments style since I hate all the available ones :)
 # Pygments Token/CSS Mappings: https://gist.github.com/TDKorn/f3a7fc98503eccb602ae7af428c0b981
@@ -40,6 +46,7 @@ pl = {
     "syntax-constant-other-reference-link": "#a5d6ff",
 }
 
+
 # ==== The Style ====
 # Things that were helpful (so I don't forget)
 #  1.   Using the ``token_map`` from https://gist.github.com/TDKorn/f3a7fc98503eccb602ae7af428c0b981,
@@ -55,7 +62,6 @@ pl = {
 
 
 class TDKStyle(Style):
-
     """An attempt at creating a Pygments style similar to GitHub's pretty lights dark theme"""
 
     background_color = "#0d1117"
@@ -84,17 +90,24 @@ class TDKStyle(Style):
         Generic.Traceback: "#f8f8f2",
         Error: "#f8f8f2",
 
+
         Keyword: pl["syntax-keyword"],
         Keyword.Constant: pl["syntax-constant"],
         Keyword.Declaration: pl["syntax-keyword"],
         Keyword.Namespace: pl["syntax-keyword"],
-        Keyword.Pseudo: pl["syntax-constant"],  # Ex. None
+        Keyword.Pseudo: pl["syntax-entity"],  # Ex. None
         Keyword.Reserved: pl["syntax-constant"],
         Keyword.Type: pl["syntax-constant"],
 
         Literal: "#f8f8f2",
         Literal.Date: "#f8f8f2",
+        Literal.String.Affix: "#f8f8f2",
+        Literal.String.Doc: "#f8f8f2",
+        Literal.String.Double: "#f8f8f2",
+        Literal.String.Interpol: "#f8f8f2",
+        Literal.String.Single: "#f8f8f2",
 
+        Name: pl["syntax-markup-bold"],
         Name.Variable: pl["syntax-markup-bold"],
         Name.Attribute: pl["syntax-markup-bold"],
         Name.Builtin.Pseudo: pl["syntax-markup-bold"],  # Ex. self
@@ -105,15 +118,16 @@ class TDKStyle(Style):
         Name.Entity: pl["syntax-entity"],
         Name.Exception: pl["syntax-variable"],
         Name.Function: pl["syntax-entity"],
+        Name.Function.Magic: pl["syntax-entity"],
         # Name.Label: "#8be9fd italic",
         Name.Namespace: pl["syntax-markup-bold"],
+        Name.Other: pl["syntax-markup-bold"],
         # Name.Other: pl["syntax-variable"],
         # Name.Tag: "#ff79c6",
         Name.Variable.Class: pl["syntax-variable"],
         Name.Variable.Global: pl["syntax-variable"],
         Name.Variable.Instance: pl["syntax-markup-bold"],
         Name.Variable.Magic: pl["syntax-entity"],
-        # Name: pl["syntax-variable"],
 
         Number: "#ffb86c",
         Number.Bin: "#ffb86c",
@@ -144,3 +158,36 @@ class TDKStyle(Style):
         String.Symbol: pl["syntax-string"],
         Text: pl["syntax-markup-bold"],
     }
+
+
+def get_pkg_funcs(pkg: types.ModuleType):
+    funcs_meths = get_funcs(pkg)  # Get funcs/meths defined in pkg.__init__
+    modules = getmembers(pkg, ismodule)  # Modules of package
+    for name, module in modules:
+        funcs_meths += get_funcs(module)  # Get standalone funcs defined in module
+        classes = getmembers(module, isclass)  # Get classes in module
+        for class_name, _class in classes:
+            if getmodule(_class).__name__.startswith(
+                    pkg.__name__):  # == module:  # If class is defined in the module, get its funcs/meths
+                funcs_meths += get_funcs(_class)
+    return set(funcs_meths)
+
+
+def get_funcs(of):
+    members = getmembers(of, isfunction or ismethod)
+    return list(dict(members))
+
+
+funcs = get_pkg_funcs(magento)
+
+
+class TDKLexer(NumPyLexer):
+    name = 'TDK'
+    url = 'https://github.com/TDKorn'
+    aliases = ['tdk']
+
+    EXTRA_KEYWORDS = funcs
+
+
+def setup(app: Sphinx):
+    app.add_lexer('python', TDKLexer)

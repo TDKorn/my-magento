@@ -9,7 +9,6 @@
 import os
 import re
 import sys
-import shutil
 import inspect
 import subprocess
 import pkg_resources
@@ -87,6 +86,7 @@ extensions = [
     'myst_nb',
     'sphinx.ext.linkcode',
     '_ext.linkcode_github',
+    'tdk_style',
 ]
 
 
