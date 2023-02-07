@@ -77,7 +77,7 @@ class SearchQuery:
 
         options = {
             'condition': condition,
-            'group': 0,
+            'group': self.last_group + 1,
             'filter': 0,
         }
         options.update(kwargs)

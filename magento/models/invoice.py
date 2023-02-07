@@ -82,11 +82,11 @@ class InvoiceItem(Model):
 
     def data_endpoint(self, scope: Optional[str] = None) -> None:
         """No data endpoint exists for invoice items"""
-        return self.logger.info("There is no data endpoint for invoice items")
+        return self.logger.info("There is no API endpoint for individual invoice items")
 
     def query_endpoint(self) -> None:
         """No search endpoint exists for invoice items"""
-        return self.logger.info("There is no search interface for invoice items")
+        return self.logger.info("There is no API endpoint for querying invoice items")
 
     @property
     def excluded_keys(self) -> List[str]:

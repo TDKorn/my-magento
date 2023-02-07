@@ -275,6 +275,7 @@ class Client:
         :param url: the url to send the request to
         :param payload: the JSON payload for the request (if the method is ``POST`` or ``PUT``)
         """
+        method = method.upper()
         if method in ('GET', 'DELETE'):
             response = requests.request(method, url, headers=self.headers)
         elif method in ('POST', 'PUT'):
@@ -290,7 +291,7 @@ class Client:
             self.authenticate()  # Will raise AuthenticationError if unsuccessful (won't recurse infinitely)
             return self.request(method, url, payload)
 
-        if response.status_code != 200:  # All other responses are returned; errors are handled by methods
+        if response.status_code != 200:  # All non 401 responses are returned; errors are logged then handled by methods
             self.logger.error("Request to {} failed with status code {}.\n{message}".format(
                 url, response.status_code, message=MagentoError.parse(response))
             )

@@ -265,12 +265,6 @@ class APIResponse(Model):
     def excluded_keys(self) -> List[str]:
         return []
 
-    def data_endpoint(self, scope: Optional[str] = None) -> Optional[str]:
-        if self.uid:
-            return super().data_endpoint(scope)
-        else:
-            self.logger.info('No uid found - unable to determine the data endpoint url')
-
     @property
     def uid(self) -> Optional[int]:
         """Unique item identifier
@@ -283,3 +277,10 @@ class APIResponse(Model):
         if not (uid := super().uid):
             uid = self.data.get('id', None)
         return uid
+
+    def data_endpoint(self, scope: Optional[str] = None) -> Optional[str]:
+        if self.uid:
+            return super().data_endpoint(scope)
+        else:
+            self.logger.info(
+                f'Unable to determine uid field for API response from "{self.endpoint}"')

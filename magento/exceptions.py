@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional, TYPE_CHECKING
+from typing import Union, Optional, TYPE_CHECKING, Dict
 import requests
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ class MagentoError(Exception):
         """Log and raise a MagentoError
 
         :param client: an initialized :class:`~.Client` object
-        :param msg: optional exception message; prepended to the error message of the response (if provided).
+        :param msg: optional exception message; prepended to the error message of the response
         :param response: optional response to :meth:`parse` an error message from
         """
         self.message = msg if msg else self.DEFAULT_MSG
@@ -32,13 +32,16 @@ class MagentoError(Exception):
         super().__init__(self.message)
 
     @staticmethod
-    def parse(response: Union[requests.Response, dict]) -> str:
-        """Parses the error message from the response, including message parameters when available
+    def parse(response: Union[requests.Response, Dict]) -> str:
+        """Parses the error message from the ``response``
 
         :param response: a bad response returned by the Magento API
+        :raises: TypeError if ``response`` is not a :class:`~requests.Response` or :class:`Dict`
         """
         if isinstance(response, requests.Response):
             response = response.json()
+        elif not isinstance(response, Dict):
+            raise TypeError(f"`response` must be a `dict` or {requests.Response}")
 
         message = response.get('message', '')
         params = response.get('parameters')
