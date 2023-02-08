@@ -20,6 +20,7 @@ class Client:
             username: str,
             password: str,
             scope: Optional[str] = '',
+            local: bool = False,
             user_agent: Optional[str] = None,
             token: Optional[str] = None,
             log_level: str = 'INFO',
@@ -41,10 +42,11 @@ class Client:
            and ensuring that ``Sales``, ``Catalog``, ``Customers``, and any other desired resources are included
 
 
-        :param domain: domain name of the Magento store (ex. ``domain.com``)
+        :param domain: domain name of the Magento store (ex. ``domain.com`` or ``127.0.0.1/magento24``)
         :param username: username of the Magento Admin account
         :param password: password of the Magento Admin account
         :param scope: the store view scope to :meth:`~search` and make requests on
+        :param local: whether the Magento store is hosted locally
         :param user_agent: the user agent to use in requests
         :param token: an existing access token
         :param log_level: the logging level for logging to stdout
@@ -60,7 +62,7 @@ class Client:
 
         """
         #: The base API URL
-        self.BASE_URL: str = f'https://{domain}/rest/V1/'
+        self.BASE_URL: str = ("http" if local else "https") + f"://{domain}/rest/V1/"
         #: The user credentials
         self.USER_CREDENTIALS: Dict[str, str] = {
             'username': username,
