@@ -60,7 +60,7 @@ class Client:
 
         """
         #: The base API URL
-        self.BASE_URL: str = f'https://www.{domain}/rest/V1/'
+        self.BASE_URL: str = f'https://{domain}/rest/V1/'
         #: The user credentials
         self.USER_CREDENTIALS: Dict[str, str] = {
             'username': username,
