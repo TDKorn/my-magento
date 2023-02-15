@@ -255,17 +255,17 @@ class Client:
 
     def validate(self) -> bool:
         """Validates the :attr:`~.token` by sending an authorized request to a standard API endpoint
+
+        :raises: :class:`~.AuthenticationError` if the token is invalid
         """
         response = self.get(self.url_for('store/websites'))
         if response.status_code == 200:
             self.logger.debug("Token validated for {} on {}".format(
-                self.USER_CREDENTIALS['username'], self.domain)
-            )
+                self.USER_CREDENTIALS['username'], self.domain))
             return True
         else:
             msg = "Token validation failed for {} on {}".format(
-                self.USER_CREDENTIALS['username'], self.domain
-            )
+                self.USER_CREDENTIALS['username'], self.domain)
             raise AuthenticationError(self, msg=msg, response=response)
 
     def request(self, method: str, url: str, payload: dict = None) -> requests.Response:

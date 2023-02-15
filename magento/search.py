@@ -50,20 +50,38 @@ class SearchQuery:
         :param kwargs: additional search option arguments (``group`` and ``filter``)
         :returns: the calling SearchQuery object
 
-        *Options*
-                condition:  condition used to evaluate the attribute value
+        .. admonition:: Keyword Argument Options: ``Condition``
+           :class: tip
 
-                            (Default Value)     'eq'            =           (field=value)
-                                                'gt'            >
-                                                'lt'            <
-                                                'gteq'          >=
-                                                'lteq'          <=
-                                                'in'            []
+           The ``condition`` argument specifies the condition used to evaluate the attribute value
 
+           * ``"eq"`` (default): matches items for which ``field=value``
+           * ``"gt"``: matches items for which ``field>value``
+           * ``"lt"``: matches items for which ``field<value``
+           * ``"gteq"``: matches items for which ``field>=value``
+           * ``"lteq"``: matches items for which ``field<=value``
+           * ``"in"``: matches items for which ``field in value.split(",")``
 
-                group:      filter group number
+             - Tip: for ``in``, use :meth:`~.by_list` if not building a complex query
 
-                filter:     filter number (within the specified filter group)
+           .. admonition:: Example
+              :class: example
+
+              ::
+
+               # Search for Orders created in 2023
+               >>> orders = api.orders.add_criteria(
+               ...     field="created_at",
+               ...     value="2023-01-01",
+               ...     condition='gteq'
+               ... ).execute()
+
+        .. admonition:: Keyword Argument Options: Using Filter Groups
+           :class: hint
+
+           ``group`` - filter group number
+
+           ``filter`` - filter number (within the specified filter group)
 
 
         *Using Filter Groups*
@@ -142,13 +160,15 @@ class SearchQuery:
     def by_list(self, field: str, values: Iterable) -> Optional[Model, List[Model]]:
         """Search for multiple items using an iterable or comma-separated string of field values
 
-        .. admonition:: Example
+        .. admonition:: Examples
            :class: example
 
-           Search for orders that are processing, pending, or completed::
+           Retrieve :class:`~.Product` with ids from 1 to 10::
 
-            #  Values can be a list/tuple/iterable
-            >> api.orders.by_list('status', ['processing', 'pending', 'completed'])
+            # Values can be a list/tuple/iterable
+            >> api.products.by_list('entity_id', range(1,11))
+
+           Search for :class:`~.Order` that are processing, pending, or completed::
 
             #  Values can be a comma-separated string
             >> api.orders.by_list('status', 'processing,pending,completed')
@@ -168,18 +188,20 @@ class SearchQuery:
         ).execute()
 
     def since(self, sinceDate: str = None) -> Self:
-        """Retrieve items for which ``created_at>=sinceDate``
+        """Retrieve items for which ``created_at >= sinceDate``
 
         **Example**::
 
-        # Retrieve products created in 2023
-        >>> api.products.since('2023-01-01').execute()
+            # Retrieve products created in 2023
+            >> api.products.since('2023-01-01').execute()
 
 
-        .. tip:: Calling with no arguments retrieves all items::
+        .. tip:: Calling with no arguments retrieves all items
 
-           # Retrieve all products
-           >>> api.products.since().execute()
+           ::
+
+            # Retrieve all products
+            >> api.products.since().execute()
 
         :param sinceDate: the date for response data to start from
         :return: the calling :class:`~SearchQuery`
@@ -192,7 +214,7 @@ class SearchQuery:
         )
 
     def until(self, toDate: str) -> Self:
-        """Retrieve items for which ``created_at<=toDate``
+        """Retrieve items for which ``created_at <= toDate``
 
         :param toDate: the date for response data to end at (inclusive)
         :return: the calling :class:`~SearchQuery`
@@ -554,7 +576,7 @@ class InvoiceSearch(SearchQuery):
             value=order_id
         ).execute()
 
-    def by_product(self, product: Product) -> Optional[Order | List[Order]]:
+    def by_product(self, product: Product) -> Optional[Invoice | List[Invoice]]:
         """Search for all :class:`~.Invoice` s of a :class:`~.Product`
 
         :param product: the :class:`~.Product` to search for in invoices
