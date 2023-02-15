@@ -64,7 +64,7 @@ templates_path = ['_templates']
 html_static_path = ['_static']
 
 # Source File type
-source_suffix = '.rst'
+source_suffix = ['.rst', '*.ipynb']
 
 # LaTeX settings
 latex_elements = {          # Less yucky looking font
@@ -84,8 +84,9 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
+    'myst_nb',
     'sphinx.ext.linkcode',
-    '_ext.linkcode_github'
+    '_ext.linkcode_github',
 ]
 
 
@@ -116,6 +117,11 @@ autodoc_typehints_description_target = 'documented_params'
 
 # Shorten type hints
 python_use_unqualified_type_names = True
+
+
+# ~~~~ MyST{NB} ~~~~
+# Turn off notebook execution until I have a store set up for testing/examples
+jupyter_execute_notebooks = "off"
 
 
 # ~~~~~~~~ My Own Thing (replace_autodoc_refs_with_linkcode) ~~~~~~~~~

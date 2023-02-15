@@ -15,7 +15,6 @@ Table Of Contents
    interact-with-api
 
 
-
 .. toctree::
    :maxdepth: 3
    :caption: Documentation
@@ -23,3 +22,11 @@ Table Of Contents
    modules
    models
 
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Examples
+   :glob:
+
+   examples/logging-in.ipynb
+   examples/*
