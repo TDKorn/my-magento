@@ -135,7 +135,7 @@ def read(file):
 #
 rst_files = list(map(
     os.path.abspath,
-    ('README.rst', 'README_PyPi.rst')))
+    ('README.rst', 'README_PyPi.rst', 'changelog.rst')))
 
 # Mapping of {"abs/path/to/file.rst": "File contents"}
 #

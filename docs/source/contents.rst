@@ -30,3 +30,9 @@ Table Of Contents
 
    examples/logging-in.ipynb
    examples/*
+
+
+.. toctree::
+   :caption: Changelog
+
+   changelog
