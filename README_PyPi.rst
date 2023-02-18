@@ -3,15 +3,28 @@
 ..  Author: TDKorn
 
 .. |Tip| replace:: 💡 **Tip**
-.. |.Client| replace:: ``Client``
-.. |.get_api| replace:: ``get_api()``
+.. |RTD| replace:: **Explore the docs »**
+.. _RTD: https://my-magento.readthedocs.io/en/latest/
+.. |api_endpoints| replace:: API endpoints
+.. _api_endpoints: https://adobe-commerce.redoc.ly/2.3.7-admin/
+.. |.Client| replace:: Client
 .. _.Client: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378
-.. _.get_api: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/__init__.py#L16-L39
+.. |.Model| replace:: Model
+.. _.Model: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241
+.. |.SearchQuery| replace:: SearchQuery
+.. _.SearchQuery: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313
+.. |.execute| replace:: execute()
+.. _.execute: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L130-L141
+.. |.ACCESS_TOKEN| replace:: ACCESS_TOKEN
+.. _.ACCESS_TOKEN: https://github.com/TDKorn/my-magento/blob/v2.1.0/magento/clients.py#L72
+.. |.USER_CREDENTIALS| replace:: USER_CREDENTIALS
+.. _.USER_CREDENTIALS: https://github.com/TDKorn/my-magento/blob/v2.1.0/magento/clients.py#L67-L70
+
 
 MyMagento🛒
 ---------------
 
-.. image:: https://my-magento.readthedocs.io/en/latest/_static/magento_orange.png
+.. image:: https://i.imgur.com/dkCWWYn.png
    :alt: Magento Logo
    :align: center
    :width: 200
@@ -19,11 +32,9 @@ MyMagento🛒
 
 A Python package that wraps and extends the Magento 2 REST API
 
-.. |RTD| replace:: **Explore the docs »**
-.. _RTD: https://my-magento.readthedocs.io/en/latest/
-
 |RTD|_
 
+|
 
 .. image:: https://img.shields.io/pypi/v/my-magento?color=eb5202
    :target: https://pypi.org/project/my-magento/
@@ -45,11 +56,16 @@ A Python package that wraps and extends the Magento 2 REST API
 About MyMagento
 ~~~~~~~~~~~~~~~~~~~~
 
-.. admonition:: What's MyMagento?
-   :class: note
+.. |note| replace:: 📝
 
-   ``MyMagento`` is a highly interconnected package that wraps and extends the Magento 2 REST API,
-   providing a more intuitive and user-friendly interface to access and update your store.
++-------------------------------------------------------------+
+| |note| What's MyMagento?                                    |
++=============================================================+
+|  ``MyMagento`` is a highly interconnected package that      |
+|  wraps and extends the Magento 2 REST API, providing a more |
+|  intuitive and user-friendly interface to access and update |
+|  your store                                                 |
++-------------------------------------------------------------+
 
 
 MyMagento simplifies interaction with the Magento 2 REST API
@@ -68,34 +84,41 @@ Main Components
    :alt: The Client
    :target: https://github.com/TDKorn/my-magento/blob/sphinx-docs/magento/clients.py
 
-.. admonition:: The |.Client|_
-   :class: client
+.. |comp| replace:: 💻
+.. |mag| replace:: 🔍
 
-   * Handles all API interactions
-   * Supports multiple store views
-   * Provides access to all other package components
++-------------------------------------------------------------+
+| |comp| The |.Client|_                                       |
++=============================================================+
+|  * Handles all API interactions                             |
+|  * Supports multiple store views                            |
+|  * Provides access to all other package components          |
++-------------------------------------------------------------+
 
-.. admonition:: The `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ and Subclasses
-   :class: search
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| |mag| The |.SearchQuery|_ and Subclasses                                                                                                                        |
++=================================================================================================================================================================+
+|  * |.execute|_ a predefined or custom search query on any endpoint                                                                                              |
+|  * Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_  |
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-   * `execute() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L130-L141>`_  a predefined or custom search query on any endpoint
-   * Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_
-
-
-.. admonition::  The `Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ Subclasses
-   :class: hint
-
-   * Wrap all API responses in the package
-   * Provide additional endpoint-specific methods to retrieve and update data
++----------------------------------------------------------------------------+
+| 🧠 The |.Model|_ Subclasses                                                |
++============================================================================+
+| * Wrap all API responses in the package                                    |
+| * Provide additional endpoint-specific methods to retrieve and update data |
++----------------------------------------------------------------------------+
 
 
 Available Endpoints
 ======================
 
-The following endpoints are currently wrapped with a `Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ and `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ subclass
+``MyMagento`` is compatible with all |api_endpoints|_
 
-+--------------------------+-------------------------------------+-----------------------------------+----------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
-| **Endpoint**             | **Client Attribute**                |`SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ **Subclass** |`Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ **Subclass**   |
+Endpoints are wrapped with a `Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ and `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ subclass as follows:
+
++--------------------------+-------------------------------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
+| **Endpoint**             | **Client Shortcut**                 |`SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ **Subclass** |`Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ **Subclass**   |
 +==========================+=====================================+==========================================================================================================+============================================================================================================+
 | ``orders``               | ``Client.orders``                   | `OrderSearch <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L316-L411>`_            | `Order <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/order.py#L12-L182>`_               |
 +--------------------------+-------------------------------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
@@ -109,26 +132,25 @@ The following endpoints are currently wrapped with a `Model <https://github.com/
 +--------------------------+-------------------------------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 | ``categories``           | ``Client.categories``               | `CategorySearch <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L778-L820>`_         | `Category <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/category.py#L12-L146>`_         |
 +--------------------------+-------------------------------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
+| ``endpoint``             | ``Client.search("endpoint")``       | `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_             | `APIResponse <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L244-L286>`_        |
++--------------------------+-------------------------------------+----------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------+
 
 ...
 
-Installation
-~~~~~~~~~~~~~~~~~~~
+⚙ Installing MyMagento
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. admonition:: Installing MyMagento
-   :class: client
+To install using ``pip``::
 
-   To install using ``pip``::
+   pip install my-magento
 
-    pip install my-magento
-
-   Please note that ``MyMagento`` requires ``Python >= 3.10``
+Please note that ``MyMagento`` requires ``Python >= 3.10``
 
 
-Documentation
-~~~~~~~~~~~~~~
+📚 Documentation
+~~~~~~~~~~~~~~~~~~
 
-Full documentation can be found on `ReadTheDocs <https://www.my-magento.readthedocs.io/en/latest/>`_
+Full documentation can be found on `ReadTheDocs <https://my-magento.readthedocs.io/en/latest/>`_
 
 
 ...
@@ -136,71 +158,90 @@ Full documentation can be found on `ReadTheDocs <https://www.my-magento.readthed
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+``MyMagento`` uses the `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_ class to handle all interactions with the API
+
+.. _login: https://my-magento.readthedocs.io/en/latest/examples/logging-in.html
+.. |login| replace:: Get a Magento 2 REST API Token With ``MyMagento``
 
 
-+-----------------------------------------------------------------------------------------------------------------------------------------+
-| |Tip|                                                                                                                                   |
-+=========================================================================================================================================+
-| See `logging-in <https://my-magento.readthedocs.io/en/latest/examples/logging-in.html>`_ for full details on generating an access token |
-+----------------------------------------------------------------------+------------------------------------------------------------------+
-
++-------------------------------------------------------------+
+| |Tip|                                                       |
++=============================================================+
+| See |login|_ for full details on generating an access token |
++-------------------------------------------------------------+
 
 
 Setting the Login Credentials
 ===================================
-The credentials of your Magento 2 admin account are used to initialize and `authenticate() <https://github.com/tdkorn/my-magento/blob/9db95d3ac755a1a2475006197a46fe49be881168/magento/clients.py#L227-L254>`_ a |.Client|_
+
+To generate an |.ACCESS_TOKEN|_ you'll need to `authenticate() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L227-L254>`_ your |.USER_CREDENTIALS|_
+
+Creating a `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_ requires a ``domain``, ``username``, and ``password`` at minimum.
+
 
 .. code-block:: python
 
-   >> domain = 'website.com'
-   >> username ='username'
-   >> password = 'password'
+   >>> domain = 'website.com'
+   >>> username ='username'
+   >>> password = 'password'
 
 
-If you're using a local installation of Magento, your domain should look like this:
-
-.. code-block:: python
-
-   >> domain = '127.0.0.1/path/to/magento'
-
-
-Getting a |.Client|_
-=================================
-
-MyMagento uses the |.Client|_
-in one of two ways
-
-Method 1: Initialize a |.Client|_
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you're using a local installation of Magento you'll need to set ``local=True``. Your domain should look like this:
 
 .. code-block:: python
 
-   from magento import Client
-
-   >>> api = Client(domain, username, password)
-
-   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
-   |[ MyMagento | website_username ]|:  Logged in to username
+   >>> domain = '127.0.0.1/path/to/magento'
 
 
-Method 2: Initialize a |.Client|_ with |.get_api|_
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
 
-The |.get_api|_ method uses the same keyword arguments as the |.Client|_, but will try
-using environment variable values if the domain, username, or password are missing
+Getting a `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_
+=========================================================================================================
+
+Option 1: Initialize a `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_ Directly
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+      from magento import Client
+
+      >>> api = Client(domain, username, password, **kwargs)
 
 
+Option 2: Call `get_api <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/__init__.py#L16-L39>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
 
       import magento
 
-      >>> api = magento.get_api()
+      >>> api = magento.get_api(**kwargs)
 
-      |[ MyMagento | website_username ]|:  Authenticating username on website.com...
-      |[ MyMagento | website_username ]|:  Logged in to username
+`get_api <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/__init__.py#L16-L39>`_ takes the same keyword arguments as the `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_, but if the ``domain``, ``username``, or ``password``
+are missing, it will attempt to use the following environment variables:
 
 
+.. code-block:: python
 
-Now let's start `interacting with the api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
+   import os
+
+   os.environ['MAGENTO_DOMAIN'] = domain
+   os.environ['MAGENTO_USERNAME']= username
+   os.environ['MAGENTO_PASSWORD']= password
+
+...
+
+Getting an |.ACCESS_TOKEN|_
+=======================================
+
+Unless you specify ``login=False``, the `Client <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378>`_ will automatically call `authenticate() <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L227-L254>`_ once initialized
+
+
+.. code-block:: python
+
+   >>> api.authenticate()
+
+   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
+   |[ MyMagento | website_username ]|:  Logged in to username
+

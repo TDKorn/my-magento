@@ -2,6 +2,12 @@
 ..  Description: A Python package that wraps and extends the Magento 2 REST API
 ..  Author: TDKorn
 
+
+.. |RTD| replace:: **Explore the docs »**
+.. _RTD: https://my-magento.readthedocs.io/en/latest/
+.. |api_endpoints| replace:: API endpoints
+.. _api_endpoints: https://adobe-commerce.redoc.ly/2.3.7-admin/
+
 .. raw:: html
 
    <div align="center">
@@ -17,8 +23,6 @@
 
 A Python package that wraps and extends the Magento 2 REST API
 
-.. |RTD| replace:: **Explore the docs »**
-.. _RTD: https://my-magento.readthedocs.io/en/latest/
 
 |RTD|_
 
@@ -93,11 +97,13 @@ Main Components
 Available Endpoints
 ======================
 
-The following endpoints are currently wrapped with a :class:`~.Model` and :class:`~.SearchQuery` subclass
+``MyMagento`` is compatible with all |api_endpoints|_
+
+Endpoints are wrapped with a :class:`~.Model` and :class:`~.SearchQuery` subclass as follows:
 
 +--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| **Endpoint**             | **Client Attribute**                |:class:`~.SearchQuery` **Subclass**|:class:`~.Model` **Subclass**|
-+==========================++====================================++==================================++============================+
+| **Endpoint**             | **Client Shortcut**                 |:class:`~.SearchQuery` **Subclass**|:class:`~.Model` **Subclass**|
++==========================+=====================================+===================================+=============================+
 | ``orders``               | :attr:`.Client.orders`              | :class:`~.OrderSearch`            | :class:`~.Order`            |
 +--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
 | ``orders/items``         | :attr:`.Client.order_items`         | :class:`~.OrderItemSearch`        | :class:`~.OrderItem`        |
@@ -109,6 +115,8 @@ The following endpoints are currently wrapped with a :class:`~.Model` and :class
 | ``products/attributes``  | :attr:`.Client.product_attributes`  | :class:`~.ProductAttributeSearch` | :class:`~.ProductAttribute` |
 +--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
 | ``categories``           | :attr:`.Client.categories`          | :class:`~.CategorySearch`         | :class:`~.Category`         |
++--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+| ``endpoint``             | ``Client.search("endpoint")``       | :class:`~.SearchQuery`            | :class:`~.APIResponse`      |
 +--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
 
 ...
@@ -125,28 +133,28 @@ Installation
 
    Please note that ``MyMagento`` requires ``Python >= 3.10``
 
-
-.. Documentation
-.. ~~~~~~~~~~~~~~
-
-.. Full documentation can be found on `ReadTheDocs <https://my-magento.readthedocs.io/en/latest/>`_
-
-
 ...
 
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+``MyMagento`` uses the :class:`~.Client` class to handle all interactions with the API.
 
 .. only:: draft
 
 
-   +----------------------------------------------------------------------+
-   | |Tip|                                                                |
-   +======================================================================+
-   | See :ref:`logging-in` for full details on generating an access token |
-   +----------------------------------------------------------------------+
+   .. raw:: html
 
+   <table>
+      <tr align="left">
+         <th>💡 Tip</th>
+      </tr>
+      <tr>
+         <td>See
+            <a href="https://my-magento.readthedocs.io/en/latest/examples/logging-in.html">Get a Magento 2 REST API Token With MyMagento</a>
+            for full details on generating an access token</td>
+      </tr>
+   </table>
 
 .. tip:: See :ref:`logging-in` for full details on generating an access token
 
@@ -154,7 +162,10 @@ QuickStart: Login with MyMagento
 Setting the Login Credentials
 ===================================
 
-Use your Magento 2 login credentials to generate an :attr:`~.ACCESS_TOKEN`
+To generate an :attr:`~.ACCESS_TOKEN` you'll need to :meth:`~.authenticate` your :attr:`~.USER_CREDENTIALS`.
+
+Creating a :class:`~.Client` requires a ``domain``, ``username``, and ``password`` at minimum.
+
 
 .. code-block:: python
 
@@ -163,59 +174,42 @@ Use your Magento 2 login credentials to generate an :attr:`~.ACCESS_TOKEN`
    >> password = 'password'
 
 
-If you're using a local installation of Magento, your domain should look like this:
+If you're using a local installation of Magento you'll need to set ``local=True``. Your domain should look like this:
 
 .. code-block:: python
 
    >> domain = '127.0.0.1/path/to/magento'
 
 
+...
+
 Getting a :class:`~.Client`
 =================================
 
-``MyMagento`` uses the :class:`~.Client` class to handle all interactions with the API
-
-You'll need to create a :class:`~.Client` to :meth:`~.authenticate` your :attr:`~.USER_CREDENTIALS`
-
-
-
-Option 1: Initialize a :class:`~.Client`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-At minimum, you'll need a ``domain``, ``username``, and ``password``
-
-* ``domain`` **Format**
-
-   - **Hosted**: ``domain.com``
-   - **Local**: ``127.0.0.1/path/to/magento`` (must also set ``local=True``)
-
+Option 1: Initialize a :class:`~.Client` Directly
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
       from magento import Client
 
-      >>> api = Client(domain, username, password)
-
+      >>> api = Client(domain, username, password, **kwargs)
 
 
 Option 2: Call :func:`~.get_api`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :func:`.get_api()` method uses the same keyword arguments as the ``Client``, but will try
-using environment variable values if the ``domain``, ``username``, or ``password`` are missing
 
 .. code-block:: python
 
 
       import magento
 
-      >>> api = magento.get_api()
+      >>> api = magento.get_api(**kwargs)
 
+:func:`.get_api` takes the same keyword arguments as the :class:`~.Client`, but if the ``domain``, ``username``, or ``password``
+are missing, it will attempt to use the following environment variables:
 
-Setting Environment Variables
-````````````````````````````````````
-
-To log in faster with :func:`~.get_api`, set the following environment variables:
 
 .. code-block:: python
 
@@ -225,15 +219,17 @@ To log in faster with :func:`~.get_api`, set the following environment variables
    os.environ['MAGENTO_USERNAME']= username
    os.environ['MAGENTO_PASSWORD']= password
 
+...
 
-Output Either Way
-====================
+Getting an :attr:`~.ACCESS_TOKEN`
+=======================================
+
+Unless you specify ``login=False``, the :class:`~.Client` will automatically call :meth:`~.authenticate` once initialized:
+
 
 .. code-block:: python
 
-      |[ MyMagento | website_username ]|:  Authenticating username on website.com...
-      |[ MyMagento | website_username ]|:  Logged in to username
+   >> api.authenticate()
 
-
-
-Once you've initialized a ``Client`` it's time to start `interacting with the api <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#interact-with-api>`_
+   |[ MyMagento | website_username ]|:  Authenticating username on website.com...
+   |[ MyMagento | website_username ]|:  Logged in to username

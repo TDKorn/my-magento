@@ -55,7 +55,7 @@ class Client:
 
         ...
 
-        :Optional Keyword Arguments:
+        :Extra Keyword Arguments:
             * **log_file** (``str``) – log file to use for the client's :attr:`logger`
             * **log_requests** (``bool``) - if ``True``, the logs from :mod:`requests`
               will be added to the client's ``log_file``
@@ -123,10 +123,12 @@ class Client:
              # Generate the url for credit memo with id 7
              >> api=Client("domain.com", "user", "password")
              >> api.url_for('creditmemo/7')
+
              "https://domain.com/rest/V1/creditmemo/7"
 
              # Generate the same url on the "en" store view
              >> api.url_for('creditmemo/7', scope='en')
+
              "https://domain.com/rest/en/V1/creditmemo/7"
 
         :param endpoint: the API endpoint
