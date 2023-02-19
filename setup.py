@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from setuptools import setup, find_packages
 
 
@@ -10,10 +11,17 @@ def read(file):
         return f.read()
 
 
+# Parse version
+init = Path(__file__).parent.joinpath("magento", "__init__.py")
+for line in init.read_text().split("\n"):
+    if line.startswith("__version__ ="):
+        break
+version = line.split(" = ")[-1].strip('"')
+
 setup(
     name='my-magento',
     packages=find_packages(),
-    version='2.1.0',
+    version=version,
     license='MIT',
     description='Python Magento 2 REST API Wrapper',
     long_description=read(LONG_DESCRIPTION_SRC),
