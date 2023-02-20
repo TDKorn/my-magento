@@ -191,8 +191,13 @@ Main Components
    </th></tr>
    <tr><td>
 
-* |.execute|_  a predefined or custom search query on any endpoint
-* Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_ ‎
+* |.execute|_  a search query on any endpoint
+* Intuitive interface for `Building Custom Search Queries <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#custom-queries>`_
+* All predefined methods retrieve data using only 1-2 API requests‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎
+
+
+.. to :ref:`custom-queries`
+.. Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_ ‎
 
 .. raw:: html
 
