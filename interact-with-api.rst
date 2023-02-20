@@ -1,73 +1,78 @@
 ..  Title: MyMagento
 ..  Description: A Python package that wraps and extends the Magento 2 REST API
 ..  Author: TDKorn
-
 .. |Tip| replace:: 💡 **Tip**
 .. |RTD| replace:: **Explore the docs »**
 .. _RTD: https://my-magento.readthedocs.io/en/latest/
 .. |api_endpoint| replace:: API endpoint
 .. _api_endpoint: https://adobe-commerce.redoc.ly/2.3.7-admin/
+.. Classes
 .. |.Client| replace:: ``Client``
-.. _.Client: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378
+.. _.Client: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L13-L378
 .. |.Model| replace:: ``Model``
-.. _.Model: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241
+.. _.Model: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/model.py#L13-L241
 .. |.SearchQuery| replace:: ``SearchQuery``
-.. _.SearchQuery: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313
+.. _.SearchQuery: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L14-L313
 .. |.Order| replace:: ``Order``
-.. _.Order: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/order.py#L12-L182
+.. _.Order: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/order.py#L12-L182
 .. |.Product| replace:: ``Product``
-.. _.Product: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/product.py#L12-L388
+.. _.Product: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/product.py#L12-L388
 .. |.APIResponse| replace:: ``APIResponse``
-.. _.APIResponse: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L244-L286
+.. _.APIResponse: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/model.py#L244-L286
+.. |.Category| replace:: ``Category``
+.. _.Category: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/category.py#L12-L146
+.. |.MediaEntry| replace:: ``MediaEntry``
+.. _.MediaEntry: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/product.py#L391-L556
+.. Functions and Methods
 .. |.get_api| replace:: ``get_api()``
-.. _.get_api: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/__init__.py#L16-L39
+.. _.get_api: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/__init__.py#L16-L39
 .. |.authenticate| replace:: ``authenticate()``
-.. _.authenticate: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L227-L254
+.. _.authenticate: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L227-L254
 .. |.execute| replace:: ``execute()``
-.. _.execute: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L130-L141
+.. _.execute: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L130-L141
 .. |.search| replace:: ``search()``
-.. _.search: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L144-L167
+.. _.search: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L144-L167
 .. |.by_id| replace:: ``by_id()``
-.. _.by_id: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L143-L158
+.. _.by_id: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L143-L158
 .. |.by_list| replace:: ``by_list()``
-.. _.by_list: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L160-L188
+.. _.by_list: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L160-L188
 .. |.get| replace:: ``get()``
-.. _.get: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L199-L204
+.. _.get: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L199-L204
 .. |.url_for| replace:: ``url_for()``
-.. _.url_for: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L115-L142
+.. _.url_for: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L115-L142
 .. |.post| replace:: ``post()``
-.. _.post: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L206-L212
+.. _.post: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L206-L212
 .. |.put| replace:: ``put()``
-.. _.put: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L214-L220
+.. _.put: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L214-L220
 .. |.delete| replace:: ``delete()``
-.. _.delete: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L222-L227
+.. _.delete: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L222-L227
 .. |.add_criteria| replace:: ``add_criteria()``
-.. _.add_criteria: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L44-L111
+.. _.add_criteria: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L44-L111
 .. |.restrict_fields| replace:: ``restrict_fields()``
-.. _.restrict_fields: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L113-L128
+.. _.restrict_fields: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L113-L128
 .. |.until| replace:: ``until()``
-.. _.until: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L216-L227
+.. _.until: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L216-L227
 .. |.since| replace:: ``since()``
-.. _.since: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L190-L214
+.. _.since: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L190-L214
 .. |.Model.refresh| replace:: ``Model.refresh()``
-.. _.Model.refresh: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L131-L165
+.. _.Model.refresh: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/models/model.py#L131-L165
 .. |.set_alt_text| replace:: ``set_alt_text()``
-.. _.set_alt_text: https://github.com/TDKorn/my-magento/blob/v2.1.0/magento/models/product.py#L502-L512
+.. _.set_alt_text: https://github.com/TDKorn/my-magento/blob/v2.1.1b0/magento/models/product.py#L502-L512
 .. |.ProductSearch.by_sku| replace:: ``by_sku()``
-.. _.ProductSearch.by_sku: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L690-L695
+.. _.ProductSearch.by_sku: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L690-L695
+.. Class Variables and Instance Attributes
 .. |.ACCESS_TOKEN| replace:: ``ACCESS_TOKEN``
-.. _.ACCESS_TOKEN: https://github.com/TDKorn/my-magento/blob/v2.1.0/magento/clients.py#L72
+.. _.ACCESS_TOKEN: https://github.com/TDKorn/my-magento/blob/v2.1.1b0/magento/clients.py#L72
 .. |.USER_CREDENTIALS| replace:: ``USER_CREDENTIALS``
-.. _.USER_CREDENTIALS: https://github.com/TDKorn/my-magento/blob/v2.1.0/magento/clients.py#L67-L70
+.. _.USER_CREDENTIALS: https://github.com/TDKorn/my-magento/blob/v2.1.1b0/magento/clients.py#L67-L70
 .. |.Client.scope| replace:: ``Client.scope``
-.. _.Client.scope: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L22
+.. _.Client.scope: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L22
 .. |.scope| replace:: ``scope``
-.. _.scope: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L22
+.. _.scope: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L22
 .. |.result| replace:: ``result``
-.. _.result: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L229-L241
+.. _.result: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/search.py#L229-L241
 .. |.views| replace:: ``views``
-.. _.views: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L410-L413
-
+.. _.views: https://github.com/tdkorn/my-magento/blob/v2.1.1b0/magento/clients.py#L410-L413
 
 Performing a |.search|_
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,9 +118,8 @@ Initializes and returns a |.SearchQuery|_ corresponding to the specified ``endpo
 
 Several endpoints have predefined |.SearchQuery|_ and |.Model|_ subclasses
 
-| If a subclass hasn’t been defined for the ``endpoint`` yet, a general |.SearchQuery|_ will be returned,
-| which wraps the |.result|_ with |.APIResponse|_)
-
+| If a subclass hasn’t been defined for the ``endpoint`` yet, a general |.SearchQuery|_
+| will be returned, which wraps the |.result|_ with |.APIResponse|_
 
 .. raw:: html
 
@@ -208,8 +212,8 @@ We can search for orders containing this product as follows:
 
 |
 
-Example: Retrieving some items related to a `Category <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/category.py#L12-L146>`_
-====================================================================================================================================================================================================================================
+Example: Retrieving some items related to a |.Category|_
+=========================================================
 
 .. code-block:: python
 
@@ -223,8 +227,8 @@ Example: Retrieving some items related to a `Category <https://github.com/tdkorn
 
 |
 
-Example: Updating the Thumbnail `MediaEntry <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/product.py#L391-L556>`_ of a |.Product|_
-======================================================================================================================================================
+Example: Updating the Thumbnail |.MediaEntry|_ of a |.Product|_
+=================================================================
 
 .. code-block:: python
 
