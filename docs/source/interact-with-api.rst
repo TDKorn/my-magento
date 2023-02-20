@@ -45,7 +45,7 @@ allowing you to retrieve data about
 
 .. rubric:: Example: :meth:`~.search` an endpoint :meth:`~.by_list`
 
-.. code-block::
+.. code-block:: python
 
     # Retrieve invoices from a list of invoice ids
     >>> ids = list(range(1,101))
@@ -69,9 +69,15 @@ These classes also provide endpoint-specific methods to search for related items
 
 .. rubric:: Example: Retrieving every :class:`~.Order` containing a :class:`~.Product`
 
-Using the :class:`~.Product` from above, we can search for orders as follows
+Let's retrieve a :class:`~.Product` using :meth:`~.ProductSearch.by_sku`
 
-.. code-block::
+.. code-block:: python
+
+   >>> product = api.products.by_sku("24-MB01")
+
+We can search for orders containing this product as follows:
+
+.. code-block:: python
 
     # Using the Product itself
     >>> product.get_orders()
@@ -89,8 +95,7 @@ Using the :class:`~.Product` from above, we can search for orders as follows
 
 .. rubric:: Example: Retrieving some items related to a :class:`~.Category`
 
-
-.. code-block::
+.. code-block:: python
 
     # Get Category data
     >>> category = api.categories.by_name("Watches")
@@ -104,10 +109,9 @@ Using the :class:`~.Product` from above, we can search for orders as follows
 
 .. rubric:: Example: Updating the Thumbnail :class:`~.MediaEntry` of a :class:`~.Product`
 
-.. code-block::
+.. code-block:: python
 
     # Update product thumbnail label on specific store view
-
    >>> product.thumbnail.set_alt_text("bonjour", scope="FR")
    >>> print(product.thumbnail)
 
@@ -132,16 +136,16 @@ Using the :class:`~.Product` from above, we can search for orders as follows
 Building Custom Search Queries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In addition to the predefined methods, you can also build your own queries – simply
-:meth:`~.add_criteria`, :meth:`~.restrict_fields`, and :meth:`~.execute` the search
+In addition to the predefined methods, you can also build your own queries
 
+* Simply :meth:`~.add_criteria`, :meth:`~.restrict_fields`, and :meth:`~.execute` the search
 * The :meth:`~.since` and :meth:`~.until` methods allow you to further filter your query by date
 
 
 .. admonition:: Example
    :class: example
 
-   .. code-block::
+   .. code-block:: python
 
     # Retrieve orders over $50 placed since the start of 2023
     >>> api.orders.add_criteria(
@@ -168,7 +172,8 @@ You can use this URL to make an authorized
 
 Example: Making a :meth:`~.get` Request
 =============================================
-.. code-block::
+
+.. code-block:: python
 
  # Request the data for credit memo with id 7
  >>> url = api.url_for('creditmemo/7')
@@ -178,23 +183,23 @@ Example: Making a :meth:`~.get` Request
  {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
 
 
-.. note:: Many endpoints need to be wrapped still, but most :meth:`~.get` requests will still be
-   simplified through a :meth:`~.search`
+.. note:: A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
+   be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
 
-   .. code-block::
+   .. code-block:: python
 
         # Retrieve credit memo with id 7 using a search
         >>> memo = api.search("creditmemo").by_id(7)
-        >>> print(memo, memo.data, sep='\n')
+        >>> print(memo.data)
+        >>> print(memo)
 
-        <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
         {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
-
+        <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
 
 Example: Making a :meth:`~.post` Request
 =============================================
 
-.. code-block::
+.. code-block:: python
 
     # Add a comment to credit memo with id 7
     >>> url = api.url_for("creditmemo/7/comments")
