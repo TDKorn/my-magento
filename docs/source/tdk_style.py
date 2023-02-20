@@ -167,9 +167,9 @@ def get_pkg_funcs(pkg: types.ModuleType):
         funcs_meths += get_funcs(module)  # Get standalone funcs defined in module
         classes = getmembers(module, isclass)  # Get classes in module
         for class_name, _class in classes:
-            if getmodule(_class).__name__.startswith(
-                    pkg.__name__):  # == module:  # If class is defined in the module, get its funcs/meths
-                funcs_meths += get_funcs(_class)
+            # if getmodule(_class).__name__.startswith(
+            #         pkg.__name__):  # == module:  # If class is defined in the module, get its funcs/meths
+            funcs_meths += get_funcs(_class)
     return set(funcs_meths)
 
 
@@ -186,7 +186,7 @@ class TDKLexer(NumPyLexer):
     url = 'https://github.com/TDKorn'
     aliases = ['tdk']
 
-    EXTRA_KEYWORDS = funcs
+    EXTRA_KEYWORDS = NumPyLexer.EXTRA_KEYWORDS.union(funcs)
 
 
 def setup(app: Sphinx):

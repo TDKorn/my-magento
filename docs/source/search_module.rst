@@ -1,6 +1,8 @@
 The ``search`` module
 ---------------------
 
+.. include:: _snippets/available_endpoints.rst
+
 .. automodule:: magento.search
    :members:
    :undoc-members:
