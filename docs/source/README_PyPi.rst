@@ -5,8 +5,8 @@
 .. |Tip| replace:: 💡 **Tip**
 .. |RTD| replace:: **Explore the docs »**
 .. _RTD: https://my-magento.readthedocs.io/en/latest/
-.. |api_endpoints| replace:: API endpoints
-.. _api_endpoints: https://adobe-commerce.redoc.ly/2.3.7-admin/
+.. |api_endpoint| replace:: API endpoint
+.. _api_endpoint: https://adobe-commerce.redoc.ly/2.3.7-admin/
 .. |.Client| replace:: Client
 .. _.Client: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378
 .. |.Model| replace:: Model
@@ -113,7 +113,7 @@ Main Components
 Available Endpoints
 ======================
 
-``MyMagento`` is compatible with all |api_endpoints|_
+``MyMagento`` is compatible with every |api_endpoint|_
 
 Endpoints are wrapped with a :class:`~.Model` and :class:`~.SearchQuery` subclass as follows:
 

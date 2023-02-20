@@ -5,8 +5,8 @@
 .. |Tip| replace:: 💡 **Tip**
 .. |RTD| replace:: **Explore the docs »**
 .. _RTD: https://my-magento.readthedocs.io/en/latest/
-.. |api_endpoints| replace:: API endpoints
-.. _api_endpoints: https://adobe-commerce.redoc.ly/2.3.7-admin/
+.. |api_endpoint| replace:: API endpoint
+.. _api_endpoint: https://adobe-commerce.redoc.ly/2.3.7-admin/
 .. |.Client| replace:: Client
 .. _.Client: https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/clients.py#L13-L378
 .. |.Model| replace:: Model
@@ -80,10 +80,6 @@ variety of commonly needed API operations.
 Main Components
 ==================================
 
-.. .. image:: https://user-images.githubusercontent.com/96394652/212470049-ebc2c46b-1fb1-44d1-a400-bf3cdfd3e4fb.png
-   :alt: The Client
-   :target: https://github.com/TDKorn/my-magento/blob/sphinx-docs/magento/clients.py
-
 .. |comp| replace:: 💻
 .. |mag| replace:: 🔍
 
@@ -113,7 +109,7 @@ Main Components
 Available Endpoints
 ======================
 
-``MyMagento`` is compatible with all |api_endpoints|_
+``MyMagento`` is compatible with every |api_endpoint|_
 
 Endpoints are wrapped with a `Model <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/models/model.py#L13-L241>`_ and `SearchQuery <https://github.com/tdkorn/my-magento/blob/v2.1.0/magento/search.py#L14-L313>`_ subclass as follows:
 
@@ -244,4 +240,7 @@ Unless you specify ``login=False``, the `Client <https://github.com/tdkorn/my-ma
 
    |[ MyMagento | website_username ]|:  Authenticating username on website.com...
    |[ MyMagento | website_username ]|:  Logged in to username
+
+
+|
 
