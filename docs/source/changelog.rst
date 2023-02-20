@@ -1,5 +1,20 @@
 Changelog
 ----------
+v2.1.1
+~~~~~~~~~
+
+* Redid the ``README.rst`` and made it slay on both GitHub and PyPi
+
+PyPi
+==========
+.. image:: https://user-images.githubusercontent.com/96394652/220112582-19dfb85f-a91a-4010-90fa-68844a2c48e8.png
+
+
+GitHub
+===========
+.. image:: https://user-images.githubusercontent.com/96394652/220112040-6101d40c-1fe6-4537-80da-d559896ae42c.png
+
+
 
 v2.1.0
 ~~~~~~~
