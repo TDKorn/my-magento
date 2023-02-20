@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The clients module &mdash; MyMagento 2.1.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The search module" href="search_module.html" />
+    <link rel="prev" title="The magento Package" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+    <a href="index.html" class="icon icon-home"> MyMagento
+            <img src="_static/magento_black.png" class="logo" alt="Logo"/>
+    </a>
+              <div class="version">
+                2.1.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">README</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">About MyMagento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#main-components">Main Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#available-endpoints">Available Endpoints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#quickstart-login-with-mymagento">QuickStart: Login with MyMagento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#setting-the-login-credentials">Setting the Login Credentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-a-client">Getting a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#option-1-initialize-a-client-directly">Option 1: Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code> Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#option-2-call-get-api">Option 2: Call <code class="xref py py-func docutils literal notranslate"><span class="pre">get_api()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-an-access-token">Getting an <code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCESS_TOKEN</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="interact-with-api.html">Interacting with the API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#performing-a-search">Performing a <code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#search-results-the-model-classes">Search Results: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#building-custom-search-queries">Building Custom Search Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#making-authorized-requests">Making Authorized Requests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interact-with-api.html#example-making-a-get-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> Request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interact-with-api.html#example-making-a-post-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code> Request</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">The <code class="docutils literal notranslate"><span class="pre">magento</span></code> Package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="modules.html#magento.get_api"><code class="docutils literal notranslate"><span class="pre">get_api()</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The <code class="docutils literal notranslate"><span class="pre">clients</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#magento.clients.Client"><code class="docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.__init__"><code class="docutils literal notranslate"><span class="pre">Client.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.BASE_URL"><code class="docutils literal notranslate"><span class="pre">Client.BASE_URL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.USER_CREDENTIALS"><code class="docutils literal notranslate"><span class="pre">Client.USER_CREDENTIALS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.ACCESS_TOKEN"><code class="docutils literal notranslate"><span class="pre">Client.ACCESS_TOKEN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.domain"><code class="docutils literal notranslate"><span class="pre">Client.domain</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.scope"><code class="docutils literal notranslate"><span class="pre">Client.scope</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.user_agent"><code class="docutils literal notranslate"><span class="pre">Client.user_agent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.logger"><code class="docutils literal notranslate"><span class="pre">Client.logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.store"><code class="docutils literal notranslate"><span class="pre">Client.store</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.new"><code class="docutils literal notranslate"><span class="pre">Client.new()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.load"><code class="docutils literal notranslate"><span class="pre">Client.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.from_json"><code class="docutils literal notranslate"><span class="pre">Client.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.from_dict"><code class="docutils literal notranslate"><span class="pre">Client.from_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.url_for"><code class="docutils literal notranslate"><span class="pre">Client.url_for()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.search"><code class="docutils literal notranslate"><span class="pre">Client.search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.orders"><code class="docutils literal notranslate"><span class="pre">Client.orders</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.order_items"><code class="docutils literal notranslate"><span class="pre">Client.order_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.invoices"><code class="docutils literal notranslate"><span class="pre">Client.invoices</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.categories"><code class="docutils literal notranslate"><span class="pre">Client.categories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.products"><code class="docutils literal notranslate"><span class="pre">Client.products</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.product_attributes"><code class="docutils literal notranslate"><span class="pre">Client.product_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.get"><code class="docutils literal notranslate"><span class="pre">Client.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.post"><code class="docutils literal notranslate"><span class="pre">Client.post()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.put"><code class="docutils literal notranslate"><span class="pre">Client.put()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.delete"><code class="docutils literal notranslate"><span class="pre">Client.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.authenticate"><code class="docutils literal notranslate"><span class="pre">Client.authenticate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.validate"><code class="docutils literal notranslate"><span class="pre">Client.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.request"><code class="docutils literal notranslate"><span class="pre">Client.request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.get_logger"><code class="docutils literal notranslate"><span class="pre">Client.get_logger()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.headers"><code class="docutils literal notranslate"><span class="pre">Client.headers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.token"><code class="docutils literal notranslate"><span class="pre">Client.token</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.to_pickle"><code class="docutils literal notranslate"><span class="pre">Client.to_pickle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.to_json"><code class="docutils literal notranslate"><span class="pre">Client.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.to_dict"><code class="docutils literal notranslate"><span class="pre">Client.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Client.view_config"><code class="docutils literal notranslate"><span class="pre">Client.view_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#magento.clients.Store"><code class="docutils literal notranslate"><span class="pre">Store</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.__init__"><code class="docutils literal notranslate"><span class="pre">Store.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.is_single_store"><code class="docutils literal notranslate"><span class="pre">Store.is_single_store</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.active"><code class="docutils literal notranslate"><span class="pre">Store.active</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.configs"><code class="docutils literal notranslate"><span class="pre">Store.configs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.views"><code class="docutils literal notranslate"><span class="pre">Store.views</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.all_product_attributes"><code class="docutils literal notranslate"><span class="pre">Store.all_product_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.store_view_product_attributes"><code class="docutils literal notranslate"><span class="pre">Store.store_view_product_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.website_product_attributes"><code class="docutils literal notranslate"><span class="pre">Store.website_product_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.global_product_attributes"><code class="docutils literal notranslate"><span class="pre">Store.global_product_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.website_attribute_codes"><code class="docutils literal notranslate"><span class="pre">Store.website_attribute_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.filter_website_attrs"><code class="docutils literal notranslate"><span class="pre">Store.filter_website_attrs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#magento.clients.Store.refresh"><code class="docutils literal notranslate"><span class="pre">Store.refresh()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="search_module.html">The <code class="docutils literal notranslate"><span class="pre">search</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="search_module.html#available-endpoints">Available Endpoints</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.SearchQuery"><code class="docutils literal notranslate"><span class="pre">SearchQuery</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.OrderSearch"><code class="docutils literal notranslate"><span class="pre">OrderSearch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.OrderItemSearch"><code class="docutils literal notranslate"><span class="pre">OrderItemSearch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.InvoiceSearch"><code class="docutils literal notranslate"><span class="pre">InvoiceSearch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.ProductSearch"><code class="docutils literal notranslate"><span class="pre">ProductSearch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.ProductAttributeSearch"><code class="docutils literal notranslate"><span class="pre">ProductAttributeSearch</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="search_module.html#magento.search.CategorySearch"><code class="docutils literal notranslate"><span class="pre">CategorySearch</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html">The <code class="docutils literal notranslate"><span class="pre">exceptions</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="exceptions.html#magento.exceptions.MagentoError"><code class="docutils literal notranslate"><span class="pre">MagentoError</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="exceptions.html#magento.exceptions.MagentoError.DEFAULT_MSG"><code class="docutils literal notranslate"><span class="pre">MagentoError.DEFAULT_MSG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="exceptions.html#magento.exceptions.MagentoError.__init__"><code class="docutils literal notranslate"><span class="pre">MagentoError.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="exceptions.html#magento.exceptions.MagentoError.parse"><code class="docutils literal notranslate"><span class="pre">MagentoError.parse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="exceptions.html#magento.exceptions.AuthenticationError"><code class="docutils literal notranslate"><span class="pre">AuthenticationError</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="exceptions.html#magento.exceptions.AuthenticationError.DEFAULT_MSG"><code class="docutils literal notranslate"><span class="pre">AuthenticationError.DEFAULT_MSG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="exceptions.html#magento.exceptions.AuthenticationError.__init__"><code class="docutils literal notranslate"><span class="pre">AuthenticationError.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">The <code class="docutils literal notranslate"><span class="pre">utils</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.ItemManager"><code class="docutils literal notranslate"><span class="pre">ItemManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.ItemManager.__init__"><code class="docutils literal notranslate"><span class="pre">ItemManager.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.ItemManager.add"><code class="docutils literal notranslate"><span class="pre">ItemManager.add()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.ItemManager.get_attrs"><code class="docutils literal notranslate"><span class="pre">ItemManager.get_attrs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.ItemManager.sum_attrs"><code class="docutils literal notranslate"><span class="pre">ItemManager.sum_attrs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils"><code class="docutils literal notranslate"><span class="pre">LoggerUtils</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.get_handler_names"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.get_handler_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.get_stream_handlers"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.get_stream_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.get_file_handlers"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.get_file_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.get_log_files"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.get_log_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.get_handler_by_log_file"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.get_handler_by_log_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.clear_handlers"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.clear_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.clear_stream_handlers"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.clear_stream_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.clear_file_handlers"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.clear_file_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.LoggerUtils.map_handlers_by_name"><code class="docutils literal notranslate"><span class="pre">LoggerUtils.map_handlers_by_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger"><code class="docutils literal notranslate"><span class="pre">MagentoLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.PREFIX"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.PREFIX</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.PACKAGE_LOG_NAME"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.PACKAGE_LOG_NAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.CLIENT_LOG_NAME"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.CLIENT_LOG_NAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.HANDLER_NAME"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.HANDLER_NAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.LOG_MESSAGE"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.LOG_MESSAGE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.FORMATTER"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.FORMATTER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.__init__"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.setup_logger"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.setup_logger()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.format_msg"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.format_msg()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.debug"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.info"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.error"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.warning"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.warning()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.critical"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.critical()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.handlers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.handler_names"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.handler_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.handler_map"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.handler_map</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.file_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.file_handlers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.stream_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.stream_handlers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.log_files"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.log_files</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.log_path"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.log_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.get_magento_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.get_magento_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.clear_magento_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.clear_magento_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.clear_magento_file_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.clear_magento_file_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.clear_magento_stdout_handlers"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.clear_magento_stdout_handlers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.owns_handler"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.owns_handler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.get_package_handler"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.get_package_handler()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="utils.html#magento.utils.MagentoLogger.add_request_logging"><code class="docutils literal notranslate"><span class="pre">MagentoLogger.add_request_logging()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.get_agents"><code class="docutils literal notranslate"><span class="pre">get_agents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.get_agent"><code class="docutils literal notranslate"><span class="pre">get_agent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="utils.html#magento.utils.get_package_file_handler"><code class="docutils literal notranslate"><span class="pre">get_package_file_handler()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">The <code class="docutils literal notranslate"><span class="pre">magento.models</span></code> subpackage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="model.html">The <code class="docutils literal notranslate"><span class="pre">model</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="model.html#magento.models.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">Model.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">Model.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.__init__"><code class="docutils literal notranslate"><span class="pre">Model.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.set_attrs"><code class="docutils literal notranslate"><span class="pre">Model.set_attrs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.excluded_keys"><code class="docutils literal notranslate"><span class="pre">Model.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.uid"><code class="docutils literal notranslate"><span class="pre">Model.uid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.data_endpoint"><code class="docutils literal notranslate"><span class="pre">Model.data_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.query_endpoint"><code class="docutils literal notranslate"><span class="pre">Model.query_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.parse"><code class="docutils literal notranslate"><span class="pre">Model.parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.refresh"><code class="docutils literal notranslate"><span class="pre">Model.refresh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.unpack_attributes"><code class="docutils literal notranslate"><span class="pre">Model.unpack_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.pack_attributes"><code class="docutils literal notranslate"><span class="pre">Model.pack_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.encode"><code class="docutils literal notranslate"><span class="pre">Model.encode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.cached"><code class="docutils literal notranslate"><span class="pre">Model.cached</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.clear"><code class="docutils literal notranslate"><span class="pre">Model.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.Model.get_scope_name"><code class="docutils literal notranslate"><span class="pre">Model.get_scope_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="model.html#magento.models.model.APIResponse"><code class="docutils literal notranslate"><span class="pre">APIResponse</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.APIResponse.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">APIResponse.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.APIResponse.__init__"><code class="docutils literal notranslate"><span class="pre">APIResponse.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.APIResponse.excluded_keys"><code class="docutils literal notranslate"><span class="pre">APIResponse.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.APIResponse.uid"><code class="docutils literal notranslate"><span class="pre">APIResponse.uid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="model.html#magento.models.model.APIResponse.data_endpoint"><code class="docutils literal notranslate"><span class="pre">APIResponse.data_endpoint()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="product.html">The <code class="docutils literal notranslate"><span class="pre">product</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="product.html#magento.models.product.Product"><code class="docutils literal notranslate"><span class="pre">Product</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.STATUS_ENABLED"><code class="docutils literal notranslate"><span class="pre">Product.STATUS_ENABLED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.STATUS_DISABLED"><code class="docutils literal notranslate"><span class="pre">Product.STATUS_DISABLED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.VISIBILITY_NOT_VISIBLE"><code class="docutils literal notranslate"><span class="pre">Product.VISIBILITY_NOT_VISIBLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.VISIBILITY_CATALOG"><code class="docutils literal notranslate"><span class="pre">Product.VISIBILITY_CATALOG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.VISIBILITY_SEARCH"><code class="docutils literal notranslate"><span class="pre">Product.VISIBILITY_SEARCH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.VISIBILITY_BOTH"><code class="docutils literal notranslate"><span class="pre">Product.VISIBILITY_BOTH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">Product.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">Product.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.__init__"><code class="docutils literal notranslate"><span class="pre">Product.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.excluded_keys"><code class="docutils literal notranslate"><span class="pre">Product.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_stock"><code class="docutils literal notranslate"><span class="pre">Product.update_stock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_status"><code class="docutils literal notranslate"><span class="pre">Product.update_status()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_price"><code class="docutils literal notranslate"><span class="pre">Product.update_price()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_special_price"><code class="docutils literal notranslate"><span class="pre">Product.update_special_price()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_name"><code class="docutils literal notranslate"><span class="pre">Product.update_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_description"><code class="docutils literal notranslate"><span class="pre">Product.update_description()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_metadata"><code class="docutils literal notranslate"><span class="pre">Product.update_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_attributes"><code class="docutils literal notranslate"><span class="pre">Product.update_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.update_custom_attributes"><code class="docutils literal notranslate"><span class="pre">Product.update_custom_attributes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.get_orders"><code class="docutils literal notranslate"><span class="pre">Product.get_orders()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.get_order_items"><code class="docutils literal notranslate"><span class="pre">Product.get_order_items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.get_invoices"><code class="docutils literal notranslate"><span class="pre">Product.get_invoices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.delete"><code class="docutils literal notranslate"><span class="pre">Product.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.get_children"><code class="docutils literal notranslate"><span class="pre">Product.get_children()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.children"><code class="docutils literal notranslate"><span class="pre">Product.children</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.categories"><code class="docutils literal notranslate"><span class="pre">Product.categories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.media_gallery_entries"><code class="docutils literal notranslate"><span class="pre">Product.media_gallery_entries</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.thumbnail"><code class="docutils literal notranslate"><span class="pre">Product.thumbnail</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.thumbnail_link"><code class="docutils literal notranslate"><span class="pre">Product.thumbnail_link</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.get_media_by_id"><code class="docutils literal notranslate"><span class="pre">Product.get_media_by_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.encoded_sku"><code class="docutils literal notranslate"><span class="pre">Product.encoded_sku</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.option_skus"><code class="docutils literal notranslate"><span class="pre">Product.option_skus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.stock"><code class="docutils literal notranslate"><span class="pre">Product.stock</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.stock_item"><code class="docutils literal notranslate"><span class="pre">Product.stock_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.stock_item_id"><code class="docutils literal notranslate"><span class="pre">Product.stock_item_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.description"><code class="docutils literal notranslate"><span class="pre">Product.description</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.Product.special_price"><code class="docutils literal notranslate"><span class="pre">Product.special_price</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="product.html#magento.models.product.MediaEntry"><code class="docutils literal notranslate"><span class="pre">MediaEntry</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.MEDIA_TYPES"><code class="docutils literal notranslate"><span class="pre">MediaEntry.MEDIA_TYPES</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">MediaEntry.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">MediaEntry.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.__init__"><code class="docutils literal notranslate"><span class="pre">MediaEntry.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.query_endpoint"><code class="docutils literal notranslate"><span class="pre">MediaEntry.query_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.excluded_keys"><code class="docutils literal notranslate"><span class="pre">MediaEntry.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.is_enabled"><code class="docutils literal notranslate"><span class="pre">MediaEntry.is_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.is_thumbnail"><code class="docutils literal notranslate"><span class="pre">MediaEntry.is_thumbnail</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.link"><code class="docutils literal notranslate"><span class="pre">MediaEntry.link</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.disable"><code class="docutils literal notranslate"><span class="pre">MediaEntry.disable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.enable"><code class="docutils literal notranslate"><span class="pre">MediaEntry.enable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.add_media_type"><code class="docutils literal notranslate"><span class="pre">MediaEntry.add_media_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.remove_media_type"><code class="docutils literal notranslate"><span class="pre">MediaEntry.remove_media_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.set_media_types"><code class="docutils literal notranslate"><span class="pre">MediaEntry.set_media_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.set_position"><code class="docutils literal notranslate"><span class="pre">MediaEntry.set_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.set_alt_text"><code class="docutils literal notranslate"><span class="pre">MediaEntry.set_alt_text()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.MediaEntry.update"><code class="docutils literal notranslate"><span class="pre">MediaEntry.update()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute"><code class="docutils literal notranslate"><span class="pre">ProductAttribute</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">ProductAttribute.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">ProductAttribute.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute.__init__"><code class="docutils literal notranslate"><span class="pre">ProductAttribute.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute.excluded_keys"><code class="docutils literal notranslate"><span class="pre">ProductAttribute.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="product.html#magento.models.product.ProductAttribute.options"><code class="docutils literal notranslate"><span class="pre">ProductAttribute.options</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="category.html">The <code class="docutils literal notranslate"><span class="pre">category</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="category.html#magento.models.category.Category"><code class="docutils literal notranslate"><span class="pre">Category</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">Category.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">Category.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.__init__"><code class="docutils literal notranslate"><span class="pre">Category.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.excluded_keys"><code class="docutils literal notranslate"><span class="pre">Category.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.custom_attributes"><code class="docutils literal notranslate"><span class="pre">Category.custom_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.subcategories"><code class="docutils literal notranslate"><span class="pre">Category.subcategories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.subcategory_ids"><code class="docutils literal notranslate"><span class="pre">Category.subcategory_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.subcategory_names"><code class="docutils literal notranslate"><span class="pre">Category.subcategory_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.all_subcategories"><code class="docutils literal notranslate"><span class="pre">Category.all_subcategories</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.all_subcategory_ids"><code class="docutils literal notranslate"><span class="pre">Category.all_subcategory_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.products"><code class="docutils literal notranslate"><span class="pre">Category.products</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.product_ids"><code class="docutils literal notranslate"><span class="pre">Category.product_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.skus"><code class="docutils literal notranslate"><span class="pre">Category.skus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.all_products"><code class="docutils literal notranslate"><span class="pre">Category.all_products</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.all_product_ids"><code class="docutils literal notranslate"><span class="pre">Category.all_product_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.all_skus"><code class="docutils literal notranslate"><span class="pre">Category.all_skus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.get_products"><code class="docutils literal notranslate"><span class="pre">Category.get_products()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.get_orders"><code class="docutils literal notranslate"><span class="pre">Category.get_orders()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.get_order_items"><code class="docutils literal notranslate"><span class="pre">Category.get_order_items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="category.html#magento.models.category.Category.get_invoices"><code class="docutils literal notranslate"><span class="pre">Category.get_invoices()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="order.html">The <code class="docutils literal notranslate"><span class="pre">order</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="order.html#magento.models.order.Order"><code class="docutils literal notranslate"><span class="pre">Order</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">Order.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">Order.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.__init__"><code class="docutils literal notranslate"><span class="pre">Order.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.excluded_keys"><code class="docutils literal notranslate"><span class="pre">Order.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.id"><code class="docutils literal notranslate"><span class="pre">Order.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.number"><code class="docutils literal notranslate"><span class="pre">Order.number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.items"><code class="docutils literal notranslate"><span class="pre">Order.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.item_ids"><code class="docutils literal notranslate"><span class="pre">Order.item_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.products"><code class="docutils literal notranslate"><span class="pre">Order.products</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.get_invoice"><code class="docutils literal notranslate"><span class="pre">Order.get_invoice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.shipping_address"><code class="docutils literal notranslate"><span class="pre">Order.shipping_address</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.bill_to"><code class="docutils literal notranslate"><span class="pre">Order.bill_to</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.bill_to_address"><code class="docutils literal notranslate"><span class="pre">Order.bill_to_address</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.ship_to"><code class="docutils literal notranslate"><span class="pre">Order.ship_to</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.ship_to_address"><code class="docutils literal notranslate"><span class="pre">Order.ship_to_address</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.payment"><code class="docutils literal notranslate"><span class="pre">Order.payment</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.net_tax"><code class="docutils literal notranslate"><span class="pre">Order.net_tax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.net_total"><code class="docutils literal notranslate"><span class="pre">Order.net_total</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.item_refunds"><code class="docutils literal notranslate"><span class="pre">Order.item_refunds</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.total_qty_invoiced"><code class="docutils literal notranslate"><span class="pre">Order.total_qty_invoiced</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.total_qty_shipped"><code class="docutils literal notranslate"><span class="pre">Order.total_qty_shipped</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.total_qty_refunded"><code class="docutils literal notranslate"><span class="pre">Order.total_qty_refunded</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.total_qty_canceled"><code class="docutils literal notranslate"><span class="pre">Order.total_qty_canceled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.total_qty_outstanding"><code class="docutils literal notranslate"><span class="pre">Order.total_qty_outstanding</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.Order.net_qty_ordered"><code class="docutils literal notranslate"><span class="pre">Order.net_qty_ordered</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="order.html#magento.models.order.OrderItem"><code class="docutils literal notranslate"><span class="pre">OrderItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">OrderItem.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">OrderItem.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.__init__"><code class="docutils literal notranslate"><span class="pre">OrderItem.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.excluded_keys"><code class="docutils literal notranslate"><span class="pre">OrderItem.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.order"><code class="docutils literal notranslate"><span class="pre">OrderItem.order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.product"><code class="docutils literal notranslate"><span class="pre">OrderItem.product</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.product_id"><code class="docutils literal notranslate"><span class="pre">OrderItem.product_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.extension_attributes"><code class="docutils literal notranslate"><span class="pre">OrderItem.extension_attributes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.qty_outstanding"><code class="docutils literal notranslate"><span class="pre">OrderItem.qty_outstanding</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.net_qty_ordered"><code class="docutils literal notranslate"><span class="pre">OrderItem.net_qty_ordered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.net_tax"><code class="docutils literal notranslate"><span class="pre">OrderItem.net_tax</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.net_total"><code class="docutils literal notranslate"><span class="pre">OrderItem.net_total</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.net_refund"><code class="docutils literal notranslate"><span class="pre">OrderItem.net_refund</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="order.html#magento.models.order.OrderItem.total_canceled"><code class="docutils literal notranslate"><span class="pre">OrderItem.total_canceled</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="invoice.html">The <code class="docutils literal notranslate"><span class="pre">invoice</span></code> module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice"><code class="docutils literal notranslate"><span class="pre">Invoice</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">Invoice.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">Invoice.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.__init__"><code class="docutils literal notranslate"><span class="pre">Invoice.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.excluded_keys"><code class="docutils literal notranslate"><span class="pre">Invoice.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.id"><code class="docutils literal notranslate"><span class="pre">Invoice.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.number"><code class="docutils literal notranslate"><span class="pre">Invoice.number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.order"><code class="docutils literal notranslate"><span class="pre">Invoice.order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice.items"><code class="docutils literal notranslate"><span class="pre">Invoice.items</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem"><code class="docutils literal notranslate"><span class="pre">InvoiceItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.DOCUMENTATION"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.DOCUMENTATION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.IDENTIFIER"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.IDENTIFIER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.__init__"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.data_endpoint"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.data_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.query_endpoint"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.query_endpoint()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.excluded_keys"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.excluded_keys</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.order"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.order</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.order_item"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.order_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.product"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.product</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="invoice.html#magento.models.invoice.InvoiceItem.product_id"><code class="docutils literal notranslate"><span class="pre">InvoiceItem.product_id</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/logging-in.html">Get a Magento 2 REST API Token With MyMagento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/logging-in.html#setting-the-login-credentials">Setting the Login Credentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/logging-in.html#getting-a-client">Getting a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/logging-in.html#setting-environment-variables">Setting Environment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/add-discount-by-product-price.html">Add discount on each product based on product price</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/add-discount-by-product-price.html#solution-using-mymagento">Solution Using MyMagento</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Extras</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#v2-1-1">v2.1.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#pypi">PyPi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#github">GitHub</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#v2-1-0">v2.1.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="contents.html">Table Of Contents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="contents.html">MyMagento</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="contents.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">The <code class="docutils literal notranslate"><span class="pre">magento</span></code> Package</a></li>
+      <li class="breadcrumb-item active">The <code class="docutils literal notranslate"><span class="pre">clients</span></code> module</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/TDKorn/my-magento/blob/v2.1.1clients.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="modules.html" class="btn btn-neutral float-left" title="The magento Package" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="search_module.html" class="btn btn-neutral float-right" title="The search module" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-magento.clients">
+<span id="the-clients-module"></span><h1>The <code class="docutils literal notranslate"><span class="pre">clients</span></code> module<a class="headerlink" href="#module-magento.clients" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="magento.clients.Client">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">magento.clients.</span></span><span class="sig-name descname"><span class="pre">Client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>The class that handles all interaction with the API</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_agent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">login</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a Client</p>
+<div class="important-af admonition">
+<p class="admonition-title">Important!</p>
+<p>The Magento account you use to log in must be assigned a <strong>User Role</strong> that has
+the appropriate API resources included in its <strong>Resource Access</strong> settings</p>
+<p>This can be verified in Magento Admin by going to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">System</span> <span class="o">-&gt;</span> <span class="n">Permissions</span> <span class="o">-&gt;</span> <span class="n">User</span> <span class="n">Roles</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="n">Role</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="n">Role</span> <span class="n">Resources</span> <span class="o">-&gt;</span> <span class="n">Resource</span> <span class="n">Access</span>
+</pre></div>
+</div>
+<p>and ensuring that <code class="docutils literal notranslate"><span class="pre">Sales</span></code>, <code class="docutils literal notranslate"><span class="pre">Catalog</span></code>, <code class="docutils literal notranslate"><span class="pre">Customers</span></code>, and any other desired resources are included</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>domain</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – domain name of the Magento store (ex. <code class="docutils literal notranslate"><span class="pre">domain.com</span></code> or <code class="docutils literal notranslate"><span class="pre">127.0.0.1/magento24</span></code>)</p></li>
+<li><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – username of the Magento Admin account</p></li>
+<li><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – password of the Magento Admin account</p></li>
+<li><p><strong>scope</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – the store view scope to <a class="reference internal" href="#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a> and make requests on</p></li>
+<li><p><strong>local</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether the Magento store is hosted locally</p></li>
+<li><p><strong>user_agent</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – the user agent to use in requests</p></li>
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – an existing access token</p></li>
+<li><p><strong>log_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the logging level for logging to stdout</p></li>
+<li><p><strong>login</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, calls <a class="reference internal" href="#magento.clients.Client.authenticate" title="magento.clients.Client.authenticate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">authenticate()</span></code></a> upon initialization</p></li>
+<li><p><strong>kwargs</strong> – see below</p></li>
+</ul>
+</dd>
+</dl>
+<p>…</p>
+<dl class="field-list simple">
+<dt class="field-odd">Extra Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_file</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – log file to use for the client’s <a class="reference internal" href="#magento.clients.Client.logger" title="magento.clients.Client.logger"><code class="xref py py-attr docutils literal notranslate"><span class="pre">logger</span></code></a></p></li>
+<li><p><strong>log_requests</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) - if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the logs from <a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#module-requests" title="(in Requests v2.28.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">requests</span></code></a>
+will be added to the client’s <code class="docutils literal notranslate"><span class="pre">log_file</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.BASE_URL">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.BASE_URL" title="Permalink to this definition"></a></dt>
+<dd><p>The base API URL</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.USER_CREDENTIALS">
+<span class="sig-name descname"><span class="pre">USER_CREDENTIALS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Client.USER_CREDENTIALS" title="Permalink to this definition"></a></dt>
+<dd><p>The user credentials</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.ACCESS_TOKEN">
+<span class="sig-name descname"><span class="pre">ACCESS_TOKEN</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.ACCESS_TOKEN" title="Permalink to this definition"></a></dt>
+<dd><p>The API access token</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.domain">
+<span class="sig-name descname"><span class="pre">domain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.domain" title="Permalink to this definition"></a></dt>
+<dd><p>The Magento store domain</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.scope">
+<span class="sig-name descname"><span class="pre">scope</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.scope" title="Permalink to this definition"></a></dt>
+<dd><p>The store view code to request/update data on</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.user_agent">
+<span class="sig-name descname"><span class="pre">user_agent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.user_agent" title="Permalink to this definition"></a></dt>
+<dd><p>The user agent to use in requests</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.logger">
+<span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="utils.html#magento.utils.MagentoLogger" title="magento.utils.MagentoLogger"><span class="pre">MagentoLogger</span></a></em><a class="headerlink" href="#magento.clients.Client.logger" title="Permalink to this definition"></a></dt>
+<dd><p>The <a class="reference internal" href="utils.html#magento.utils.MagentoLogger" title="magento.utils.MagentoLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">MagentoLogger</span></code></a> for the domain/username combination</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="magento.clients.Client.store">
+<span class="sig-name descname"><span class="pre">store</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#magento.clients.Store" title="magento.clients.Store"><span class="pre">Store</span></a></em><a class="headerlink" href="#magento.clients.Client.store" title="Permalink to this definition"></a></dt>
+<dd><p>An initialized <a class="reference internal" href="#magento.clients.Store" title="magento.clients.Store"><code class="xref py py-class docutils literal notranslate"><span class="pre">Store</span></code></a> object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.new">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">new</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.new"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.new" title="Permalink to this definition"></a></dt>
+<dd><p>Prompts for input to log in to the Magento API</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><em>Client</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickle_bytes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.load" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a <a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> using a pickle bytestring from <a class="reference internal" href="#magento.clients.Client.to_pickle" title="magento.clients.Client.to_pickle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_pickle()</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><em>Client</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.from_json" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a <a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> from a JSON string of settings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><em>Client</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.from_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a <a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> from a dictionary of settings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><em>Client</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.url_for">
+<span class="sig-name descname"><span class="pre">url_for</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.url_for"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.url_for" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the appropriate request url for the given API endpoint and store scope</p>
+<div class="example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate the url for credit memo with id 7</span>
+<span class="o">&gt;&gt;</span> <span class="n">api</span><span class="o">=</span><span class="n">Client</span><span class="p">(</span><span class="s2">&quot;domain.com&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="kp">url_for</span><span class="p">(</span><span class="s1">&#39;creditmemo/7&#39;</span><span class="p">)</span>
+<span class="s2">&quot;https://domain.com/rest/V1/creditmemo/7&quot;</span>
+
+<span class="c1"># Generate the same url on the &quot;en&quot; store view</span>
+<span class="o">&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="kp">url_for</span><span class="p">(</span><span class="s1">&#39;creditmemo/7&#39;</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s1">&#39;en&#39;</span><span class="p">)</span>
+<span class="s2">&quot;https://domain.com/rest/en/V1/creditmemo/7&quot;</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the API endpoint</p></li>
+<li><p><strong>scope</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – the scope to generate the url for; uses the <a class="reference internal" href="#magento.clients.Client.scope" title="magento.clients.Client.scope"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.scope</span></code></a> if not provided</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.search" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes and returns a <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> corresponding to the specified endpoint</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Several endpoints have predefined <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> and <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> subclasses</p>
+<p>If a subclass hasn’t been defined for the <code class="docutils literal notranslate"><span class="pre">endpoint</span></code> yet, a general <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a>
+will be returned, which wraps the <a class="reference internal" href="search_module.html#magento.search.SearchQuery.result" title="magento.search.SearchQuery.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> with <a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">APIResponse</span></code></a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – a valid Magento API search endpoint</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><em>SearchQuery</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.orders">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orders</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.OrderSearch" title="magento.search.OrderSearch"><span class="pre">OrderSearch</span></a></em><a class="headerlink" href="#magento.clients.Client.orders" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes an <a class="reference internal" href="search_module.html#magento.search.OrderSearch" title="magento.search.OrderSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderSearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.order_items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">order_items</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.OrderItemSearch" title="magento.search.OrderItemSearch"><span class="pre">OrderItemSearch</span></a></em><a class="headerlink" href="#magento.clients.Client.order_items" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes an <a class="reference internal" href="search_module.html#magento.search.OrderItemSearch" title="magento.search.OrderItemSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderItemSearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.invoices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">invoices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.InvoiceSearch" title="magento.search.InvoiceSearch"><span class="pre">InvoiceSearch</span></a></em><a class="headerlink" href="#magento.clients.Client.invoices" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes an <a class="reference internal" href="search_module.html#magento.search.InvoiceSearch" title="magento.search.InvoiceSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvoiceSearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.categories">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">categories</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.CategorySearch" title="magento.search.CategorySearch"><span class="pre">CategorySearch</span></a></em><a class="headerlink" href="#magento.clients.Client.categories" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes a <a class="reference internal" href="search_module.html#magento.search.CategorySearch" title="magento.search.CategorySearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">CategorySearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.products">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">products</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.ProductSearch" title="magento.search.ProductSearch"><span class="pre">ProductSearch</span></a></em><a class="headerlink" href="#magento.clients.Client.products" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes a <a class="reference internal" href="search_module.html#magento.search.ProductSearch" title="magento.search.ProductSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductSearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.product_attributes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">product_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="search_module.html#magento.search.ProductAttributeSearch" title="magento.search.ProductAttributeSearch"><span class="pre">ProductAttributeSearch</span></a></em><a class="headerlink" href="#magento.clients.Client.product_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>Initializes a <a class="reference internal" href="search_module.html#magento.search.ProductAttributeSearch" title="magento.search.ProductAttributeSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductAttributeSearch</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.get" title="Permalink to this definition"></a></dt>
+<dd><p>Sends an authorized <code class="docutils literal notranslate"><span class="pre">GET</span></code> request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the URL to make the request on</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.28.2)"><em>Response</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.post" title="Permalink to this definition"></a></dt>
+<dd><p>Sends an authorized <code class="docutils literal notranslate"><span class="pre">POST</span></code> request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the URL to make the request on</p></li>
+<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – the JSON payload for the request</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.28.2)"><em>Response</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.put"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.put" title="Permalink to this definition"></a></dt>
+<dd><p>Sends an authorized <code class="docutils literal notranslate"><span class="pre">PUT</span></code> request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the URL to make the request on</p></li>
+<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – the JSON payload for the request</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.28.2)"><em>Response</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.delete">
+<span class="sig-name descname"><span class="pre">delete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.delete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.delete" title="Permalink to this definition"></a></dt>
+<dd><p>Sends an authorized <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> request</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the URL to make the request on</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.28.2)"><em>Response</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.authenticate">
+<span class="sig-name descname"><span class="pre">authenticate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.authenticate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.authenticate" title="Permalink to this definition"></a></dt>
+<dd><p>Authenticates the <a class="reference internal" href="#magento.clients.Client.USER_CREDENTIALS" title="magento.clients.Client.USER_CREDENTIALS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">USER_CREDENTIALS</span></code></a> and retrieves an access token</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.validate" title="Permalink to this definition"></a></dt>
+<dd><p>Validates the <a class="reference internal" href="#magento.clients.Client.token" title="magento.clients.Client.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a> by sending an authorized request to a standard API endpoint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#magento.exceptions.AuthenticationError" title="magento.exceptions.AuthenticationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthenticationError</span></code></a> if the token is invalid</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.request" title="Permalink to this definition"></a></dt>
+<dd><p>Sends an authorized API request. Used for all internal requests</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Use <a class="reference internal" href="#magento.clients.Client.get" title="magento.clients.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, <a class="reference internal" href="#magento.clients.Client.post" title="magento.clients.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a>, <a class="reference internal" href="#magento.clients.Client.put" title="magento.clients.Client.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a> or <a class="reference internal" href="#magento.clients.Client.delete" title="magento.clients.Client.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete()</span></code></a> instead</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the request method</p></li>
+<li><p><strong>url</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the url to send the request to</p></li>
+<li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>]</em>) – the JSON payload for the request (if the method is <code class="docutils literal notranslate"><span class="pre">POST</span></code> or <code class="docutils literal notranslate"><span class="pre">PUT</span></code>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://requests.readthedocs.io/en/latest/api/#requests.Response" title="(in Requests v2.28.2)"><em>Response</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.get_logger">
+<span class="sig-name descname"><span class="pre">get_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stdout_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_requests</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.get_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.get_logger" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve a MagentoLogger for the current username/domain combination. Log files are DEBUG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – the file to log to</p></li>
+<li><p><strong>stdout_level</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – the logging level for stdout logging</p></li>
+<li><p><strong>log_requests</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, adds the <code class="xref py py-class docutils literal notranslate"><span class="pre">FileHandler</span></code> to the <code class="xref py py-mod docutils literal notranslate"><span class="pre">connectionpool</span></code> logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="utils.html#magento.utils.MagentoLogger" title="magento.utils.MagentoLogger"><em>MagentoLogger</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.headers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">headers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></em><a class="headerlink" href="#magento.clients.Client.headers" title="Permalink to this definition"></a></dt>
+<dd><p>Authorization headers for API requests</p>
+<p>Automatically generates a <a class="reference internal" href="#magento.clients.Client.token" title="magento.clients.Client.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a> if needed</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Client.token">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#magento.clients.Client.token" title="Permalink to this definition"></a></dt>
+<dd><p>Returns or generates an <code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCES_TOKEN</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.to_pickle">
+<span class="sig-name descname"><span class="pre">to_pickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.to_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.to_pickle" title="Permalink to this definition"></a></dt>
+<dd><p>Serializes the Client to a pickle bytestring</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>validate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, validates the <a class="reference internal" href="#magento.clients.Client.token" title="magento.clients.Client.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a>/<a class="reference internal" href="#magento.clients.Client.USER_CREDENTIALS" title="magento.clients.Client.USER_CREDENTIALS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">USER_CREDENTIALS</span></code></a> before serializing</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.to_json" title="Permalink to this definition"></a></dt>
+<dd><p>Serializes the Client to a JSON string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>validate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, validates the <a class="reference internal" href="#magento.clients.Client.token" title="magento.clients.Client.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a>/<a class="reference internal" href="#magento.clients.Client.USER_CREDENTIALS" title="magento.clients.Client.USER_CREDENTIALS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">USER_CREDENTIALS</span></code></a> before serializing</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Serializes the Client to a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>validate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, validates the <a class="reference internal" href="#magento.clients.Client.token" title="magento.clients.Client.token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">token</span></code></a>/<a class="reference internal" href="#magento.clients.Client.USER_CREDENTIALS" title="magento.clients.Client.USER_CREDENTIALS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">USER_CREDENTIALS</span></code></a> before serializing</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.11)"><em>Dict</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Client.view_config">
+<span class="sig-name descname"><span class="pre">view_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.view_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Client.view_config" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the Client configuration settings</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="magento.clients.Store">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">magento.clients.</span></span><span class="sig-name descname"><span class="pre">Store</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Store" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class containing store configurations and cached attribute lists</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Store.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Store.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Store.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize a Store object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>client</strong> (<a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><em>Client</em></a>) – an initialized <a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.is_single_store">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_single_store</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#magento.clients.Store.is_single_store" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the store has a single store view (<code class="docutils literal notranslate"><span class="pre">default</span></code>) or multiple store views</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.active">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">active</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><span class="pre">APIResponse</span></a></em><a class="headerlink" href="#magento.clients.Store.active" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the store config corresponding to the current <a class="reference internal" href="#magento.clients.Client.scope" title="magento.clients.Client.scope"><code class="xref py py-attr docutils literal notranslate"><span class="pre">scope</span></code></a> of the <a class="reference internal" href="#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.configs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">configs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><span class="pre">APIResponse</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><span class="pre">APIResponse</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.configs" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of all store configurations</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.views">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">views</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><span class="pre">APIResponse</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><span class="pre">APIResponse</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.views" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a list of all store views</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.all_product_attributes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all_product_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="product.html#magento.models.product.ProductAttribute" title="magento.models.product.ProductAttribute"><span class="pre">ProductAttribute</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.all_product_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>A cached list of all product attributes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.store_view_product_attributes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">store_view_product_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="product.html#magento.models.product.ProductAttribute" title="magento.models.product.ProductAttribute"><span class="pre">ProductAttribute</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.store_view_product_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>A cached list of all product attributes with the <code class="docutils literal notranslate"><span class="pre">Store</span> <span class="pre">View</span></code> scope</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.website_product_attributes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">website_product_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="product.html#magento.models.product.ProductAttribute" title="magento.models.product.ProductAttribute"><span class="pre">ProductAttribute</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.website_product_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>A cached list of all product attributes with the <code class="docutils literal notranslate"><span class="pre">Web</span> <span class="pre">Site</span></code> scope</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.global_product_attributes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_product_attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="product.html#magento.models.product.ProductAttribute" title="magento.models.product.ProductAttribute"><span class="pre">ProductAttribute</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.global_product_attributes" title="Permalink to this definition"></a></dt>
+<dd><p>A cached list of all product attributes with the <code class="docutils literal notranslate"><span class="pre">Global</span></code> scope</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="magento.clients.Store.website_attribute_codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">website_attribute_codes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#magento.clients.Store.website_attribute_codes" title="Permalink to this definition"></a></dt>
+<dd><p>The attribute codes of the <a class="reference internal" href="#magento.clients.Store.website_product_attributes" title="magento.clients.Store.website_product_attributes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">website_product_attributes</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Store.filter_website_attrs">
+<span class="sig-name descname"><span class="pre">filter_website_attrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Store.filter_website_attrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Store.filter_website_attrs" title="Permalink to this definition"></a></dt>
+<dd><p>Filters a product attribute dict and returns a new one that contains only the website scope attributes</p>
+<p>Website scoped attributes must be updated on the admin by making a second request on the <code class="docutils literal notranslate"><span class="pre">all</span></code> scope</p>
+<ul class="simple">
+<li><p>This method is called by <a class="reference internal" href="product.html#magento.models.product.Product.update_attributes" title="magento.models.product.Product.update_attributes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update_attributes()</span></code></a> and <a class="reference internal" href="product.html#magento.models.product.Product.update_custom_attributes" title="magento.models.product.Product.update_custom_attributes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">update_custom_attributes()</span></code></a>
+to see if the second request is needed</p></li>
+</ul>
+<div class="example admonition">
+<p class="admonition-title"><strong>Example</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">price</span></code> attribute is <code class="docutils literal notranslate"><span class="pre">Website</span></code> scope and the <code class="docutils literal notranslate"><span class="pre">meta_title</span></code> attribute is <code class="docutils literal notranslate"><span class="pre">Store</span> <span class="pre">View</span></code> scope</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">attribute_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;meta_title&#39;</span><span class="p">:</span> <span class="s1">&#39;My Product&#39;</span><span class="p">}</span>
+<span class="o">&gt;&gt;</span> <span class="n">store</span><span class="o">.</span><span class="kp">filter_website_attrs</span><span class="p">(</span><span class="n">attribute_data</span><span class="p">)</span>
+<span class="p">{</span><span class="s1">&#39;price&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>attribute_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – a dict of product attributes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="magento.clients.Store.refresh">
+<span class="sig-name descname"><span class="pre">refresh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Store.refresh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#magento.clients.Store.refresh" title="Permalink to this definition"></a></dt>
+<dd><p>Clears all cached properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="The magento Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="search_module.html" class="btn btn-neutral float-right" title="The search module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Adam Korn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

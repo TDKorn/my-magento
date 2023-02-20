@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About MyMagento &mdash; MyMagento 2.1.1 documentation</title>
+  <title>Interacting with the API &mdash; MyMagento 2.1.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" type="text/css" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Interacting with the API" href="interact-with-api.html" />
-    <link rel="prev" title="Table Of Contents" href="contents.html" /> 
+    <link rel="next" title="The magento Package" href="modules.html" />
+    <link rel="prev" title="About MyMagento" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +31,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-    <a href="#" class="icon icon-home"> MyMagento
+    <a href="index.html" class="icon icon-home"> MyMagento
             <img src="_static/magento_black.png" class="logo" alt="Logo"/>
     </a>
               <div class="version">
@@ -47,29 +47,29 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">README</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">About MyMagento</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-components">Main Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#available-endpoints">Available Endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">About MyMagento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#main-components">Main Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#available-endpoints">Available Endpoints</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#quickstart-login-with-mymagento">QuickStart: Login with MyMagento</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#setting-the-login-credentials">Setting the Login Credentials</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-a-client">Getting a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-1-initialize-a-client-directly">Option 1: Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code> Directly</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-2-call-get-api">Option 2: Call <code class="xref py py-func docutils literal notranslate"><span class="pre">get_api()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#quickstart-login-with-mymagento">QuickStart: Login with MyMagento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="index.html#setting-the-login-credentials">Setting the Login Credentials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-a-client">Getting a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="index.html#option-1-initialize-a-client-directly">Option 1: Initialize a <code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code> Directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#option-2-call-get-api">Option 2: Call <code class="xref py py-func docutils literal notranslate"><span class="pre">get_api()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#getting-an-access-token">Getting an <code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCESS_TOKEN</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#getting-an-access-token">Getting an <code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCESS_TOKEN</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="interact-with-api.html">Interacting with the API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#performing-a-search">Performing a <code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#search-results-the-model-classes">Search Results: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#building-custom-search-queries">Building Custom Search Queries</a></li>
-<li class="toctree-l2"><a class="reference internal" href="interact-with-api.html#making-authorized-requests">Making Authorized Requests</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="interact-with-api.html#example-making-a-get-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> Request</a></li>
-<li class="toctree-l3"><a class="reference internal" href="interact-with-api.html#example-making-a-post-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code> Request</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interacting with the API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#performing-a-search">Performing a <code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#search-results-the-model-classes">Search Results: The <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-custom-search-queries">Building Custom Search Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-authorized-requests">Making Authorized Requests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-making-a-get-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> Request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-making-a-post-request">Example: Making a <code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code> Request</a></li>
 </ul>
 </li>
 </ul>
@@ -467,195 +467,208 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="contents.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">About MyMagento</li>
+      <li class="breadcrumb-item active">Interacting with the API</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/TDKorn/my-magento/blob/v2.1.1index.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/TDKorn/my-magento/blob/v2.1.1interact-with-api.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
-        <a href="contents.html" class="btn btn-neutral float-left" title="Table Of Contents" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="interact-with-api.html" class="btn btn-neutral float-right" title="Interacting with the API" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="About MyMagento" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="The magento Package" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
   </div>
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div align="center"><a class="reference internal image-reference" href="_images/magento_orange.png"><img alt="MyMagento: Magento 2 REST API wrapper" src="_images/magento_orange.png" style="width: 15%;" /></a>
-<h1>MyMagento🛒</h1><p>A Python package that wraps and extends the Magento 2 REST API</p>
-<p><a class="reference external" href="https://my-magento.readthedocs.io/en/latest/"><strong>Explore the docs »</strong></a></p>
-<a class="reference external image-reference" href="https://pypi.org/project/my-magento/"><img alt="PyPI Version" src="https://img.shields.io/pypi/v/my-magento?color=eb5202" /></a>
-<a class="reference external image-reference" href="https://github.com/tdkorn/my-magento"><img alt="GitHub Repository" src="https://img.shields.io/badge/GitHub-my--magento-4f1abc" /></a>
-<a class="reference external image-reference" href="https://pepy.tech/project/my-magento"><img alt="https://static.pepy.tech/personalized-badge/my-magento?period=total&amp;units=none&amp;left_color=grey&amp;right_color=blue&amp;left_text=Downloads" src="https://static.pepy.tech/personalized-badge/my-magento?period=total&amp;units=none&amp;left_color=grey&amp;right_color=blue&amp;left_text=Downloads" /></a>
-<a class="reference external image-reference" href="https://my-magento.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/my-magento/badge/?version=latest" /></a>
-</div>
-<br/>
-<br/><section id="about-mymagento">
-<h1>About MyMagento<a class="headerlink" href="#about-mymagento" title="Permalink to this heading"></a></h1>
-<div class="note admonition">
-<p class="admonition-title">What’s MyMagento?</p>
-<p><code class="docutils literal notranslate"><span class="pre">MyMagento</span></code> is a highly interconnected package that wraps and extends the Magento 2 REST API,
-providing a more intuitive and user-friendly interface to access and update your store.</p>
-</div>
-<p class="rubric">MyMagento simplifies interaction with the Magento 2 REST API</p>
-<p>If you’ve worked with the Magento 2 API, you’ll know that not all endpoints are created equally.</p>
-<p><code class="docutils literal notranslate"><span class="pre">MyMagento</span></code> aims to streamline your workflow by simplifying a
-variety of commonly needed API operations.</p>
-<section id="main-components">
-<h2>Main Components<a class="headerlink" href="#main-components" title="Permalink to this heading"></a></h2>
-<div class="client admonition">
-<p class="admonition-title">The <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a></p>
+  <section id="interacting-with-the-api">
+<span id="interact-with-api"></span><h1>Interacting with the API<a class="headerlink" href="#interacting-with-the-api" title="Permalink to this heading"></a></h1>
+<p>Did you <a class="reference internal" href="examples/logging-in.html#logging-in"><span class="std std-ref">Get a Magento 2 REST API Token With MyMagento</span></a>? Then let’s start using the API!</p>
+<section id="performing-a-search">
+<h2>Performing a <a class="reference internal" href="clients.html#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a><a class="headerlink" href="#performing-a-search" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference internal" href="clients.html#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Client.search()</span></code></a> method lets you <a class="reference internal" href="search_module.html#magento.search.SearchQuery.execute" title="magento.search.SearchQuery.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a> a query on
+any <a class="reference external" href="https://adobe-commerce.redoc.ly/2.3.7-admin/">API endpoint</a></p>
+<p>It creates a <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> for the endpoint,
+allowing you to retrieve data about</p>
 <ul class="simple">
-<li><p>Handles all API interactions</p></li>
-<li><p>Supports multiple store views</p></li>
-<li><p>Provides access to all other package components</p></li>
+<li><p>An individual item (ex. <a class="reference internal" href="search_module.html#magento.search.SearchQuery.by_id" title="magento.search.SearchQuery.by_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_id()</span></code></a>)</p></li>
+<li><p>A list of items (ex. <a class="reference internal" href="search_module.html#magento.search.SearchQuery.by_list" title="magento.search.SearchQuery.by_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_list()</span></code></a>)</p></li>
+<li><p>Any search criteria you desire (see <a class="reference internal" href="#custom-queries"><span class="std std-ref">Building Custom Search Queries</span></a>)</p></li>
 </ul>
+<div class="docs admonition">
+<p class="admonition-title">From the Docs…</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Client.</span></span><span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">endpoint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/magento/clients.html#Client.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Initializes and returns a <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> corresponding to the specified endpoint</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Several endpoints have predefined <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> and <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> subclasses</p>
+<p>If a subclass hasn’t been defined for the <code class="docutils literal notranslate"><span class="pre">endpoint</span></code> yet, a general <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a>
+will be returned, which wraps the <a class="reference internal" href="search_module.html#magento.search.SearchQuery.result" title="magento.search.SearchQuery.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> with <a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">APIResponse</span></code></a></p>
 </div>
-<div class="search admonition">
-<p class="admonition-title">The <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> and Subclasses</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="search_module.html#magento.search.SearchQuery.execute" title="magento.search.SearchQuery.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a>  a predefined or custom search query on any endpoint</p></li>
-<li><p>Simplified creation of basic and advanced <a class="reference external" href="https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/">searches using REST endpoints</a></p></li>
-</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>endpoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – a valid Magento API search endpoint</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><em>SearchQuery</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
-<div class="hint admonition">
-<p class="admonition-title">The <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> Subclasses</p>
-<ul class="simple">
-<li><p>Wrap all API responses in the package</p></li>
-<li><p>Provide additional endpoint-specific methods to retrieve and update data</p></li>
-</ul>
-</div>
-</section>
-<section id="available-endpoints">
-<h2>Available Endpoints<a class="headerlink" href="#available-endpoints" title="Permalink to this heading"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">MyMagento</span></code> is compatible with every <a class="reference external" href="https://adobe-commerce.redoc.ly/2.3.7-admin/">API endpoint</a></p>
-<p>Endpoints are wrapped with a <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> and <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> subclass as follows:</p>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 29%" />
-<col style="width: 28%" />
-<col style="width: 23%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p><strong>Endpoint</strong></p></th>
-<th class="head"><p><strong>Client Shortcut</strong></p></th>
-<th class="head"><p><a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> <strong>Subclass</strong></p></th>
-<th class="head"><p><a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> <strong>Subclass</strong></p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">orders</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.orders" title="magento.clients.Client.orders"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.orders</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.OrderSearch" title="magento.search.OrderSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderSearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="order.html#magento.models.order.Order" title="magento.models.order.Order"><code class="xref py py-class docutils literal notranslate"><span class="pre">Order</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">orders/items</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.order_items" title="magento.clients.Client.order_items"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.order_items</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.OrderItemSearch" title="magento.search.OrderItemSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderItemSearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="order.html#magento.models.order.OrderItem" title="magento.models.order.OrderItem"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderItem</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">invoices</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.invoices" title="magento.clients.Client.invoices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.invoices</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.InvoiceSearch" title="magento.search.InvoiceSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvoiceSearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="invoice.html#magento.models.invoice.Invoice" title="magento.models.invoice.Invoice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Invoice</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">products</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.products" title="magento.clients.Client.products"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.products</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.ProductSearch" title="magento.search.ProductSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductSearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="product.html#magento.models.product.Product" title="magento.models.product.Product"><code class="xref py py-class docutils literal notranslate"><span class="pre">Product</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">products/attributes</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.product_attributes" title="magento.clients.Client.product_attributes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.product_attributes</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.ProductAttributeSearch" title="magento.search.ProductAttributeSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductAttributeSearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="product.html#magento.models.product.ProductAttribute" title="magento.models.product.ProductAttribute"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProductAttribute</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">categories</span></code></p></td>
-<td><p><a class="reference internal" href="clients.html#magento.clients.Client.categories" title="magento.clients.Client.categories"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.categories</span></code></a></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.CategorySearch" title="magento.search.CategorySearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">CategorySearch</span></code></a></p></td>
-<td><p><a class="reference internal" href="category.html#magento.models.category.Category" title="magento.models.category.Category"><code class="xref py py-class docutils literal notranslate"><span class="pre">Category</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">endpoint</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Client.search(&quot;endpoint&quot;)</span></code></p></td>
-<td><p><a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a></p></td>
-<td><p><a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">APIResponse</span></code></a></p></td>
-</tr>
-</tbody>
-</table>
-<p>…</p>
-</section>
-</section>
-<section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
-<div class="client admonition">
-<p class="admonition-title">Installing MyMagento</p>
-<p>To install using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">my</span><span class="o">-</span><span class="n">magento</span>
+<p class="rubric">Example: <a class="reference internal" href="clients.html#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a> an endpoint <a class="reference internal" href="search_module.html#magento.search.SearchQuery.by_id" title="magento.search.SearchQuery.by_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_id()</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Query the &quot;invoices&quot; endpoint (also: api.invoices)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="kp">search</span><span class="p">(</span><span class="s2">&quot;invoices&quot;</span><span class="p">)</span><span class="o">.</span><span class="kp">by_id</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Invoice</span><span class="p">:</span> <span class="s2">&quot;#000000001&quot;</span><span class="o">&gt;</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000001&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">01</span> <span class="mi">03</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">33</span><span class="o">&gt;</span>
 </pre></div>
 </div>
-<p>Please note that <code class="docutils literal notranslate"><span class="pre">MyMagento</span></code> requires <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&gt;=</span> <span class="pre">3.10</span></code></p>
+<p class="rubric">Example: <a class="reference internal" href="clients.html#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a> an endpoint <a class="reference internal" href="search_module.html#magento.search.SearchQuery.by_list" title="magento.search.SearchQuery.by_list"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_list()</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve invoices from a list of invoice ids</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">101</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">invoices</span><span class="o">.</span><span class="kp">by_list</span><span class="p">(</span><span class="s2">&quot;entity_id&quot;</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Invoice</span><span class="p">:</span> <span class="s2">&quot;#000000001&quot;</span><span class="o">&gt;</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000001&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">01</span> <span class="mi">03</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">33</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
 </div>
 <p>…</p>
 </section>
-<section id="quickstart-login-with-mymagento">
-<h1>QuickStart: Login with MyMagento<a class="headerlink" href="#quickstart-login-with-mymagento" title="Permalink to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">MyMagento</span></code> uses the <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> class to handle all interactions with the API.</p>
+<section id="search-results-the-model-classes">
+<h2>Search Results: The <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> Classes<a class="headerlink" href="#search-results-the-model-classes" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference internal" href="search_module.html#magento.search.SearchQuery.result" title="magento.search.SearchQuery.result"><code class="xref py py-attr docutils literal notranslate"><span class="pre">result</span></code></a> of any <a class="reference internal" href="search_module.html#magento.search.SearchQuery" title="magento.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> will be parsed and wrapped by a
+<a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> class in <a class="reference external" href="models.html">the <code class="docutils literal notranslate"><span class="pre">magento.models</span></code> subpackage</a>, making the API response data easier to work with.</p>
+<p>These classes also provide endpoint-specific methods to search for related items and update store data.</p>
+<p class="rubric">Example: Retrieving every <a class="reference internal" href="order.html#magento.models.order.Order" title="magento.models.order.Order"><code class="xref py py-class docutils literal notranslate"><span class="pre">Order</span></code></a> containing a <a class="reference internal" href="product.html#magento.models.product.Product" title="magento.models.product.Product"><code class="xref py py-class docutils literal notranslate"><span class="pre">Product</span></code></a></p>
+<p>Let’s retrieve a <a class="reference internal" href="product.html#magento.models.product.Product" title="magento.models.product.Product"><code class="xref py py-class docutils literal notranslate"><span class="pre">Product</span></code></a> using <a class="reference internal" href="search_module.html#magento.search.ProductSearch.by_sku" title="magento.search.ProductSearch.by_sku"><code class="xref py py-meth docutils literal notranslate"><span class="pre">by_sku()</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">product</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">products</span><span class="o">.</span><span class="n">by_sku</span><span class="p">(</span><span class="s2">&quot;24-MB01&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can search for orders containing this product as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using the Product itself</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kp">product</span><span class="o">.</span><span class="kp">get_orders</span><span class="p">()</span>
+
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000003&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">21</span> <span class="mi">08</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mi">33</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span> <span class="p">]</span>
+
+<span class="c1"># Using an OrderSearch</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="kp">by_product</span><span class="p">(</span><span class="kp">product</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="kp">by_product_id</span><span class="p">(</span><span class="kp">product</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="kp">by_sku</span><span class="p">(</span><span class="kp">product</span><span class="o">.</span><span class="n">sku</span><span class="p">)</span>
+
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000003&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="mi">21</span> <span class="mi">08</span><span class="p">:</span><span class="mi">09</span><span class="p">:</span><span class="mi">33</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p class="rubric">Example: Retrieving some items related to a <a class="reference internal" href="category.html#magento.models.category.Category" title="magento.models.category.Category"><code class="xref py py-class docutils literal notranslate"><span class="pre">Category</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get Category data</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">category</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">categories</span><span class="o">.</span><span class="kp">by_name</span><span class="p">(</span><span class="s2">&quot;Watches&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">category</span><span class="o">.</span><span class="kp">get_products</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">category</span><span class="o">.</span><span class="kp">get_invoices</span><span class="p">()</span>
+
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Product</span><span class="p">:</span> <span class="mi">24</span><span class="o">-</span><span class="n">MG04</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Product</span><span class="p">:</span> <span class="mi">24</span><span class="o">-</span><span class="n">MG01</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Product</span><span class="p">:</span> <span class="mi">24</span><span class="o">-</span><span class="n">MG03</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span> <span class="p">]</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Invoice</span><span class="p">:</span> <span class="s2">&quot;#000000004&quot;</span><span class="o">&gt;</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000004&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2022</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="mi">14</span> <span class="mi">03</span><span class="p">:</span><span class="mi">27</span><span class="p">:</span><span class="mi">33</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span> <span class="p">]</span>
+</pre></div>
+</div>
+<p class="rubric">Example: Updating the Thumbnail <a class="reference internal" href="product.html#magento.models.product.MediaEntry" title="magento.models.product.MediaEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">MediaEntry</span></code></a> of a <a class="reference internal" href="product.html#magento.models.product.Product" title="magento.models.product.Product"><code class="xref py py-class docutils literal notranslate"><span class="pre">Product</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="c1"># Update product thumbnail label on specific store view</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kp">product</span><span class="o">.</span><span class="n">thumbnail</span><span class="o">.</span><span class="kp">set_alt_text</span><span class="p">(</span><span class="s2">&quot;bonjour&quot;</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;FR&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="kp">product</span><span class="o">.</span><span class="n">thumbnail</span><span class="p">)</span>
+
+ <span class="o">&lt;</span><span class="n">MediaEntry</span> <span class="mi">3417</span> <span class="k">for</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Product</span><span class="p">:</span> <span class="mi">24</span><span class="o">-</span><span class="n">MB01</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">bonjour</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>…</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>See <a class="reference internal" href="examples/logging-in.html#logging-in"><span class="std std-ref">Get a Magento 2 REST API Token With MyMagento</span></a> for full details on generating an access token</p>
-</div>
-<section id="setting-the-login-credentials">
-<h2>Setting the Login Credentials<a class="headerlink" href="#setting-the-login-credentials" title="Permalink to this heading"></a></h2>
-<p>To generate an <a class="reference internal" href="clients.html#magento.clients.Client.ACCESS_TOKEN" title="magento.clients.Client.ACCESS_TOKEN"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCESS_TOKEN</span></code></a> you’ll need to <a class="reference internal" href="clients.html#magento.clients.Client.authenticate" title="magento.clients.Client.authenticate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">authenticate()</span></code></a> your <a class="reference internal" href="clients.html#magento.clients.Client.USER_CREDENTIALS" title="magento.clients.Client.USER_CREDENTIALS"><code class="xref py py-attr docutils literal notranslate"><span class="pre">USER_CREDENTIALS</span></code></a>.</p>
-<p>Creating a <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> requires a <code class="docutils literal notranslate"><span class="pre">domain</span></code>, <code class="docutils literal notranslate"><span class="pre">username</span></code>, and <code class="docutils literal notranslate"><span class="pre">password</span></code> at minimum.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">domain</span> <span class="o">=</span> <span class="s1">&#39;website.com&#39;</span>
-<span class="o">&gt;&gt;</span> <span class="n">username</span> <span class="o">=</span><span class="s1">&#39;username&#39;</span>
-<span class="o">&gt;&gt;</span> <span class="n">password</span> <span class="o">=</span> <span class="s1">&#39;password&#39;</span>
-</pre></div>
-</div>
-<p>If you’re using a local installation of Magento you’ll need to set <code class="docutils literal notranslate"><span class="pre">local=True</span></code>. Your domain should look like this:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">domain</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1/path/to/magento&#39;</span>
-</pre></div>
+<p>If you have multiple store views, a <code class="docutils literal notranslate"><span class="pre">store_code</span></code> can be specified when
+retrieving/updating data</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="clients.html#magento.clients.Client.scope" title="magento.clients.Client.scope"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Client.scope</span></code></a> is used by default - simply change it to switch store <a class="reference internal" href="clients.html#magento.clients.Store.views" title="magento.clients.Store.views"><code class="xref py py-attr docutils literal notranslate"><span class="pre">views</span></code></a></p></li>
+<li><p>Passing the <code class="docutils literal notranslate"><span class="pre">scope</span></code> keyword argument to <a class="reference internal" href="clients.html#magento.clients.Client.url_for" title="magento.clients.Client.url_for"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Client.url_for()</span></code></a>, <a class="reference internal" href="model.html#magento.models.model.Model.refresh" title="magento.models.model.Model.refresh"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Model.refresh()</span></code></a>,
+and some Model update methods will temporarily override the Client scope</p></li>
+</ul>
 </div>
 <p>…</p>
 </section>
-<section id="getting-a-client">
-<h2>Getting a <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a><a class="headerlink" href="#getting-a-client" title="Permalink to this heading"></a></h2>
-<section id="option-1-initialize-a-client-directly">
-<h3>Option 1: Initialize a <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> Directly<a class="headerlink" href="#option-1-initialize-a-client-directly" title="Permalink to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">magento</span> <span class="kn">import</span> <span class="n">Client</span>
+<section id="building-custom-search-queries">
+<span id="custom-queries"></span><h2>Building Custom Search Queries<a class="headerlink" href="#building-custom-search-queries" title="Permalink to this heading"></a></h2>
+<p>In addition to the predefined methods, you can also build your own queries</p>
+<ul class="simple">
+<li><p>Simply <a class="reference internal" href="search_module.html#magento.search.SearchQuery.add_criteria" title="magento.search.SearchQuery.add_criteria"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_criteria()</span></code></a>, <a class="reference internal" href="search_module.html#magento.search.SearchQuery.restrict_fields" title="magento.search.SearchQuery.restrict_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">restrict_fields()</span></code></a>, and <a class="reference internal" href="search_module.html#magento.search.SearchQuery.execute" title="magento.search.SearchQuery.execute"><code class="xref py py-meth docutils literal notranslate"><span class="pre">execute()</span></code></a> the search</p></li>
+<li><p>The <a class="reference internal" href="search_module.html#magento.search.SearchQuery.since" title="magento.search.SearchQuery.since"><code class="xref py py-meth docutils literal notranslate"><span class="pre">since()</span></code></a> and <a class="reference internal" href="search_module.html#magento.search.SearchQuery.until" title="magento.search.SearchQuery.until"><code class="xref py py-meth docutils literal notranslate"><span class="pre">until()</span></code></a> methods allow you to further filter your query by date</p></li>
+</ul>
+<div class="example admonition">
+<p class="admonition-title">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve orders over $50 placed since the start of 2023</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="kp">add_criteria</span><span class="p">(</span>
+<span class="o">...</span>    <span class="n">field</span><span class="o">=</span><span class="s2">&quot;grand_total&quot;</span><span class="p">,</span>
+<span class="o">...</span>    <span class="n">value</span><span class="o">=</span><span class="s2">&quot;50&quot;</span><span class="p">,</span>
+<span class="o">...</span>    <span class="n">condition</span><span class="o">=</span><span class="s2">&quot;gt&quot;</span>
+<span class="o">...</span> <span class="p">)</span><span class="o">.</span><span class="kp">since</span><span class="p">(</span><span class="s2">&quot;2023-01-01&quot;</span><span class="p">)</span><span class="o">.</span><span class="kp">execute</span><span class="p">()</span>
 
-<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">domain</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000012&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2023</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">02</span> <span class="mi">05</span><span class="p">:</span><span class="mi">19</span><span class="p">:</span><span class="mi">55</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Magento</span> <span class="n">Order</span><span class="p">:</span> <span class="s2">&quot;#000000013&quot;</span> <span class="n">placed</span> <span class="n">on</span> <span class="mi">2023</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">05</span> <span class="mi">09</span><span class="p">:</span><span class="mi">24</span><span class="p">:</span><span class="mi">13</span><span class="o">&gt;</span><span class="p">]</span>
 </pre></div>
 </div>
-</section>
-<section id="option-2-call-get-api">
-<h3>Option 2: Call <a class="reference internal" href="modules.html#magento.get_api" title="magento.get_api"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_api()</span></code></a><a class="headerlink" href="#option-2-call-get-api" title="Permalink to this heading"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">magento</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">api</span> <span class="o">=</span> <span class="n">magento</span><span class="o">.</span><span class="kp">get_api</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-</div>
-<p><a class="reference internal" href="modules.html#magento.get_api" title="magento.get_api"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_api()</span></code></a> takes the same keyword arguments as the <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a>, but if the <code class="docutils literal notranslate"><span class="pre">domain</span></code>, <code class="docutils literal notranslate"><span class="pre">username</span></code>, or <code class="docutils literal notranslate"><span class="pre">password</span></code>
-are missing, it will attempt to use the following environment variables:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MAGENTO_DOMAIN&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MAGENTO_USERNAME&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">username</span>
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MAGENTO_PASSWORD&#39;</span><span class="p">]</span><span class="o">=</span> <span class="n">password</span>
-</pre></div>
 </div>
 <p>…</p>
 </section>
-</section>
-<section id="getting-an-access-token">
-<h2>Getting an <a class="reference internal" href="clients.html#magento.clients.Client.ACCESS_TOKEN" title="magento.clients.Client.ACCESS_TOKEN"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ACCESS_TOKEN</span></code></a><a class="headerlink" href="#getting-an-access-token" title="Permalink to this heading"></a></h2>
-<p>Unless you specify <code class="docutils literal notranslate"><span class="pre">login=False</span></code>, the <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> will automatically call <a class="reference internal" href="clients.html#magento.clients.Client.authenticate" title="magento.clients.Client.authenticate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">authenticate()</span></code></a> once initialized:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">api</span><span class="o">.</span><span class="kp">authenticate</span><span class="p">()</span>
+<section id="making-authorized-requests">
+<h2>Making Authorized Requests<a class="headerlink" href="#making-authorized-requests" title="Permalink to this heading"></a></h2>
+<p>The <a class="reference internal" href="clients.html#magento.clients.Client" title="magento.clients.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> can be used to generate the <a class="reference internal" href="clients.html#magento.clients.Client.url_for" title="magento.clients.Client.url_for"><code class="xref py py-meth docutils literal notranslate"><span class="pre">url_for()</span></code></a> any API endpoint,
+including a store <a class="reference internal" href="clients.html#magento.clients.Client.scope" title="magento.clients.Client.scope"><code class="xref py py-attr docutils literal notranslate"><span class="pre">scope</span></code></a>.</p>
+<p>You can use this URL to make an authorized
+<a class="reference internal" href="clients.html#magento.clients.Client.get" title="magento.clients.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, <a class="reference internal" href="clients.html#magento.clients.Client.post" title="magento.clients.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a>, <a class="reference internal" href="clients.html#magento.clients.Client.put" title="magento.clients.Client.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a>, or <a class="reference internal" href="clients.html#magento.clients.Client.delete" title="magento.clients.Client.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete()</span></code></a> request.</p>
+<section id="example-making-a-get-request">
+<h3>Example: Making a <a class="reference internal" href="clients.html#magento.clients.Client.get" title="magento.clients.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> Request<a class="headerlink" href="#example-making-a-get-request" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Request the data for credit memo with id 7</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">url</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">url_for</span><span class="p">(</span><span class="s1">&#39;creditmemo/7&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
-<span class="o">|</span><span class="p">[</span> <span class="n">MyMagento</span> <span class="o">|</span> <span class="n">website_username</span> <span class="p">]</span><span class="o">|</span><span class="p">:</span>  <span class="n">Authenticating</span> <span class="n">username</span> <span class="n">on</span> <span class="n">website</span><span class="o">.</span><span class="n">com</span><span class="o">...</span>
-<span class="o">|</span><span class="p">[</span> <span class="n">MyMagento</span> <span class="o">|</span> <span class="n">website_username</span> <span class="p">]</span><span class="o">|</span><span class="p">:</span>  <span class="n">Logged</span> <span class="ow">in</span> <span class="n">to</span> <span class="n">username</span>
+<span class="p">{</span><span class="s1">&#39;adjustment&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s1">&#39;adjustment_negative&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;adjustment_positive&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s1">&#39;base_adjustment&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>  <span class="o">...</span> <span class="p">}</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <a class="reference internal" href="clients.html#magento.clients.Client.search" title="magento.clients.Client.search"><code class="xref py py-meth docutils literal notranslate"><span class="pre">search()</span></code></a> is simpler than making <a class="reference internal" href="clients.html#magento.clients.Client.get" title="magento.clients.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> requests, as the result will
+be wrapped by  <a class="reference internal" href="model.html#magento.models.model.APIResponse" title="magento.models.model.APIResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">APIResponse</span></code></a> or other <a class="reference internal" href="model.html#magento.models.model.Model" title="magento.models.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve credit memo with id 7 using a search</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">memo</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">search</span><span class="p">(</span><span class="s2">&quot;creditmemo&quot;</span><span class="p">)</span><span class="o">.</span><span class="kp">by_id</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">memo</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">memo</span><span class="p">)</span>
+
+<span class="p">{</span><span class="s1">&#39;adjustment&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s1">&#39;adjustment_negative&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;adjustment_positive&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span> <span class="s1">&#39;base_adjustment&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">,</span>  <span class="o">...</span> <span class="p">}</span>
+<span class="o">&lt;</span><span class="n">magento</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">APIResponse</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x000001BA42FD0FD1</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="example-making-a-post-request">
+<h3>Example: Making a <a class="reference internal" href="clients.html#magento.clients.Client.post" title="magento.clients.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a> Request<a class="headerlink" href="#example-making-a-post-request" title="Permalink to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add a comment to credit memo with id 7</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">url</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">url_for</span><span class="p">(</span><span class="s2">&quot;creditmemo/7/comments&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;entity&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;this is a comment&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;is_customer_notified&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;is_visible_on_front&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;parent_id&quot;</span><span class="p">:</span> <span class="mi">20</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <a class="reference internal" href="model.html#magento.models.model.Model.data_endpoint" title="magento.models.model.Model.data_endpoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Model.data_endpoint()</span></code></a> will usually be
+close to the url to <a class="reference internal" href="clients.html#magento.clients.Client.post" title="magento.clients.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a> to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># The same as above, but using a search</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">memo</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">search</span><span class="p">(</span><span class="s2">&quot;creditmemo&quot;</span><span class="p">)</span><span class="o">.</span><span class="kp">by_id</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">url</span> <span class="o">=</span> <span class="n">memo</span><span class="o">.</span><span class="kp">data_endpoint</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;/comments&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="kp">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 </section>
 
@@ -663,8 +676,8 @@ are missing, it will attempt to use the following environment variables:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="contents.html" class="btn btn-neutral float-left" title="Table Of Contents" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="interact-with-api.html" class="btn btn-neutral float-right" title="Interacting with the API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="About MyMagento" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="The magento Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
