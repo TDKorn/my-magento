@@ -8,6 +8,8 @@
 
 import os
 import re
+import string
+
 import sys
 import inspect
 import subprocess
@@ -203,8 +205,10 @@ except subprocess.CalledProcessError:
 html_context['github_version'] = linkcode_revision
 
 # Source URL template; formatted + returned by linkcode_resolve
-linkcode_url = "https://github.com/tdkorn/my-magento/blob/" \
-               + linkcode_revision + "/{filepath}#L{linestart}-L{linestop}"
+# linkcode_url = "https://github.com/tdkorn/my-magento/blob/" \
+#                + linkcode_revision + "/{filepath}#L{linestart}-L{linestop}"
+#
+linkcode_url = f"https://my-magento.readthedocs.io"
 
 # Hardcoded Top Level Module Path since MyMagento isn't PyPi release name
 modpath = pkg_resources.require('my-magento')[0].location
@@ -226,49 +230,47 @@ def linkcode_resolve(domain, info):
 
     submod = sys.modules.get(modname)
     if submod is None:
-        print(f'No submodule found for {fullname}')
         return None
 
     obj = submod
     for part in fullname.split('.'):
         try:
             obj = getattr(obj, part)
-            print(obj)
+            # print(obj)
         except Exception:
-            print(f'error getting part? obj = {obj}, part = {part})')
             return None
 
     try:
         filepath = os.path.relpath(inspect.getsourcefile(obj), modpath)
         if filepath is None:
-            print(f'No filepath found for {obj} in module {modpath}...?')
             return
     except Exception as e:
-        return print(  # ie. None
-            f'Exception raised while trying to retrieve module path for {obj}:',
-            e, sep='\n'
-        )
+        return None
 
     try:
         source, lineno = inspect.getsourcelines(obj)
     except OSError:
-        print(f'failed to get source lines for {obj}')
+        # print(f'failed to get source lines for {obj}')
         return None
     else:
         linestart, linestop = lineno, lineno + len(source) - 1
 
     # Format link using the filepath of the source file plus the line numbers
     # Fix links with "../../../" or "..\\..\\..\\"
-    filepath = '/'.join(filepath[filepath.find(top_level):].split('\\'))
 
     # Example of final link: # https://github.com/tdkorn/my-magento/blob/sphinx-docs/magento/utils.py#L355-L357
-    final_link = linkcode_url.format(
-        filepath=filepath,
-        linestart=linestart,
-        linestop=linestop
-    )
-    print(f"Final Link for {fullname}: {final_link}")
+    filepath = '/'.join(filepath[filepath.find(top_level):].split('\\'))
+    fname = os.path.basename(filepath)[:-3]
 
+    if 'readthedocs.io' in linkcode_url or 'rtfd' in linkcode_url:
+        final_link = f"{linkcode_url}/en/{linkcode_revision}/{fname}.html#{modname}.{fullname}"
+    else:
+        final_link = linkcode_url.format(
+            filepath=filepath,
+            linestart=linestart,
+            linestop=linestop
+        )
+    print(f"Final Link for {fullname}: {final_link}")
     # Use the link to replace directives with links in the README for GitHub/PyPi
     if not on_rtd:
         for rst_src in rst_sources:
@@ -277,7 +279,6 @@ def linkcode_resolve(domain, info):
                 link=final_link,
                 rst_src=rst_src
             )
-    return final_link
 
 
 def replace_autodoc_refs_with_linkcode(info: dict, link: str, rst_src: str):
