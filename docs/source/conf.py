@@ -142,7 +142,7 @@ rst_files = list(map(
 # Mapping of {"abs/path/to/file.rst": "File contents"}
 #
 rst_sources = {rst_file: read(rst_file) for rst_file in rst_files}
-
+rst_sources['rst_links'] = {}
 
 # Directory to save the final converted output to
 #
@@ -273,12 +273,15 @@ def linkcode_resolve(domain, info):
     print(f"Final Link for {fullname}: {final_link}")
     # Use the link to replace directives with links in the README for GitHub/PyPi
     if not on_rtd:
+        ref_name = fullname.split('.')[-1]
+        rst_sources['rst_links'][ref_name] = f".. _.{ref_name}: {final_link}" + "\n"
         for rst_src in rst_sources:
-            replace_autodoc_refs_with_linkcode(
-                info=info,
-                link=final_link,
-                rst_src=rst_src
-            )
+            if rst_src != 'rst_links':
+                replace_autodoc_refs_with_linkcode(
+                    info=info,
+                    link=final_link,
+                    rst_src=rst_src
+                )
 
 
 def replace_autodoc_refs_with_linkcode(info: dict, link: str, rst_src: str):
@@ -323,7 +326,7 @@ def replace_autodoc_refs_with_linkcode(info: dict, link: str, rst_src: str):
     if match := re.findall(pattern, rst):
         directive = match[0].split(':')[1]
     else:
-        print('No references found for', ref_name)
+        # print('No references found for', ref_name)
         return None
 
     # Format the name of methods
@@ -331,7 +334,7 @@ def replace_autodoc_refs_with_linkcode(info: dict, link: str, rst_src: str):
         ref_name += "()"
 
     # Format the link -> `method() <https://www.github.com/.../file.py#L10-L19`_
-    rst_link = f"`{ref_name} <{link}>`_"
+    rst_link = f".. _.{ref_name}: {link}"
 
     # Then take the link and sub that hoe in!!
     rst_sources[rst_src] = re.sub(pattern, rst_link, rst)
@@ -389,21 +392,26 @@ def save_generated_rst_files(app, exception):
         os.mkdir(rst_out_dir)
 
     for rst_src in rst_sources:
-        rst = replace_rst_images(
-            rst=rst_sources[rst_src]
-        )
-        rst = replace_rst_rubrics(rst)
-        if rst_replace_refs:
-            rst = replace_rst_refs(
-                rst, refs=rst_replace_refs
+        if rst_src == 'rst_links':
+            links = list(rst_sources[rst_src].values())
+            with open(os.path.join(rst_out_dir, 'readcode.rst'), 'w', encoding='utf-8') as f:
+                f.writelines(links)
+        else:
+            rst = replace_rst_images(
+                rst=rst_sources[rst_src]
             )
-        rst_out = os.path.join(
-            rst_out_dir, os.path.basename(rst_src)
-        )
-        with open(rst_out, 'w', encoding='utf-8') as f:
-            f.write(rst)
-        print(
-            f'Saved generated .rst file to {rst_out}')
+            rst = replace_rst_rubrics(rst)
+            if rst_replace_refs:
+                rst = replace_rst_refs(
+                    rst, refs=rst_replace_refs
+                )
+            rst_out = os.path.join(
+                rst_out_dir, os.path.basename(rst_src)
+            )
+            with open(rst_out, 'w', encoding='utf-8') as f:
+                f.write(rst)
+            print(
+                f'Saved generated .rst file to {rst_out}')
 
 
 # ---- Skip and Setup Method -------------------------------------------------
