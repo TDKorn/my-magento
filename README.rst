@@ -1,6 +1,6 @@
 ..  Title: MyMagento
 ..  Description: A Python package that wraps and extends the Magento 2 REST API
-..  Author: TDKorn
+..  Author: Adam Kornt
 
 .. |Tip| replace:: 💡 **Tip**
 .. |RTD| replace:: **Explore the docs »**
