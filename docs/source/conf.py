@@ -46,7 +46,7 @@ version = pkg_resources.require("my-magento")[0].version
 release = version
 
 
-# ======================== General configuration ============================
+# ======================== General configuration ===========================
 
 # Doc with root toctree
 master_doc = 'contents'  # .rst
