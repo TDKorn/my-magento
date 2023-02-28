@@ -10,16 +10,24 @@
 
 .. raw:: html
 
+   <div id="magento-title">
+
+MyMagento - Python Magento 2 REST API Wrapper
+------------------------------------------------
+
+
+.. raw:: html
+
+   </div></div>
    <div align="center">
 
 .. image:: _static/magento_orange.png
-   :alt: MyMagento: Magento 2 REST API wrapper
+   :alt: Logo for MyMagento: Python Magento 2 REST API Wrapper
    :width: 15%
 
 .. raw:: html
 
-   <h1>MyMagento🛒</h1>
-
+   <span class="h1">MyMagento🛒</span>
 
 A Python package that wraps and extends the Magento 2 REST API
 

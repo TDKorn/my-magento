@@ -1,3 +1,7 @@
+.. meta::
+   :title: Magento 2 REST API with Python: Using the MyMagento API Wrapper Package
+   :description: Interacting with the Magento 2 REST API using the MyMagento API Wrapper Package
+
 .. _interact_with_api:
 
 Interacting with the API
