@@ -87,6 +87,7 @@ extensions = [
     'sphinx.ext.linkcode',
     '_ext.linkcode_github',
     'tdk_style',
+    'sphinx_sitemap',
 ]
 
 
@@ -182,6 +183,10 @@ html_context = {
 }
 
 html_logo = "_static/magento_black.png"
+
+html_baseurl = "https://my-magento.readthedocs.io/en/latest/"
+
+sitemap_url_scheme = "{link}"
 
 # ============================ Linkcode Extension Settings ============================
 #
