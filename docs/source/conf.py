@@ -9,10 +9,8 @@
 import os
 import re
 import sys
-import inspect
-import subprocess
 import pkg_resources
-
+import sphinx_github_style
 
 # ============================== Build Environment ==============================
 # Build behaviour is dependent on environment
@@ -24,9 +22,7 @@ sys.path.insert(0, root)
 sys.path.append(os.path.abspath('.'))
 
 # Add custom Pygments style if HTML
-if 'html' in sys.argv:
-    pygments_style = 'tdk_style.TDKStyle'
-else:
+if 'html' not in sys.argv:
     pygments_style = 'sphinx'
 
 # on_rtd = True  # Uncomment for testing RTD builds locally
@@ -37,10 +33,11 @@ else:
 project = 'MyMagento'
 copyright = '2023, Adam Korn'
 author = 'Adam Korn'
+repo = "my-magento"
 
-# The full version, including alpha/beta/rc tags
-# Simplify things by using the version from setup.py
-version = pkg_resources.require("my-magento")[0].version
+# Simplify things by using the installed version
+pkg = pkg_resources.require(repo)[0]
+version = pkg.version
 release = version
 
 
@@ -83,11 +80,9 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.viewcode',
-    'myst_nb',
-    'sphinx.ext.linkcode',
-    '_ext.linkcode_github',
-    'tdk_style',
+    'sphinx_github_style',
     'sphinx_sitemap',
+    'myst_nb',
 ]
 
 
@@ -157,8 +152,6 @@ rst_replace_refs = {
     "logging-in":  docs + "examples/logging-in.html",
 }
 
-# The text to use for linkcode source code links
-linkcode_link_text = "View on GitHub"
 
 # ============================ HTML Theme Settings ============================
 
@@ -178,8 +171,7 @@ html_theme_options = {
 html_context = {
     'display_github': True,
     'github_user': 'TDKorn',
-    'github_repo': 'my-magento',
-    'github_version': None
+    'github_repo': repo,
 }
 
 html_logo = "_static/magento_black.png"
@@ -188,93 +180,28 @@ html_baseurl = "https://my-magento.readthedocs.io/en/latest/"
 
 sitemap_url_scheme = "{link}"
 
-# ============================ Linkcode Extension Settings ============================
+# ============================ Sphinx Github Style ============================
 #
-#                     Adapted from https://github.com/nlgranger/SeqTools
-#
-#
+# Top level package name
+top_level = pkg.get_metadata("top_level.txt").strip()
 
-# Get the most recent tag to link to on GitHub
-try:
-    cmd = "git describe --tags --abbrev=0"
-    tag = subprocess.check_output(cmd.split(" ")).strip().decode('utf-8')
-    linkcode_revision = tag
+# Blob to use when linking to GitHub source code
+linkcode_blob = 'last_tag'
 
-except subprocess.CalledProcessError:
-    linkcode_revision = "main"
-
-
-# Set GitHub version to be same as linkcode
-html_context['github_version'] = linkcode_revision
+# Text to use for the linkcode link
+linkcode_link_text = "View on GitHub"
 
 # Source URL template; formatted + returned by linkcode_resolve
-linkcode_url = "https://github.com/tdkorn/my-magento/blob/" \
-               + linkcode_revision + "/{filepath}#L{linestart}-L{linestop}"
+linkcode_url = sphinx_github_style.get_linkcode_url(linkcode_blob, html_context)
 
-# Hardcoded Top Level Module Path since MyMagento isn't PyPi release name
-modpath = pkg_resources.require('my-magento')[0].location
 
-# Top Level Package Name
-top_level = 'magento'  # pkg_resources.require('my-magento')[0].get_metadata('top_level.txt').strip()
+# Use default linkcode_resolve function to generate links for rst ref replacements
+linkcode_func = sphinx_github_style.get_linkcode_resolve(linkcode_url)
 
 
 def linkcode_resolve(domain, info):
-    """Returns a link to the source code on GitHub, with appropriate lines highlighted
-
-    Adapted from https://github.com/nlgranger
-    """
-    if domain != 'py' or not info['module']:
-        return None
-
-    modname = info['module']
-    fullname = info['fullname']
-
-    submod = sys.modules.get(modname)
-    if submod is None:
-        print(f'No submodule found for {fullname}')
-        return None
-
-    obj = submod
-    for part in fullname.split('.'):
-        try:
-            obj = getattr(obj, part)
-            print(obj)
-        except Exception:
-            print(f'error getting part? obj = {obj}, part = {part})')
-            return None
-
-    try:
-        filepath = os.path.relpath(inspect.getsourcefile(obj), modpath)
-        if filepath is None:
-            print(f'No filepath found for {obj} in module {modpath}...?')
-            return
-    except Exception as e:
-        return print(  # ie. None
-            f'Exception raised while trying to retrieve module path for {obj}:',
-            e, sep='\n'
-        )
-
-    try:
-        source, lineno = inspect.getsourcelines(obj)
-    except OSError:
-        print(f'failed to get source lines for {obj}')
-        return None
-    else:
-        linestart, linestop = lineno, lineno + len(source) - 1
-
-    # Format link using the filepath of the source file plus the line numbers
-    # Fix links with "../../../" or "..\\..\\..\\"
-    filepath = '/'.join(filepath[filepath.find(top_level):].split('\\'))
-
-    # Example of final link: # https://github.com/tdkorn/my-magento/blob/sphinx-docs/magento/utils.py#L355-L357
-    final_link = linkcode_url.format(
-        filepath=filepath,
-        linestart=linestart,
-        linestop=linestop
-    )
-    print(f"Final Link for {fullname}: {final_link}")
-
     # Use the link to replace directives with links in the README for GitHub/PyPi
+    final_link = linkcode_func(domain, info)
     if not on_rtd:
         for rst_src in rst_sources:
             replace_autodoc_refs_with_linkcode(
