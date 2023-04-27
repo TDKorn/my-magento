@@ -178,6 +178,9 @@ html_logo = "_static/magento_black.png"
 
 html_baseurl = "https://my-magento.readthedocs.io/en/latest/"
 
+if not on_rtd:
+    site_url = "https://tdkorn.github.io/my-magento/"
+
 sitemap_url_scheme = "{link}"
 
 # ============================ Sphinx Github Style ============================
@@ -186,7 +189,11 @@ sitemap_url_scheme = "{link}"
 top_level = pkg.get_metadata("top_level.txt").strip()
 
 # Blob to use when linking to GitHub source code
-linkcode_blob = 'last_tag'
+if on_rtd:
+    linkcode_blob = 'last_tag'
+else:
+    # For gh-pages use master
+    linkcode_blob = 'main'
 
 # Text to use for the linkcode link
 linkcode_link_text = "View on GitHub"
