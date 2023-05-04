@@ -2,6 +2,10 @@
 ..  Description: A Python package that wraps and extends the Magento 2 REST API
 ..  Author: TDKorn
 
+.. meta::
+   :title: MyMagento
+   :description: A Python package that wraps and extends the Magento 2 REST API
+
 .. |Tip| replace:: 💡 **Tip**
 .. |RTD| replace:: **Explore the docs »**
 .. _RTD: https://my-magento.readthedocs.io/en/latest/
