@@ -6,7 +6,7 @@ import copy
 
 if TYPE_CHECKING:
     from magento import Client
-    from . import Product, Invoice
+    from . import Product, Invoice, Customer
 
 
 class Order(Model):
@@ -77,6 +77,10 @@ class Order(Model):
         return self.client.invoices.by_order(self)
 
     @property
+    def customer(self) -> Customer:
+        return self.client.customers.by_order(self)
+
+    @property
     def shipping_address(self) -> dict:
         """Shipping details, from ``extension_attributes.shipping_assignments``"""
         return self.extension_attributes.get(
@@ -121,7 +125,7 @@ class Order(Model):
         :param address_type: the address to parse; either ``shipping`` or ``billing``
         """
         address_dict = getattr(self, f'{address_type}_address')
-        address = ' '.join(address_dict.get('street')) + ', '
+        address = ' '.join(address_dict.get('street', [])) + ', '
         for field in ('city', 'region_code', 'postcode', 'country_id'):
             if value := address_dict.get(field):
                 address += value.replace('None', '') + ', '

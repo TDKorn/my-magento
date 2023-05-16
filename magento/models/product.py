@@ -6,7 +6,7 @@ from typing import Union, TYPE_CHECKING, Optional, List
 
 if TYPE_CHECKING:
     from magento import Client
-    from . import Category, Order, OrderItem, Invoice
+    from . import Category, Order, OrderItem, Invoice, Customer
 
 
 class Product(Model):
@@ -288,6 +288,15 @@ class Product(Model):
         :returns: invoices that contain the product, as an individual or list of :class:`~.Invoice` objects
         """
         return self.client.invoices.by_product(self)
+
+    def get_customers(self) -> Optional[Customer | List[Customer]]:
+        """Searches for customers that have ordered the product
+
+        If the product is configurable, returns customers that have ordered any of its child products
+
+        :returns: customers that have ordered the product, as an individual or list of :class:`~.Customer` objects
+        """
+        return self.client.customers.by_product(self)
 
     def delete(self) -> bool:
         """Deletes the product

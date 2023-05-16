@@ -1,5 +1,5 @@
 from __future__ import annotations
-from . import Model, Order, OrderItem, Product
+from . import Model, Order, OrderItem, Product, Customer
 from typing import TYPE_CHECKING, Optional, List, Union
 from functools import cached_property
 
@@ -49,6 +49,11 @@ class Invoice(Model):
     def order(self) -> Order:
         """The corresponding :class:`~.Order`"""
         return self.client.orders.by_id(self.order_id)
+
+    @cached_property
+    def customer(self) -> Customer:
+        """The corresponding :class:`~.Customer`"""
+        return self.client.customers.by_invoice(self)
 
     @cached_property
     def items(self) -> List[InvoiceItem]:

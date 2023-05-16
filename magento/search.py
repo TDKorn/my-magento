@@ -2,7 +2,7 @@ from __future__ import annotations
 import re
 from functools import cached_property
 from typing import Union, Type, Iterable, List, Optional, Dict, TYPE_CHECKING
-from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice
+from .models import Model, APIResponse, Product, Category, ProductAttribute, Order, OrderItem, Invoice, Customer
 from .exceptions import MagentoError
 from . import clients
 
@@ -397,6 +397,23 @@ class OrderSearch(SearchQuery):
         items = self.client.order_items.by_skulist(skulist)
         return self.from_items(items)
 
+    def by_customer(self, customer: Customer) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s by :class:`~.Customer`
+
+        :param customer: the :class:`~.Customer` to retrieve orders from
+        """
+        return self.by_customer_id(customer.uid)
+
+    def by_customer_id(self, customer_id: Union[int, str]) -> Optional[Order | List[Order]]:
+        """Search for :class:`~.Order` s by ``customer_id``
+
+        :param customer_id: the ``id`` of the customer to retrieve orders for
+        """
+        return self.add_criteria(
+            field='customer_id',
+            value=str(customer_id)
+        ).execute()
+
     def from_items(self, items: Optional[OrderItem | List[OrderItem]]) -> Optional[Order, List[Order]]:
         """Retrieve unique :class:`~.Order` objects from :class:`~.OrderItem` entries using a single request
 
@@ -635,6 +652,27 @@ class InvoiceSearch(SearchQuery):
         items = self.client.order_items.by_skulist(skulist)
         return self.from_order_items(items)
 
+    def by_customer(self, customer: Customer) -> Optional[Invoice | List[Invoice]]:
+        """Search for all :class:`~.Invoice` s of a :class:`~.Customer`
+
+        :param customer: the :class:`~.Customer` to search for in invoices
+        :returns: any :class:`~.Invoice` associated with the provided :class:`~.Customer`
+        """
+        return self.by_customer_id(customer.uid)
+
+    def by_customer_id(self, customer_id: Union[int, str]) -> Optional[Invoice | List[Invoice]]:
+        """Search for :class:`~.Invoice` s by ``customer_id``
+
+        :param customer_id: the ``id`` of the customer to retrieve invoices for
+        """
+        orders = self.client.orders.by_customer_id(customer_id)
+
+        if isinstance(orders, list):
+            order_ids = set(order.id for order in orders)
+            return self.by_list('order_id', order_ids)
+        else:
+            return self.by_order_id(orders.id)
+
     def from_order_items(self, items: Optional[OrderItem | List[OrderItem]]) -> Optional[Invoice, List[Invoice]]:
         """Retrieve unique :class:`~.Invoice` objects from :class:`~.OrderItem` entries using a single request
 
@@ -735,6 +773,16 @@ class ProductSearch(SearchQuery):
         else:
             return self.add_criteria('category_id', category_id).execute()
 
+    def by_customer_id(self, customer_id: Union[int, str], exclude_cancelled: bool = True):
+        """Search for ordered :class:`~.Product`\s by ``customer_id``
+
+        :param customer_id: the ``id`` of the customer to retrieve ordered products for
+        :param exclude_cancelled: flag indicating if products from cancelled orders should be excluded
+        :returns: products that the customer has ordered, as an individual or list of :class:`~.Product` objects
+        """
+        if customer := self.client.customers.by_id(customer_id):
+            return customer.get_ordered_products(exclude_cancelled)
+
     def get_stock(self, sku) -> Optional[int]:
         """Retrieve the :attr:`~.stock` of a product by sku
 
@@ -818,3 +866,51 @@ class CategorySearch(SearchQuery):
             return self.add_criteria('name', name).execute()
         else:
             return self.add_criteria('name', f'%25{name}%25', 'like').execute()
+
+
+class CustomerSearch(SearchQuery):
+    """:class:`SearchQuery` subclass for the ``customers/search`` endpoint"""
+
+    def __init__(self, client: Client):
+        """Initialize a :class:`CustomerSearch`
+
+        :param client: an initialized :class:`~.Client` object
+        """
+        super().__init__(
+            endpoint='customers/search',
+            client=client,
+            model=Customer
+        )
+
+    def by_id(self, item_id: Union[int, str]) -> Optional[Customer]:
+        self.query = self.query.replace('customers/search', 'customers')
+        return super().by_id(item_id)
+
+    def by_first_name(self, name):
+        return self.add_criteria('firstName', name).execute()
+
+    def by_last_name(self, name):
+        return self.add_criteria('lastName', name).execute()
+
+    def by_invoice(self, invoice: Invoice):
+        return self.by_order(invoice.order)
+
+    def by_order(self, order: Order):
+        if customer_id := order.data.get("customer_id"):
+            return self.by_id(customer_id)
+        else:
+            return self.client.logger.info(
+                f"No customer account exists for {order}")
+
+    def by_product(self, product: Product) -> Optional[Customer | List[Customer]]:
+        orders = product.get_orders() or []
+        customer_ids = set()
+
+        if not isinstance(orders, list):
+            return self.by_order(orders)
+
+        for order in orders:
+            if customer_id := order.data.get('customer_id'):
+                customer_ids.add(customer_id)
+
+        return self.by_list('entity_id', customer_ids)

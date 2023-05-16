@@ -6,7 +6,7 @@ from functools import cached_property
 from typing import Optional, Dict, List
 from .utils import MagentoLogger, get_agent, parse_domain
 from .models import APIResponse, ProductAttribute
-from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch
+from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch, CustomerSearch
 from .exceptions import AuthenticationError, MagentoError
 
 
@@ -161,6 +161,8 @@ class Client:
             return self.products
         if endpoint.lower() == 'products/attributes':
             return self.product_attributes
+        if endpoint.lower() in ('customers', 'customers/search'):
+            return self.customers
         # Any other endpoint is queried with a general SearchQuery object
         return SearchQuery(endpoint=endpoint, client=self)
 
@@ -193,6 +195,11 @@ class Client:
     def product_attributes(self) -> ProductAttributeSearch:
         """Initializes a :class:`~.ProductAttributeSearch`"""
         return ProductAttributeSearch(self)
+
+    @property
+    def customers(self) -> CustomerSearch:
+        """Initializes a :class:`~.CustomerSearch`"""
+        return CustomerSearch(self)
 
     def get(self, url: str) -> requests.Response:
         """Sends an authorized ``GET`` request
