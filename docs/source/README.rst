@@ -94,9 +94,9 @@ Main Components
 .. admonition:: The :class:`~.SearchQuery` and Subclasses
    :class: search
 
-   * :meth:`~.execute`  a predefined or custom search query on any endpoint
-   * Simplified creation of basic and advanced `searches using REST endpoints <https://developer.adobe.com/commerce/webapi/rest/use-rest/performing-searches/>`_
-
+   * :meth:`~.execute` a search query on any endpoint
+   * Intuitive interface for :ref:`Custom Queries`
+   * All predefined methods retrieve data using only 1-2 API requests
 
 .. admonition::  The :class:`~.Model` Subclasses
    :class: hint
