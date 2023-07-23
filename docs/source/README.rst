@@ -11,32 +11,49 @@
 .. |api_endpoint| replace:: API endpoint
 .. _api_endpoint: https://adobe-commerce.redoc.ly/2.3.7-admin/
 
+
+.. only:: pypi
+
+   MyMagento🛒
+   ---------------
+
+   .. image:: https://i.imgur.com/dkCWWYn.png
+      :alt: Logo for MyMagento: Python Magento 2 REST API Wrapper
+      :align: center
+      :width: 200
+      :height: 175
+
 .. raw:: html
 
-   <div id="magento-title">
-
-MyMagento - Python Magento 2 REST API Wrapper
-------------------------------------------------
-
-
-.. raw:: html
-
-   </div></div>
    <div align="center">
 
-.. image:: _static/magento_orange.png
-   :alt: Logo for MyMagento: Python Magento 2 REST API Wrapper
-   :width: 15%
+.. only:: html or readme
 
-.. raw:: html
+   .. image:: _static/magento_orange.png
+      :alt: Logo for MyMagento: Python Magento 2 REST API Wrapper
+      :width: 15%
 
-   <span class="h1">MyMagento🛒</span>
+.. only:: html
+
+   .. raw:: html
+
+      <span class="h1">MyMagento🛒</span>
+
+.. only:: readme
+
+   .. raw:: html
+
+      <h1>MyMagento🛒</h1>
+
 
 A Python package that wraps and extends the Magento 2 REST API
 
 
 |RTD|_
 
+.. only:: pypi
+
+   |
 
 .. image:: https://img.shields.io/pypi/v/my-magento?color=eb5202
    :target: https://pypi.org/project/my-magento/
@@ -56,8 +73,8 @@ A Python package that wraps and extends the Magento 2 REST API
 .. raw:: html
 
    </div>
-   <br/>
-   <br/>
+
+|
 
 About MyMagento
 ~~~~~~~~~~~~~~~~~~~~
@@ -76,13 +93,12 @@ If you've worked with the Magento 2 API, you'll know that not all endpoints are 
 ``MyMagento`` aims to streamline your workflow by simplifying a
 variety of commonly needed API operations.
 
+.. only:: readme
+
+   ...
 
 Main Components
 ==================================
-
-.. .. image:: https://user-images.githubusercontent.com/96394652/212470049-ebc2c46b-1fb1-44d1-a400-bf3cdfd3e4fb.png
-   :alt: The Client
-   :target: https://github.com/TDKorn/my-magento/blob/sphinx-docs/magento/clients.py
 
 .. admonition:: The :class:`~.Client`
    :class: client
@@ -104,6 +120,9 @@ Main Components
    * Wrap all API responses in the package
    * Provide additional endpoint-specific methods to retrieve and update data
 
+.. only:: readme
+
+   ...
 
 Available Endpoints
 ======================
@@ -112,60 +131,37 @@ Available Endpoints
 
 Endpoints are wrapped with a :class:`~.Model` and :class:`~.SearchQuery` subclass as follows:
 
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| **Endpoint**             | **Client Shortcut**                 |:class:`~.SearchQuery` **Subclass**|:class:`~.Model` **Subclass**|
-+==========================+=====================================+===================================+=============================+
-| ``orders``               | :attr:`.Client.orders`              | :class:`~.OrderSearch`            | :class:`~.Order`            |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``orders/items``         | :attr:`.Client.order_items`         | :class:`~.OrderItemSearch`        | :class:`~.OrderItem`        |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``invoices``             | :attr:`.Client.invoices`            | :class:`~.InvoiceSearch`          | :class:`~.Invoice`          |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``products``             | :attr:`.Client.products`            | :class:`~.ProductSearch`          | :class:`~.Product`          |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``products/attributes``  | :attr:`.Client.product_attributes`  | :class:`~.ProductAttributeSearch` | :class:`~.ProductAttribute` |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``categories``           | :attr:`.Client.categories`          | :class:`~.CategorySearch`         | :class:`~.Category`         |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
-| ``endpoint``             | ``Client.search("endpoint")``       | :class:`~.SearchQuery`            | :class:`~.APIResponse`      |
-+--------------------------+-------------------------------------+-----------------------------------+-----------------------------+
+.. include:: _snippets/available_endpoints.rst
+   :start-line: 6
+
 
 ...
 
-Installation
-~~~~~~~~~~~~~~~~~~~
+⚙ Installing MyMagento
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. admonition:: Installing MyMagento
-   :class: client
 
-   To install using ``pip``::
+To install using ``pip``::
 
-    pip install my-magento
+   pip install my-magento
 
-   Please note that ``MyMagento`` requires ``Python >= 3.10``
+Please note that ``MyMagento`` requires ``Python >= 3.10``
 
 ...
+
+.. only:: readme or pypi
+
+   📚 Documentation
+   ~~~~~~~~~~~~~~~~~~
+
+   Full documentation can be found on `ReadTheDocs <https://my-magento.readthedocs.io/en/latest/>`_
+
+   |
 
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``MyMagento`` uses the :class:`~.Client` class to handle all interactions with the API.
-
-.. only:: draft
-
-
-   .. raw:: html
-
-   <table>
-      <tr align="left">
-         <th>💡 Tip</th>
-      </tr>
-      <tr>
-         <td>See
-            <a href="https://my-magento.readthedocs.io/en/latest/examples/logging-in.html">Get a Magento 2 REST API Token With MyMagento</a>
-            for full details on generating an access token</td>
-      </tr>
-   </table>
 
 .. tip:: See :ref:`logging-in` for full details on generating an access token
 
@@ -180,16 +176,16 @@ Creating a :class:`~.Client` requires a ``domain``, ``username``, and ``password
 
 .. code-block:: python
 
-   >> domain = 'website.com'
-   >> username ='username'
-   >> password = 'password'
+   >>> domain = 'website.com'
+   >>> username ='username'
+   >>> password = 'password'
 
 
 If you're using a local installation of Magento you'll need to set ``local=True``. Your domain should look like this:
 
 .. code-block:: python
 
-   >> domain = '127.0.0.1/path/to/magento'
+   >>> domain = '127.0.0.1/path/to/magento'
 
 
 ...
@@ -210,7 +206,6 @@ Option 1: Initialize a :class:`~.Client` Directly
 Option 2: Call :func:`~.get_api`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 .. code-block:: python
 
 
@@ -218,8 +213,10 @@ Option 2: Call :func:`~.get_api`
 
       >>> api = magento.get_api(**kwargs)
 
-:func:`.get_api` takes the same keyword arguments as the :class:`~.Client`, but if the ``domain``, ``username``, or ``password``
-are missing, it will attempt to use the following environment variables:
+:func:`.get_api` takes the same keyword arguments as the :class:`~.Client`
+
+* If the ``domain``, ``username``, or ``password`` are missing,
+  it will attempt to use the following environment variables:
 
 
 .. code-block:: python
@@ -244,3 +241,11 @@ Unless you specify ``login=False``, the :class:`~.Client` will automatically cal
 
    |[ MyMagento | website_username ]|:  Authenticating username on website.com...
    |[ MyMagento | website_username ]|:  Logged in to username
+
+
+.. only:: readme or pypi
+
+   |
+
+   .. include:: interact-with-api.rst
+      :start-line: 11

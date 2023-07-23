@@ -28,13 +28,17 @@ allowing you to retrieve data about
 * Any search criteria you desire (see :ref:`Custom Queries`)
 
 
-.. admonition:: From the Docs…
-   :class: docs
+.. only:: html
 
-   .. automethod:: magento.clients.Client.search
-      :noindex:
+   .. admonition:: From the Docs…
+      :class: docs
 
+      .. automethod:: magento.clients.Client.search
+         :noindex:
 
+.. only:: readme or pypi
+
+   ...
 
 .. rubric:: Example: :meth:`~.search` an endpoint :meth:`~.by_id`
 
@@ -66,10 +70,11 @@ Search Results: The :class:`~.Model` Classes
 .. _the_models: models.html
 
 The :attr:`~.SearchQuery.result` of any :class:`~.SearchQuery` will be parsed and wrapped by a
-:class:`~.Model` class in |the_models|_, making the API response data easier to work with.
+:class:`~.Model` class in |the_models|_.
 
+These classes make the API response data easier to work with.
 
-These classes also provide endpoint-specific methods to search for related items and update store data.
+They also provide endpoint-specific methods to update store data and search for related items.
 
 .. rubric:: Example: Retrieving every :class:`~.Order` containing a :class:`~.Product`
 
@@ -79,7 +84,7 @@ Let's retrieve a :class:`~.Product` using :meth:`~.ProductSearch.by_sku`
 
    >>> product = api.products.by_sku("24-MB01")
 
-We can search for orders containing this product as follows:
+We can search for orders containing this product in multiple ways:
 
 .. code-block:: python
 
@@ -97,11 +102,10 @@ We can search for orders containing this product as follows:
 
 
 
-.. rubric:: Example: Retrieving some items related to a :class:`~.Category`
+.. rubric:: Example: Retrieving all :class:`~.Product`\s and :class:`~.Invoice`\s for a :class:`~.Category`
 
 .. code-block:: python
 
-    # Get Category data
     >>> category = api.categories.by_name("Watches")
     >>> category.get_products()
     >>> category.get_invoices()
@@ -121,10 +125,14 @@ We can search for orders containing this product as follows:
 
     <MediaEntry 3417 for <Magento Product: 24-MB01>: bonjour>
 
+
 ...
 
 
-.. tip:: If you have multiple store views, a ``store_code`` can be specified when
+.. admonition:: Tip: Set the Store Scope
+   :class: tip
+
+   If you have multiple store views, a ``store_code`` can be specified when
    retrieving/updating data
 
    * The :attr:`.Client.scope` is used by default - simply change it to switch store :attr:`~.views`
@@ -146,20 +154,37 @@ In addition to the predefined methods, you can also build your own queries
 * The :meth:`~.since` and :meth:`~.until` methods allow you to further filter your query by date
 
 
-.. admonition:: Example
-   :class: example
+.. only:: readme or html
 
-   .. code-block:: python
+   .. admonition:: Example: Retrieve Orders Over $50 Placed Since the Start of 2023
+      :class: example
 
-    # Retrieve orders over $50 placed since the start of 2023
-    >>> api.orders.add_criteria(
-    ...    field="grand_total",
-    ...    value="50",
-    ...    condition="gt"
-    ... ).since("2023-01-01").execute()
+      .. code-block:: python
 
-    [<Magento Order: "#000000012" placed on 2023-01-02 05:19:55>, <Magento Order: "#000000013" placed on 2023-01-05 09:24:13>]
+       >>> api.orders.add_criteria(
+       ...    field="grand_total",
+       ...    value="50",
+       ...    condition="gt"
+       ... ).since("2023-01-01").execute()
 
+       [<Magento Order: "#000000012" placed on 2023-01-02 05:19:55>, ...]
+
+
+.. only:: pypi
+
+   .. list-table::
+      :header-rows: 1
+
+      * - 📋 Example: Retrieve Orders Over $50 Placed Since the Start of 2023
+      * - .. code-block:: python
+
+             >>> api.orders.add_criteria(
+             ...    field="grand_total",
+             ...    value="50",
+             ...    condition="gt"
+             ... ).since("2023-01-01").execute()
+
+             [<Magento Order: "#000000012" placed on 2023-01-02 05:19:55>, ...]
 
 ...
 
@@ -186,44 +211,67 @@ Example: Making a :meth:`~.get` Request
 
  {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
 
+.. only:: readme or html
 
-.. note:: A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
-   be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
+   .. note:: A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
+      be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
+
+      .. code-block:: python
+
+           # Retrieve credit memo with id 7 using a search
+           >>> memo = api.search("creditmemo").by_id(7)
+           >>> print(memo.data)
+           >>> print(memo)
+
+           {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
+           <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
+
+.. only:: pypi
+
+   .. list-table::
+      :header-rows: 1
+
+      * - 📝 Note
+      * - A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
+          be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
+
+          .. code-block:: python
+
+             # Retrieve credit memo with id 7 using a search
+             >>> memo = api.search("creditmemo").by_id(7)
+             >>> print(memo.data)
+             >>> print(memo)
+
+             {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
+             <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
+
+.. only:: html
+
+   Example: Making a :meth:`~.post` Request
+   =============================================
 
    .. code-block:: python
 
-        # Retrieve credit memo with id 7 using a search
-        >>> memo = api.search("creditmemo").by_id(7)
-        >>> print(memo.data)
-        >>> print(memo)
-
-        {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
-        <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
-
-Example: Making a :meth:`~.post` Request
-=============================================
-
-.. code-block:: python
-
-    # Add a comment to credit memo with id 7
-    >>> url = api.url_for("creditmemo/7/comments")
-    >>> payload = {
-            "entity": {
-                "comment": "this is a comment",
-                "is_customer_notified": 0,
-                "is_visible_on_front": 0,
-                "parent_id": 20
-            }
-        }
-    >>> response = api.post(url, payload)
+       # Add a comment to credit memo with id 7
+       >>> url = api.url_for("creditmemo/7/comments")
+       >>> payload = {
+               "entity": {
+                   "comment": "this is a comment",
+                   "is_customer_notified": 0,
+                   "is_visible_on_front": 0,
+                   "parent_id": 20
+               }
+           }
+       >>> response = api.post(url, payload)
 
 
-.. tip:: The :meth:`.Model.data_endpoint` will usually be
-   close to the url to :meth:`~.post` to
+   .. tip:: The :meth:`.Model.data_endpoint` will usually be
+      close to the url to :meth:`~.post` to
 
-   .. code-block::
+      .. code-block::
 
-        # The same as above, but using a search
-        >>> memo = api.search("creditmemo").by_id(7)
-        >>> url = memo.data_endpoint() + '/comments'
-        >>> response = api.post(url, payload)
+           # The same as above, but using a search
+           >>> memo = api.search("creditmemo").by_id(7)
+           >>> url = memo.data_endpoint() + '/comments'
+           >>> response = api.post(url, payload)
+
