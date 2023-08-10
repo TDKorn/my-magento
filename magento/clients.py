@@ -4,7 +4,7 @@ import pickle
 import requests
 from functools import cached_property
 from typing import Optional, Dict, List
-from .utils import MagentoLogger, get_agent
+from .utils import MagentoLogger, get_agent, parse_domain
 from .models import APIResponse, ProductAttribute
 from .search import SearchQuery, OrderSearch, ProductSearch, InvoiceSearch, CategorySearch, ProductAttributeSearch, OrderItemSearch
 from .exceptions import AuthenticationError, MagentoError
@@ -62,7 +62,7 @@ class Client:
 
         """
         #: The base API URL
-        self.BASE_URL: str = ("http" if local else "https") + f"://{domain}/rest/V1/"
+        self.BASE_URL: str = ("http" if local else "https") + f"://{parse_domain(domain)}/rest/V1/"
         #: The user credentials
         self.USER_CREDENTIALS: Dict[str, str] = {
             'username': username,
@@ -308,7 +308,7 @@ class Client:
         :param log_requests: if ``True``, adds the :class:`~.FileHandler` to the :mod:`~.urllib3.connectionpool` logger
         """
         logger_name = MagentoLogger.CLIENT_LOG_NAME.format(
-            domain=self.domain.split('.')[0],
+            domain=self.BASE_URL.split('://')[-1].split('/')[0].replace('.', '_'),
             username=self.USER_CREDENTIALS['username']
         )   # Example:``domain_username``
         return MagentoLogger(

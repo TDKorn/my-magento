@@ -1,10 +1,28 @@
 import os
+import re
 import sys
 import logging
 import requests
 
 from typing import Union, List, Type
 from logging import Logger, FileHandler, StreamHandler, Handler
+
+
+def parse_domain(domain: str):
+    """Returns the root domain of the provided domain
+
+    **Example**::
+
+       >>> parse_domain('https://www.mymagento.com/')
+       'mymagento.com'
+    """
+    match = re.match(
+        pattern=r"(?:https?://)?(?:w{,3}\.)?([\w\./]+?)/?$",
+        string=domain
+    )
+    if match:
+        return match.group(1).rstrip('/')
+    raise ValueError("Invalid format provided for ``domain``")
 
 
 class ItemManager:
