@@ -1,7 +1,8 @@
 from __future__ import annotations
-from functools import cached_property
-from typing import Union, TYPE_CHECKING, Optional, List
 from . import Model
+from functools import cached_property
+from magento.exceptions import MagentoError
+from typing import Union, TYPE_CHECKING, Optional, List
 
 if TYPE_CHECKING:
     from magento import Client
@@ -71,7 +72,7 @@ class Product(Model):
         else:
             self.logger.error(
                 f'Failed to update stock for {self} with status code {response.status_code}' + '\n' +
-                f'Message: {response.json()}'
+                f'Message: {MagentoError.parse(response)}'
             )
             return False
 
@@ -227,7 +228,7 @@ class Product(Model):
         else:
             self.logger.error(
                 f'Failed with status code {response.status_code}' + '\n' +
-                f'Message: {response.json()}')
+                f'Message: {MagentoError.parse(response)}')
             return False
 
     def get_orders(self) -> Optional[Order | List[Order]]:
@@ -273,7 +274,7 @@ class Product(Model):
             return True
         else:
             self.logger.error(
-                f'Failed to delete {self}. Message: {response.json()["message"]}'
+                f'Failed to delete {self}. Message: {MagentoError.parse(response)}'
             )
             return False
 
