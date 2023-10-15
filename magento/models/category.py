@@ -1,12 +1,14 @@
 from __future__ import annotations
 import copy
-from . import Model
-from typing import TYPE_CHECKING, List, Optional, Set, Dict, Union
+from . import Model, Product
 from functools import cached_property
+from magento.exceptions import MagentoError
+from typing import TYPE_CHECKING, List, Optional, Set, Dict, Union
+
 
 if TYPE_CHECKING:
     from magento import Client
-    from . import Product, Order, OrderItem, Invoice
+    from . import Order, OrderItem, Invoice
 
 
 class Category(Model):
@@ -144,3 +146,54 @@ class Category(Model):
         :param search_subcategories: if ``True``, also searches for invoices from :attr:`~.all_subcategories`
         """
         return self.client.invoices.by_category(self, search_subcategories)
+
+    def add_product(self, product: Union[str, Product], position: Optional[int] = None) -> bool:
+        """Adds a product to the category.
+
+        .. note:: This method can also be used to update the position of a product
+           that's already in the category.
+
+        :param product: the product sku or its corresponding :class:`~.Product` object
+        :param position: the product position value to use
+        :return: success status
+        """
+        url = self.data_endpoint() + "/products"
+        sku = product.encoded_sku if isinstance(product, Product) else self.encode(product)
+        payload = {
+            "productLink": {
+                "sku": sku,
+                "category_id": self.uid
+            }
+        }
+        if isinstance(position, int):
+            payload['productLink'].update({"position": position})
+
+        response = self.client.put(url, payload)
+
+        if response.ok and response.json() is True:
+            self.logger.info(f"Added {product} to {self}")
+            return True
+        else:
+            self.logger.error(
+                f"Failed to add {product} to {self}.\nMessage: {MagentoError.parse(response)}"
+            )
+            return False
+
+    def remove_product(self, product: Union[str, Product]) -> bool:
+        """Removes a product from the category.
+
+        :param product: the product sku or its corresponding :class:`~.Product` object
+        :return: success status
+        """
+        sku = product.encoded_sku if isinstance(product, Product) else self.encode(product)
+        url = f"{self.data_endpoint()}/products/{sku}"
+        response = self.client.delete(url)
+
+        if response.ok and response.json() is True:
+            self.logger.info(f'Removed {product} from {self}')
+            return True
+        else:
+            self.logger.error(
+                f'Failed to remove {product} from {self}. Message: {MagentoError.parse(response)}'
+            )
+            return False

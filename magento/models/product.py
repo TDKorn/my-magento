@@ -6,7 +6,6 @@ from typing import Union, TYPE_CHECKING, Optional, List
 
 if TYPE_CHECKING:
     from magento import Client
-    from magento.search import SearchQuery
     from . import Category, Order, OrderItem, Invoice
 
 
@@ -128,6 +127,38 @@ class Product(Model):
         """
         attributes = {k: v for k, v in metadata.items() if k in ('meta_title', 'meta_keyword', 'meta_description')}
         return self.update_custom_attributes(attributes, scope)
+
+    def add_categories(self, category_ids: Union[int, str, List[int | str]]) -> bool:
+        """Adds the product to an individual or multiple categories
+
+        :param category_ids: an individual or list of category IDs to add the product to
+        """
+        if not isinstance(category_ids, list):
+            if not isinstance(category_ids, (str, int)):
+                raise TypeError(
+                    "`category_ids` must be an individual or list of integers/strings"
+                )
+            category_ids = [category_ids]
+
+        current_ids = self.custom_attributes.get('category_ids', [])
+        new_ids = [id for id in map(str, category_ids) if id not in current_ids]
+        return self.update_custom_attributes({"category_ids": current_ids + new_ids})
+
+    def remove_categories(self, category_ids: Union[int, str, List[int | str]]) -> bool:
+        """Removes the product from an individual or multiple categories
+
+        :param category_ids: an individual or list of category IDs to remove the product from
+        """
+        if not isinstance(category_ids, list):
+            if not isinstance(category_ids, (str, int)):
+                raise TypeError(
+                    "`category_ids` must be an individual or list of integers/strings"
+                )
+            category_ids = [category_ids]
+
+        current_ids = self.custom_attributes.get('category_ids', [])
+        new_ids = [id for id in current_ids if id not in map(str, category_ids)]
+        return self.update_custom_attributes({'category_ids': new_ids})
 
     def update_attributes(self, attribute_data: dict, scope: Optional[str] = None) -> bool:
         """Update top level product attributes with scoping taken into account
