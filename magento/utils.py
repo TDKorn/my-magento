@@ -23,7 +23,7 @@ def parse_domain(domain: str):
        'my-magento.magento.com'
     """
     match = re.match(
-        pattern=r"^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n?]+)"
+        pattern=r"^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n?]+)",
         string=domain
     )
     if match:
