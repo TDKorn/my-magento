@@ -16,14 +16,17 @@ def parse_domain(domain: str):
 
     **Example**::
 
-       >>> parse_domain('https://www.mymagento.com/')
+       >>> parse_domain('https://www.mymagento.com#new-products')
        'mymagento.com'
 
        >>> parse_domain('https://www.my-magento.magento.com/')
        'my-magento.magento.com'
+
+       >>> parse_domain('https://username:password@my-magento.mymagento.com:443/store')
+       'my-magento.mymagento.com'
     """
     match = re.match(
-        pattern=r"^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n?]+)",
+        pattern=r"^(?:https?://)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?#]+)",
         string=domain
     )
     if match:
