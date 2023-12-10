@@ -1,105 +1,105 @@
-.. |.`~.ACCESS_TOKEN`| replace:: ``ACCESS_TOKEN``
-.. _.`~.ACCESS_TOKEN`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.ACCESS_TOKEN
-.. |.`~.APIResponse`| replace:: ``APIResponse``
-.. _.`~.APIResponse`: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.APIResponse
-.. |.`~.CategorySearch`| replace:: ``CategorySearch``
-.. _.`~.CategorySearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.CategorySearch
-.. |.`~.Category`| replace:: ``Category``
-.. _.`~.Category`: https://my-magento.readthedocs.io/en/latest/category.html#magento.models.category.Category
-.. |.`.Client.categories`| replace:: ``Client.categories``
-.. _.`.Client.categories`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.categories
-.. |.`.Client.invoices`| replace:: ``Client.invoices``
-.. _.`.Client.invoices`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.invoices
-.. |.`.Client.order_items`| replace:: ``Client.order_items``
-.. _.`.Client.order_items`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.order_items
-.. |.`.Client.orders`| replace:: ``Client.orders``
-.. _.`.Client.orders`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.orders
-.. |.`.Client.product_attributes`| replace:: ``Client.product_attributes``
-.. _.`.Client.product_attributes`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.product_attributes
-.. |.`.Client.products`| replace:: ``Client.products``
-.. _.`.Client.products`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.products
-.. |.`.Client.scope`| replace:: ``Client.scope``
-.. _.`.Client.scope`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.scope
-.. |.`.Client.search`| replace:: ``Client.search()``
-.. _.`.Client.search`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.search
-.. |.`.Client.url_for`| replace:: ``Client.url_for()``
-.. _.`.Client.url_for`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.url_for
-.. |.`~.Client`| replace:: ``Client``
-.. _.`~.Client`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client
-.. |.`~.InvoiceSearch`| replace:: ``InvoiceSearch``
-.. _.`~.InvoiceSearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.InvoiceSearch
-.. |.`~.Invoice`| replace:: ``Invoice``
-.. _.`~.Invoice`: https://my-magento.readthedocs.io/en/latest/invoice.html#magento.models.invoice.Invoice
-.. |.`~.MediaEntry`| replace:: ``MediaEntry``
-.. _.`~.MediaEntry`: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.MediaEntry
-.. |.`.Model.refresh`| replace:: ``Model.refresh()``
-.. _.`.Model.refresh`: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.Model.refresh
-.. |.`~.Model`| replace:: ``Model``
-.. _.`~.Model`: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.Model
-.. |.`~.OrderItemSearch`| replace:: ``OrderItemSearch``
-.. _.`~.OrderItemSearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.OrderItemSearch
-.. |.`~.OrderItem`| replace:: ``OrderItem``
-.. _.`~.OrderItem`: https://my-magento.readthedocs.io/en/latest/order.html#magento.models.order.OrderItem
-.. |.`~.OrderSearch`| replace:: ``OrderSearch``
-.. _.`~.OrderSearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.OrderSearch
-.. |.`~.Order`| replace:: ``Order``
-.. _.`~.Order`: https://my-magento.readthedocs.io/en/latest/order.html#magento.models.order.Order
-.. |.`~.ProductAttributeSearch`| replace:: ``ProductAttributeSearch``
-.. _.`~.ProductAttributeSearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductAttributeSearch
-.. |.`~.ProductAttribute`| replace:: ``ProductAttribute``
-.. _.`~.ProductAttribute`: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.ProductAttribute
-.. |.`~.ProductSearch.by_sku`| replace:: ``by_sku()``
-.. _.`~.ProductSearch.by_sku`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductSearch.by_sku
-.. |.`~.ProductSearch`| replace:: ``ProductSearch``
-.. _.`~.ProductSearch`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductSearch
-.. |.`~.Product`| replace:: ``Product``
-.. _.`~.Product`: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.Product
-.. |.`~.SearchQuery.by_id`| replace:: ``by_id()``
-.. _.`~.SearchQuery.by_id`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_id
-.. |.`~.SearchQuery.by_list`| replace:: ``by_list()``
-.. _.`~.SearchQuery.by_list`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_list
-.. |.`~.SearchQuery.result`| replace:: ``result``
-.. _.`~.SearchQuery.result`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.result
-.. |.`~.SearchQuery`| replace:: ``SearchQuery``
-.. _.`~.SearchQuery`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery
-.. |.`~.USER_CREDENTIALS`| replace:: ``USER_CREDENTIALS``
-.. _.`~.USER_CREDENTIALS`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.USER_CREDENTIALS
-.. |.`~.add_criteria`| replace:: ``add_criteria()``
-.. _.`~.add_criteria`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.add_criteria
-.. |.`~.authenticate`| replace:: ``authenticate()``
-.. _.`~.authenticate`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.authenticate
-.. |.`~.by_id`| replace:: ``by_id()``
-.. _.`~.by_id`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_id
-.. |.`~.by_list`| replace:: ``by_list()``
-.. _.`~.by_list`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_list
-.. |.`~.delete`| replace:: ``delete()``
-.. _.`~.delete`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.delete
-.. |.`~.execute`| replace:: ``execute()``
-.. _.`~.execute`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.execute
-.. |.`.get_api`| replace:: ``get_api()``
-.. _.`.get_api`: https://my-magento.readthedocs.io/en/latest/modules.html#magento.get_api
-.. |.`~.get_api`| replace:: ``get_api()``
-.. _.`~.get_api`: https://my-magento.readthedocs.io/en/latest/modules.html#magento.get_api
-.. |.`~.get`| replace:: ``get()``
-.. _.`~.get`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.get
-.. |.`~.post`| replace:: ``post()``
-.. _.`~.post`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.post
-.. |.`~.put`| replace:: ``put()``
-.. _.`~.put`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.put
-.. |.`~.restrict_fields`| replace:: ``restrict_fields()``
-.. _.`~.restrict_fields`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.restrict_fields
-.. |.`~.scope`| replace:: ``scope``
-.. _.`~.scope`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.scope
-.. |.`~.search`| replace:: ``search()``
-.. _.`~.search`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.search
-.. |.`~.since`| replace:: ``since()``
-.. _.`~.since`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.since
-.. |.`~.until`| replace:: ``until()``
-.. _.`~.until`: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.until
-.. |.`~.url_for`| replace:: ``url_for()``
-.. _.`~.url_for`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.url_for
-.. |.`~.views`| replace:: ``views``
-.. _.`~.views`: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Store.views
+.. |.~.ACCESS_TOKEN| replace:: ``ACCESS_TOKEN``
+.. _.~.ACCESS_TOKEN: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.ACCESS_TOKEN
+.. |.~.APIResponse| replace:: ``APIResponse``
+.. _.~.APIResponse: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.APIResponse
+.. |.~.Category| replace:: ``Category``
+.. _.~.Category: https://my-magento.readthedocs.io/en/latest/category.html#magento.models.category.Category
+.. |.~.CategorySearch| replace:: ``CategorySearch``
+.. _.~.CategorySearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.CategorySearch
+.. |.~.Client| replace:: ``Client``
+.. _.~.Client: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client
+.. |..Client.categories| replace:: ``Client.categories``
+.. _..Client.categories: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.categories
+.. |..Client.invoices| replace:: ``Client.invoices``
+.. _..Client.invoices: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.invoices
+.. |..Client.order_items| replace:: ``Client.order_items``
+.. _..Client.order_items: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.order_items
+.. |..Client.orders| replace:: ``Client.orders``
+.. _..Client.orders: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.orders
+.. |..Client.product_attributes| replace:: ``Client.product_attributes``
+.. _..Client.product_attributes: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.product_attributes
+.. |..Client.products| replace:: ``Client.products``
+.. _..Client.products: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.products
+.. |..Client.scope| replace:: ``Client.scope``
+.. _..Client.scope: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.scope
+.. |..Client.search| replace:: ``Client.search()``
+.. _..Client.search: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.search
+.. |..Client.url_for| replace:: ``Client.url_for()``
+.. _..Client.url_for: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.url_for
+.. |.~.Invoice| replace:: ``Invoice``
+.. _.~.Invoice: https://my-magento.readthedocs.io/en/latest/invoice.html#magento.models.invoice.Invoice
+.. |.~.InvoiceSearch| replace:: ``InvoiceSearch``
+.. _.~.InvoiceSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.InvoiceSearch
+.. |.~.MediaEntry| replace:: ``MediaEntry``
+.. _.~.MediaEntry: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.MediaEntry
+.. |.~.Model| replace:: ``Model``
+.. _.~.Model: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.Model
+.. |..Model.refresh| replace:: ``Model.refresh()``
+.. _..Model.refresh: https://my-magento.readthedocs.io/en/latest/model.html#magento.models.model.Model.refresh
+.. |.~.Order| replace:: ``Order``
+.. _.~.Order: https://my-magento.readthedocs.io/en/latest/order.html#magento.models.order.Order
+.. |.~.OrderItem| replace:: ``OrderItem``
+.. _.~.OrderItem: https://my-magento.readthedocs.io/en/latest/order.html#magento.models.order.OrderItem
+.. |.~.OrderItemSearch| replace:: ``OrderItemSearch``
+.. _.~.OrderItemSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.OrderItemSearch
+.. |.~.OrderSearch| replace:: ``OrderSearch``
+.. _.~.OrderSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.OrderSearch
+.. |.~.Product| replace:: ``Product``
+.. _.~.Product: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.Product
+.. |.~.ProductAttribute| replace:: ``ProductAttribute``
+.. _.~.ProductAttribute: https://my-magento.readthedocs.io/en/latest/product.html#magento.models.product.ProductAttribute
+.. |.~.ProductAttributeSearch| replace:: ``ProductAttributeSearch``
+.. _.~.ProductAttributeSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductAttributeSearch
+.. |.~.ProductSearch| replace:: ``ProductSearch``
+.. _.~.ProductSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductSearch
+.. |.~.ProductSearch.by_sku| replace:: ``by_sku()``
+.. _.~.ProductSearch.by_sku: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.ProductSearch.by_sku
+.. |.~.SearchQuery| replace:: ``SearchQuery``
+.. _.~.SearchQuery: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery
+.. |.~.SearchQuery.by_id| replace:: ``by_id()``
+.. _.~.SearchQuery.by_id: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_id
+.. |.~.SearchQuery.by_list| replace:: ``by_list()``
+.. _.~.SearchQuery.by_list: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_list
+.. |.~.SearchQuery.result| replace:: ``result``
+.. _.~.SearchQuery.result: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.result
+.. |.~.USER_CREDENTIALS| replace:: ``USER_CREDENTIALS``
+.. _.~.USER_CREDENTIALS: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.USER_CREDENTIALS
+.. |.~.add_criteria| replace:: ``add_criteria()``
+.. _.~.add_criteria: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.add_criteria
+.. |.~.authenticate| replace:: ``authenticate()``
+.. _.~.authenticate: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.authenticate
+.. |.~.by_id| replace:: ``by_id()``
+.. _.~.by_id: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_id
+.. |.~.by_list| replace:: ``by_list()``
+.. _.~.by_list: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.by_list
+.. |.~.delete| replace:: ``delete()``
+.. _.~.delete: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.delete
+.. |.~.execute| replace:: ``execute()``
+.. _.~.execute: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.execute
+.. |.~.get| replace:: ``get()``
+.. _.~.get: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.get
+.. |..get_api| replace:: ``get_api()``
+.. _..get_api: https://my-magento.readthedocs.io/en/latest/modules.html#magento.get_api
+.. |.~.get_api| replace:: ``get_api()``
+.. _.~.get_api: https://my-magento.readthedocs.io/en/latest/modules.html#magento.get_api
+.. |.~.post| replace:: ``post()``
+.. _.~.post: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.post
+.. |.~.put| replace:: ``put()``
+.. _.~.put: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.put
+.. |.~.restrict_fields| replace:: ``restrict_fields()``
+.. _.~.restrict_fields: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.restrict_fields
+.. |.~.scope| replace:: ``scope``
+.. _.~.scope: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.scope
+.. |.~.search| replace:: ``search()``
+.. _.~.search: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.search
+.. |.~.since| replace:: ``since()``
+.. _.~.since: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.since
+.. |.~.until| replace:: ``until()``
+.. _.~.until: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.SearchQuery.until
+.. |.~.url_for| replace:: ``url_for()``
+.. _.~.url_for: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.url_for
+.. |.~.views| replace:: ``views``
+.. _.~.views: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Store.views
 
 ..  Title: MyMagento
 ..  Description: A Python package that wraps and extends the Magento 2 REST API
@@ -207,7 +207,7 @@ Main Components
        <tr align="left">
            <th>
 
-💻 The |.`~.Client`|_
+💻 The |.~.Client|_
 
 .. raw:: html
 
@@ -231,14 +231,14 @@ Main Components
        <tr align="left">
            <th>
 
-🔍 The |.`~.SearchQuery`|_ and Subclasses
+🔍 The |.~.SearchQuery|_ and Subclasses
 
 .. raw:: html
 
    </th>
    <tr><td>
 
-* |.`~.execute`|_ a search query on any endpoint
+* |.~.execute|_ a search query on any endpoint
 * Intuitive interface for `Building Custom Search Queries <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#custom-queries>`_
 * All predefined methods retrieve data using only 1-2 API requests
 
@@ -255,7 +255,7 @@ Main Components
        <tr align="left">
            <th>
 
-🧠 The |.`~.Model`|_ Subclasses
+🧠 The |.~.Model|_ Subclasses
 
 .. raw:: html
 
@@ -278,19 +278,19 @@ Available Endpoints
 
 ``MyMagento`` is compatible with every |api_endpoint|_
 
-Endpoints are wrapped with a |.`~.Model`|_ and |.`~.SearchQuery`|_ subclass as follows:
+Endpoints are wrapped with a |.~.Model|_ and |.~.SearchQuery|_ subclass as follows:
 
 
 .. csv-table::
-   :header: "**Endpoint**", "**Client Shortcut**", "|.`~.SearchQuery`|_ **Subclass**", "|.`~.Model`|_ **Subclass**"
+   :header: "**Endpoint**", "**Client Shortcut**", "|.~.SearchQuery|_ **Subclass**", "|.~.Model|_ **Subclass**"
 
-   "``orders``", "|.`.Client.orders`|_", "|.`~.OrderSearch`|_", "|.`~.Order`|_"
-   "``orders/items``", "|.`.Client.order_items`|_", "|.`~.OrderItemSearch`|_", "|.`~.OrderItem`|_"
-   "``invoices``", "|.`.Client.invoices`|_", "|.`~.InvoiceSearch`|_", "|.`~.Invoice`|_"
-   "``products``", "|.`.Client.products`|_", "|.`~.ProductSearch`|_", "|.`~.Product`|_"
-   "``products/attributes``", "|.`.Client.product_attributes`|_", "|.`~.ProductAttributeSearch`|_", "|.`~.ProductAttribute`|_"
-   "``categories``", "|.`.Client.categories`|_", "|.`~.CategorySearch`|_", "|.`~.Category`|_"
-   "``endpoint``", "``Client.search('endpoint')``", "|.`~.SearchQuery`|_", "|.`~.APIResponse`|_"
+   "``orders``", "|..Client.orders|_", "|.~.OrderSearch|_", "|.~.Order|_"
+   "``orders/items``", "|..Client.order_items|_", "|.~.OrderItemSearch|_", "|.~.OrderItem|_"
+   "``invoices``", "|..Client.invoices|_", "|.~.InvoiceSearch|_", "|.~.Invoice|_"
+   "``products``", "|..Client.products|_", "|.~.ProductSearch|_", "|.~.Product|_"
+   "``products/attributes``", "|..Client.product_attributes|_", "|.~.ProductAttributeSearch|_", "|.~.ProductAttribute|_"
+   "``categories``", "|..Client.categories|_", "|.~.CategorySearch|_", "|.~.Category|_"
+   "``endpoint``", "``Client.search('endpoint')``", "|.~.SearchQuery|_", "|.~.APIResponse|_"
 
 
 
@@ -318,7 +318,7 @@ Full documentation can be found on `ReadTheDocs <https://my-magento.readthedocs.
 QuickStart: Login with MyMagento
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``MyMagento`` uses the |.`~.Client`|_ class to handle all interactions with the API.
+``MyMagento`` uses the |.~.Client|_ class to handle all interactions with the API.
 
 
 .. raw:: html
@@ -346,9 +346,9 @@ See `Get a Magento 2 REST API Token With MyMagento <https://my-magento.readthedo
 Setting the Login Credentials
 ===================================
 
-To generate an |.`~.ACCESS_TOKEN`|_ you'll need to |.`~.authenticate`|_ your |.`~.USER_CREDENTIALS`|_.
+To generate an |.~.ACCESS_TOKEN|_ you'll need to |.~.authenticate|_ your |.~.USER_CREDENTIALS|_.
 
-Creating a |.`~.Client`|_ requires a ``domain``, ``username``, and ``password`` at minimum.
+Creating a |.~.Client|_ requires a ``domain``, ``username``, and ``password`` at minimum.
 
 
 .. code-block:: python
@@ -367,10 +367,10 @@ If you're using a local installation of Magento you'll need to set ``local=True`
 
 ...
 
-Getting a |.`~.Client`|_
+Getting a |.~.Client|_
 =================================
 
-Option 1: Initialize a |.`~.Client`|_ Directly
+Option 1: Initialize a |.~.Client|_ Directly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
@@ -380,7 +380,7 @@ Option 1: Initialize a |.`~.Client`|_ Directly
       >>> api = Client(domain, username, password, **kwargs)
 
 
-Option 2: Call |.`~.get_api`|_
+Option 2: Call |.~.get_api|_
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
@@ -390,7 +390,7 @@ Option 2: Call |.`~.get_api`|_
 
       >>> api = magento.get_api(**kwargs)
 
-|.`.get_api`|_ takes the same keyword arguments as the |.`~.Client`|_
+|..get_api|_ takes the same keyword arguments as the |.~.Client|_
 
 * If the ``domain``, ``username``, or ``password`` are missing,
   it will attempt to use the following environment variables:
@@ -406,10 +406,10 @@ Option 2: Call |.`~.get_api`|_
 
 ...
 
-Getting an |.`~.ACCESS_TOKEN`|_
+Getting an |.~.ACCESS_TOKEN|_
 =======================================
 
-Unless you specify ``login=False``, the |.`~.Client`|_ will automatically call |.`~.authenticate`|_ once initialized:
+Unless you specify ``login=False``, the |.~.Client|_ will automatically call |.~.authenticate|_ once initialized:
 
 
 .. code-block:: python
@@ -423,21 +423,21 @@ Unless you specify ``login=False``, the |.`~.Client`|_ will automatically call |
 |
 
 
-Performing a |.`~.search`|_
+Performing a |.~.search|_
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. |api_endpoints| replace:: API endpoint
 .. _api_endpoints: https://adobe-commerce.redoc.ly/2.3.7-admin/
 
 
-The |.`.Client.search`|_ method lets you |.`~.execute`|_ a query on
+The |..Client.search|_ method lets you |.~.execute|_ a query on
 any |api_endpoints|_
 
-It creates a |.`~.SearchQuery`|_ for the endpoint,
+It creates a |.~.SearchQuery|_ for the endpoint,
 allowing you to retrieve data about
 
-* An individual item (ex. |.`~.SearchQuery.by_id`|_)
-* A list of items (ex. |.`~.SearchQuery.by_list`|_)
+* An individual item (ex. |.~.SearchQuery.by_id|_)
+* A list of items (ex. |.~.SearchQuery.by_list|_)
 * Any search criteria you desire (see `Building Custom Search Queries <https://my-magento.readthedocs.io/en/latest/interact-with-api.html#custom-queries>`_)
 
 
@@ -445,7 +445,7 @@ allowing you to retrieve data about
 
 ...
 
-Example: |.`~.search`|_ an endpoint |.`~.by_id`|_
+Example: |.~.search|_ an endpoint |.~.by_id|_
 =====================================================
 
 .. code-block:: python
@@ -457,7 +457,7 @@ Example: |.`~.search`|_ an endpoint |.`~.by_id`|_
 
 
 
-Example: |.`~.search`|_ an endpoint |.`~.by_list`|_
+Example: |.~.search|_ an endpoint |.~.by_list|_
 =======================================================
 
 .. code-block:: python
@@ -470,23 +470,23 @@ Example: |.`~.search`|_ an endpoint |.`~.by_list`|_
 
 ...
 
-Search Results: The |.`~.Model`|_ Classes
+Search Results: The |.~.Model|_ Classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. |the_models| replace:: the ``magento.models`` subpackage
 .. _the_models: models.html
 
-The |.`~.SearchQuery.result`|_ of any |.`~.SearchQuery`|_ will be parsed and wrapped by a
-|.`~.Model`|_ class in |the_models|_.
+The |.~.SearchQuery.result|_ of any |.~.SearchQuery|_ will be parsed and wrapped by a
+|.~.Model|_ class in |the_models|_.
 
 These classes make the API response data easier to work with.
 
 They also provide endpoint-specific methods to update store data and search for related items.
 
-Example: Retrieving every |.`~.Order`|_ containing a |.`~.Product`|_
+Example: Retrieving every |.~.Order|_ containing a |.~.Product|_
 ==========================================================================
 
-Let's retrieve a |.`~.Product`|_ using |.`~.ProductSearch.by_sku`|_
+Let's retrieve a |.~.Product|_ using |.~.ProductSearch.by_sku|_
 
 .. code-block:: python
 
@@ -510,7 +510,7 @@ We can search for orders containing this product in multiple ways:
 
 
 
-Example: Retrieving all |.`~.Product`|_\s and |.`~.Invoice`|_\s for a |.`~.Category`|_
+Example: Retrieving all |.~.Product|_\s and |.~.Invoice|_\s for a |.~.Category|_
 ===============================================================================================
 
 .. code-block:: python
@@ -524,7 +524,7 @@ Example: Retrieving all |.`~.Product`|_\s and |.`~.Invoice`|_\s for a |.`~.Categ
 
 
 
-Example: Updating the Thumbnail |.`~.MediaEntry`|_ of a |.`~.Product`|_
+Example: Updating the Thumbnail |.~.MediaEntry|_ of a |.~.Product|_
 =============================================================================
 
 .. code-block:: python
@@ -556,8 +556,8 @@ Example: Updating the Thumbnail |.`~.MediaEntry`|_ of a |.`~.Product`|_
 If you have multiple store views, a ``store_code`` can be specified when
 retrieving/updating data
 
-* The |.`.Client.scope`|_ is used by default - simply change it to switch store |.`~.views`|_
-* Passing the ``scope`` keyword argument to |.`.Client.url_for`|_, |.`.Model.refresh`|_,
+* The |..Client.scope|_ is used by default - simply change it to switch store |.~.views|_
+* Passing the ``scope`` keyword argument to |..Client.url_for|_, |..Model.refresh|_,
   and some Model update methods will temporarily override the Client scope
 
 .. raw:: html
@@ -577,8 +577,9 @@ Building Custom Search Queries
 
 In addition to the predefined methods, you can also build your own queries
 
-* Simply |.`~.add_criteria`|_, |.`~.restrict_fields`|_, and |.`~.execute`|_ the search
-* The |.`~.since`|_ and |.`~.until`|_ methods allow you to further filter your query by date
+* Simply |.~.add_criteria|_, |.~.restrict_fields|_, and |.~.execute|_ the search
+* The |.~.since|_ and |.~.until|_ methods allow you to further filter your query by date
+
 
 
 
@@ -620,14 +621,14 @@ In addition to the predefined methods, you can also build your own queries
 Making Authorized Requests
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The |.`~.Client`|_ can be used to generate the |.`~.url_for`|_ any API endpoint,
-including a store |.`~.scope`|_.
+The |.~.Client|_ can be used to generate the |.~.url_for|_ any API endpoint,
+including a store |.~.scope|_.
 
 You can use this URL to make an authorized
-|.`~.get`|_, |.`~.post`|_, |.`~.put`|_, or |.`~.delete`|_ request.
+|.~.get|_, |.~.post|_, |.~.put|_, or |.~.delete|_ request.
 
 
-Example: Making a |.`~.get`|_ Request
+Example: Making a |.~.get|_ Request
 =============================================
 
 .. code-block:: python
@@ -638,6 +639,7 @@ Example: Making a |.`~.get`|_ Request
  >>> print(response.json())
 
  {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
+
 
 
 .. raw:: html
@@ -653,8 +655,8 @@ Example: Making a |.`~.get`|_ Request
    </th>
    <tr><td>
 
-A |.`~.search`|_ is simpler than making |.`~.get`|_ requests, as the result will
-be wrapped by  |.`~.APIResponse`|_ or other |.`~.Model`|_
+A |.~.search|_ is simpler than making |.~.get|_ requests, as the result will
+be wrapped by  |.~.APIResponse|_ or other |.~.Model|_
 
 .. code-block:: python
 
@@ -670,7 +672,6 @@ be wrapped by  |.`~.APIResponse`|_ or other |.`~.Model`|_
 
    </td></tr>
    </table>
-
 
 
 

@@ -154,20 +154,19 @@ In addition to the predefined methods, you can also build your own queries
 * The :meth:`~.since` and :meth:`~.until` methods allow you to further filter your query by date
 
 
-.. only:: readme or html
 
-   .. admonition:: Example: Retrieve Orders Over $50 Placed Since the Start of 2023
-      :class: example
+.. admonition:: Example: Retrieve Orders Over $50 Placed Since the Start of 2023
+   :class: example
 
-      .. code-block:: python
+   .. code-block:: python
 
-       >>> api.orders.add_criteria(
-       ...    field="grand_total",
-       ...    value="50",
-       ...    condition="gt"
-       ... ).since("2023-01-01").execute()
+    >>> api.orders.add_criteria(
+    ...    field="grand_total",
+    ...    value="50",
+    ...    condition="gt"
+    ... ).since("2023-01-01").execute()
 
-       [<Magento Order: "#000000012" placed on 2023-01-02 05:19:55>, ...]
+    [<Magento Order: "#000000012" placed on 2023-01-02 05:19:55>, ...]
 
 
 .. only:: pypi
@@ -211,39 +210,20 @@ Example: Making a :meth:`~.get` Request
 
  {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
 
-.. only:: readme or html
 
-   .. note:: A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
-      be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
+.. note:: A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
+   be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
 
-      .. code-block:: python
+   .. code-block:: python
 
-           # Retrieve credit memo with id 7 using a search
-           >>> memo = api.search("creditmemo").by_id(7)
-           >>> print(memo.data)
-           >>> print(memo)
+        # Retrieve credit memo with id 7 using a search
+        >>> memo = api.search("creditmemo").by_id(7)
+        >>> print(memo.data)
+        >>> print(memo)
 
-           {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
-           <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
+        {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
+        <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
 
-.. only:: pypi
-
-   .. list-table::
-      :header-rows: 1
-
-      * - 📝 Note
-      * - A :meth:`~.search` is simpler than making :meth:`~.get` requests, as the result will
-          be wrapped by  :class:`~.APIResponse` or other :class:`~.Model`
-
-          .. code-block:: python
-
-             # Retrieve credit memo with id 7 using a search
-             >>> memo = api.search("creditmemo").by_id(7)
-             >>> print(memo.data)
-             >>> print(memo)
-
-             {'adjustment': 1.5, 'adjustment_negative': 0, 'adjustment_positive': 1.5, 'base_adjustment': 1.5,  ... }
-             <magento.models.model.APIResponse object at 0x000001BA42FD0FD1>
 
 .. only:: html
 
