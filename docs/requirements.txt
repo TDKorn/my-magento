@@ -5,3 +5,4 @@ myst-nb>=0.17.1
 sphinx-sitemap>=2.5.0
 sphinx-github-style>=1.0.2
 sphinx-readme>=0.2.1
+sphinx-inlinecode

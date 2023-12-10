@@ -81,6 +81,7 @@ extensions = [
     'sphinx_readme',
     'sphinx_sitemap',
     'sphinx_github_style',
+    'sphinx_inlinecode',
     'myst_nb',
 ]
 
