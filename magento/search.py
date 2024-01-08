@@ -187,6 +187,13 @@ class SearchQuery:
             condition='in'
         ).execute()
 
+    def get_all(self) -> Optional[Model, List[Model]]:
+        """Retrieve all items for the given search endpoint.
+
+        .. warning:: Not guaranteed to work with all endpoints.
+        """
+        return self.since().execute()
+
     def since(self, sinceDate: str = None) -> Self:
         """Retrieve items for which ``created_at >= sinceDate``
 
