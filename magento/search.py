@@ -478,7 +478,11 @@ class OrderItemSearch(SearchQuery):
         if not isinstance(product, Product):
             raise TypeError(f'`product` must be of type {Product}')
 
-        return self.by_product_id(product.id)
+        if items := self.by_product_id(product.id):
+            return items
+
+        self.reset()
+        return self.by_sku(product.encoded_sku)
 
     def by_sku(self, sku: str) -> Optional[OrderItem | List[OrderItem]]:
         """Search for :class:`~.OrderItem` entries by product sku.
