@@ -19,18 +19,18 @@ def parse_domain(domain: str):
        >>> parse_domain('https://www.mymagento.com#new-products')
        'mymagento.com'
 
-       >>> parse_domain('https://www.my-magento.magento.com/')
-       'my-magento.magento.com'
-
        >>> parse_domain('https://username:password@my-magento.mymagento.com:443/store')
        'my-magento.mymagento.com'
+
+       >>> parse_domain('127.0.0.1/path/to/magento/')
+       '127.0.0.1/path/to/magento'
     """
     match = re.match(
-        pattern=r"^(?:https?://)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?#]+)",
+        pattern=r"^(?:https?://)?(?:[^@\n]+@)?(?:www\.)?([^:\n?#]+)",
         string=domain
     )
     if match:
-        return match.group(1)
+        return match.group(1).rstrip('/')
     raise ValueError("Invalid format provided for ``domain``")
 
 
