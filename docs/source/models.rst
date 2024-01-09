@@ -14,3 +14,4 @@ The ``magento.models`` subpackage contains all of the :class:`~.Model` API respo
    category
    order
    invoice
+   customer

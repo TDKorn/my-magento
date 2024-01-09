@@ -14,4 +14,5 @@ The following endpoints are currently wrapped with a :class:`~.Model` and :class
    "``products``", ":attr:`.Client.products`", ":class:`~.ProductSearch`", ":class:`~.Product`"
    "``products/attributes``", ":attr:`.Client.product_attributes`", ":class:`~.ProductAttributeSearch`", ":class:`~.ProductAttribute`"
    "``categories``", ":attr:`.Client.categories`", ":class:`~.CategorySearch`", ":class:`~.Category`"
+   "``customers``", ":attr:`.Client.customers`", ":class:`~.CustomerSearch`", ":class:`~.Customer`"
    "``endpoint``", "``Client.search('endpoint')``", ":class:`~.SearchQuery`", ":class:`~.APIResponse`"

@@ -10,6 +10,8 @@
 .. _.~.Client: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client
 .. |..Client.categories| replace:: ``Client.categories``
 .. _..Client.categories: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.categories
+.. |..Client.customers| replace:: ``Client.customers``
+.. _..Client.customers: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.customers
 .. |..Client.invoices| replace:: ``Client.invoices``
 .. _..Client.invoices: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.invoices
 .. |..Client.order_items| replace:: ``Client.order_items``
@@ -26,6 +28,10 @@
 .. _..Client.search: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.search
 .. |..Client.url_for| replace:: ``Client.url_for()``
 .. _..Client.url_for: https://my-magento.readthedocs.io/en/latest/clients.html#magento.clients.Client.url_for
+.. |.~.Customer| replace:: ``Customer``
+.. _.~.Customer: https://my-magento.readthedocs.io/en/latest/customer.html#magento.models.customer.Customer
+.. |.~.CustomerSearch| replace:: ``CustomerSearch``
+.. _.~.CustomerSearch: https://my-magento.readthedocs.io/en/latest/search_module.html#magento.search.CustomerSearch
 .. |.~.Invoice| replace:: ``Invoice``
 .. _.~.Invoice: https://my-magento.readthedocs.io/en/latest/invoice.html#magento.models.invoice.Invoice
 .. |.~.InvoiceSearch| replace:: ``InvoiceSearch``
@@ -290,6 +296,7 @@ Endpoints are wrapped with a |.~.Model|_ and |.~.SearchQuery|_ subclass as follo
    "``products``", "|..Client.products|_", "|.~.ProductSearch|_", "|.~.Product|_"
    "``products/attributes``", "|..Client.product_attributes|_", "|.~.ProductAttributeSearch|_", "|.~.ProductAttribute|_"
    "``categories``", "|..Client.categories|_", "|.~.CategorySearch|_", "|.~.Category|_"
+   "``customers``", "|..Client.customers|_", "|.~.CustomerSearch|_", "|.~.Customer|_"
    "``endpoint``", "``Client.search('endpoint')``", "|.~.SearchQuery|_", "|.~.APIResponse|_"
 
 
