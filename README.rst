@@ -127,7 +127,7 @@
 
    <div align="center">
 
-.. image:: https://raw.githubusercontent.com/TDKorn/my-magento/v2.1.4/docs/source/_static/magento_orange.png
+.. image:: https://raw.githubusercontent.com/TDKorn/my-magento/v2.2.0/docs/source/_static/magento_orange.png
    :alt: Logo for MyMagento: Python Magento 2 REST API Wrapper
    :width: 15%
 
