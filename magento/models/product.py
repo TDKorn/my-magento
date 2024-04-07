@@ -2,7 +2,7 @@ from __future__ import annotations
 from . import Model
 from functools import cached_property
 from magento.exceptions import MagentoError
-from typing import Union, TYPE_CHECKING, Optional, List
+from typing import Union, TYPE_CHECKING, Optional, List, Dict
 
 if TYPE_CHECKING:
     from magento import Client
@@ -262,6 +262,92 @@ class Product(Model):
                 f'Message: {MagentoError.parse(response)}')
             return False
 
+    def add_product_link(self, link_type: str, linked_sku: str, position: Optional[int] = None) -> bool:
+        """Adds or updates a related, up-sell, or cross-sell product link.
+
+        .. note:: If the product link already exists for the provided SKU, this method
+           will only update the link if a ``position`` is specified.
+
+        :param link_type: the product link type; must be ``upsell``, ``related`` or ``crosssell``
+        :param linked_sku: the SKU of the product to be linked
+        :param position: the position of the product link; if not provided, it will be added as the last link.
+        :returns: boolean indicating success of the operation.
+        """
+        if link_type not in ('upsell', 'crosssell', 'related'):
+            raise ValueError('Invalid value for `link_type` (must be "upsell", "crosssell", or "related")')
+
+        if not (linked_product := self.client.products.by_sku(linked_sku)):
+            self.logger.error(f"Invalid SKU provided: {linked_sku}")
+            return False
+
+        current_links = self.get_product_links(link_type)
+        is_already_linked = linked_product.sku in [
+            link['linked_product_sku']
+            for link in current_links
+        ]
+        if position is None:
+            if is_already_linked:  # Nothing to do if it's already linked and no position is specified
+                self.logger.info(f'{linked_product} is already linked to {self}')
+                return True
+
+            if current_links:  # Add it as the last linked product
+                position = current_links[-1]['position'] + 1
+            else:
+                position = 1
+
+        url = f'{self.data_endpoint()}/links'
+        product_link = {
+            'link_type': link_type,
+            'linked_product_sku': linked_product.sku,
+            'linked_product_type': linked_product.type_id,
+            'position': position,
+            'sku': self.sku,
+        }
+        if is_already_linked:  # Update the position
+            response = self.client.put(url, payload ={
+                'entity': product_link
+            })
+        else:  # Add a new product link
+            response = self.client.post(url, payload={
+                'items': [product_link]
+            })
+        if response.ok and response.json() is True:
+            self.logger.info(
+                f"{'Updated' if is_already_linked else 'Added'} {linked_product} "
+                f"as a {link_type} product for {self}"
+            )
+            self.refresh()
+            return True
+        else:
+            self.logger.error(
+                f"Failed to {'update' if is_already_linked else 'add'} {linked_product} as a {link_type} product "
+                f"for {self}.\nMessage: {MagentoError.parse(response)}"
+            )
+            return False
+            
+    def delete_product_link(self, link_type: str, linked_sku: str) -> bool:
+        """Removes a related, up-sell, or cross-sell product link.
+
+        :param link_type: the product link type; must be ``upsell``, ``related`` or ``crosssell``
+        :param linked_sku: the SKU of the product link to remove
+        :returns: boolean indicating success of the operation.
+        """
+        if link_type not in ('upsell', 'crosssell', 'related'):
+            raise ValueError('Invalid value for `link_type` (must be "upsell", "crosssell", or "related")')
+
+        url = f"{self.data_endpoint()}/links/{link_type}/{linked_sku}"
+        response = self.client.delete(url)
+
+        if response.ok and response.json() is True:
+            self.logger.info(f'Deleted {linked_sku} as a {link_type} product for {self}')
+            return True
+        else:
+            self.logger.error(
+                f'Failed to delete {linked_sku} as a {link_type} product for {self}.\n'
+                f'Message: {MagentoError.parse(response)}'
+            )
+            return False
+
     def get_orders(self) -> Optional[Order | List[Order]]:
         """Searches for orders that contain the product
 
@@ -317,6 +403,18 @@ class Product(Model):
                 f'Failed to delete {self}. Message: {MagentoError.parse(response)}'
             )
             return False
+
+    def get_product_links(self, link_type: str) -> List[Dict]:
+        """Returns data for all product links of the specified type
+
+        :param link_type: the product link type; must be ``upsell``, ``related`` or ``crosssell``
+        """
+        if link_type not in ('upsell', 'crosssell', 'related'):
+            self.logger.error('Invalid link type (must be "upsell", "crosssell", or "related")')
+            return []
+
+        products = [product for product in self.product_links if product['link_type'] == link_type]
+        return sorted(products, key=lambda product: product['position'])
 
     def get_children(self, refresh: bool = False, scope: Optional[str] = None) -> List[Product]:
         """Retrieve the child simple products of a configurable product
