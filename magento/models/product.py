@@ -1,5 +1,7 @@
 from __future__ import annotations
+import requests
 from . import Model
+from pathlib import Path
 from functools import cached_property
 from magento.exceptions import MagentoError
 from typing import Union, TYPE_CHECKING, Optional, List, Dict
@@ -594,6 +596,30 @@ class MediaEntry(Model):
         """
         self.data['disabled'] = False
         return self.update(scope)
+
+    def download(self, filename: Optional[str] = None) -> Optional[str]:
+        """Downloads the MediaEntry image
+
+        :param filename: the name of the file to save the image to; uses the filename on Magento if not provided.
+        :return: the absolute path of the downloaded image file, or ``None`` if the download failed
+        """
+        if filename is None:
+            filename = Path(self.file).name
+
+        try:
+            response = requests.get(self.link)
+            response.raise_for_status()
+
+        except requests.RequestException as e:
+            self.logger.error(f"Failed to download {self}: {e}")
+            return None
+
+        fpath = Path(filename).resolve()
+        with open(fpath, 'wb') as f:
+            f.write(response.content)
+
+        self.logger.info(f"Downloaded {self} to {fpath}")
+        return str(fpath)
 
     def add_media_type(self, media_type: str, scope: Optional[str] = None) -> bool:
         """Add a media type to the MediaEntry on the given scope
