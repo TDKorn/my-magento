@@ -409,6 +409,10 @@ class Store:
             if store.code == store_code:
                 return store
 
+        if store_code == 'default':  # If custom store code is used for default view, use config with the smallest ID
+            return sorted(self.configs, key=lambda config: config.id)[0]
+
+
     @cached_property
     def configs(self) -> Optional[APIResponse | List[APIResponse]]:
         """Returns a list of all store configurations"""
