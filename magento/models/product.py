@@ -343,6 +343,12 @@ class Product(Model):
         return []
 
     @cached_property
+    def link(self) -> str:
+        """Link of the product"""
+        if url_key := self.custom_attributes.get('url_key'):
+            return self.client.store.active.base_url + url_key + '.html'
+
+    @cached_property
     def categories(self) -> Optional[Category | List[Category]]:
         """Categories the product is in, returned as a list of :class:`~.Category` objects"""
         category_ids = self.custom_attributes.get('category_ids', [])
